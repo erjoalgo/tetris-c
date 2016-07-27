@@ -21,6 +21,14 @@ typedef struct {
   shape* shape;
 } block;
 
+block* block_new ( int shape )	{
+  block* b = malloc(sizeof(block));
+  b->rot = 0;
+  b->offset[0] = 0;
+  b->offset[1] = 0;
+  return b;
+}
+
 typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 
 void block_get ( block* b, int i, coord* result )	{
