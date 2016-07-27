@@ -81,12 +81,31 @@ grid* grid_new ( int width, int height )	{
 int max(int* heights, int count){
   int mx = heights[0];
   int i;
-  for ( i = 0; i < count; i++ )	{
+  for ( i = 1; i < count; i++ )	{
     int curr = heights[i];
     mx = curr>mx?curr:mx;
   }
   return mx;
 }
+int max_dim(int** coords, int count, int dim) {
+  int mx = coords[0][dim];
+  int i;
+  for ( i = 1; i < count; i++ )	{
+    int curr = coords[i][dim];
+    mx = curr>mx?curr:mx;
+  }
+  return mx;
+}
+int min_dim(int** coords, int count, int dim) {
+  int mn = coords[0][dim];
+  int i;
+  for ( i = 1; i < count; i++ )	{
+    int curr = coords[i][dim];
+    mn = curr<mn?curr:mn;
+  }
+  return mn;
+}
+
 void fatal(char* msg){
   printf("FATAL: %s", msg);
   exit(1);
