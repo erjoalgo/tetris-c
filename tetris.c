@@ -14,6 +14,7 @@ typedef struct {
   int** crust[2];
   int* crust_count;
   int count;
+  int max_dim_length;
 } shape;
 
 typedef struct {
@@ -400,6 +401,16 @@ void drop ( grid* g, block* b )	{
   assert(block_valid(g, b));
 }
 
+void block_center_top (grid* g, block* b){
+  // assert(extreme(b, BOT) == 0); this makes no sense here
+  int rot = b->rot;
+  b->offset[1] = g->height - b->shape->rots_wh[rot][1];
+  b->offset[0] = (g->width - b->shape->rots_wh[rot][0])/2;
+  assert(in_bounds(g, b));
+  assert(b->shape->max_dim_length<g->width);
+}
+
+
 
 typedef struct {
   int shape;
@@ -489,9 +500,6 @@ int main(int argc, char* argv[])
         # self.on_cells = LLGrid(self.dim) if track_on_cells else None
         self.on_cells = [ LL(LL.NONE) for _ in xrange(self.height)] if track_on_cells else None
 
-    def __getitem__ (self, index):
-        return self.grid[index]
-
     def get (self, y, x):
         coords = [x,y]
         for block in self.virtualBlocks:
@@ -500,17 +508,6 @@ int main(int argc, char* argv[])
                     return 1
         return self.grid[y][x]
 
-
-
-
-    def centerTop (self, block):
-        assert(assert2(block.model.squareC < self.width))
-        assert(assert2(block.extreme (BOT)==0))
-        block.offset[1] = self.height - block.model.rotationWH[block.rotation][1]
-       #printt (block.offset)
-        #block.move (TOP, self.height - block.extreme (TOP) - 1)
-        block.offset[0] = (self.width - block.model.rotationWH[block.rotation][0])/2
-        assert(assert2(self.inBounds (block), block, block.model.rotationWH[block.rotation]))
 
     def apply_move_stream ( self, stream ):
          count = 0
