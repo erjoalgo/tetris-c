@@ -12,13 +12,12 @@ typedef struct {
   int rots_count;
   int** crust[2];
   int* crust_count;
+  int count;
 } shape;
 
 typedef struct {
   int offset[2];
   int rot;
-  coord* block;
-  int count;
   shape* shape;
 } block;
 
@@ -111,7 +110,7 @@ int grid_block_set_color ( grid* g, block* b, int color )	{
   int i = 0;
   int delta = color == 0? -1 : 1;
   coord c;
-  for ( i = 0; i < b->count; i++ )	{
+  for ( i = 0; i < b->shape->count; i++ )	{
     block_get(b, i, &c);
     int x = c[0];
     int y = c[1];
@@ -300,7 +299,7 @@ int intersects ( grid* g, block* b )	{
   }
   int i;
   coord rc;
-  for ( i = 0; i < b->count; i++ )	{
+  for ( i = 0; i < b->shape->count; i++ )	{
     block_get(b, i, &rc);
     int r = rc[0];
     int c = rc[1];
