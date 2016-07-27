@@ -417,6 +417,7 @@ typedef struct {
   int rot;//abs rot
   int col;
 } game_move;
+
 void print_grid ( grid* g )	{
   printf( "\n" );
   int row, col;
@@ -429,6 +430,21 @@ void print_grid ( grid* g )	{
     printf( "\n" );
   }
   printf( "\n" );
+}
+
+void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
+  int i;
+  for ( i = 0; i < stream_count; i++ )	{
+    game_move move = stream[i];
+    block* b = block_new(move.shape);
+    b->offset[0] = move.col;
+    b->offset[1] = g->height - b->shape->rots_wh[b->rot][1];
+    assert(block_valid(g, b));
+    b->rot = move.rot;
+    drop(g, b);
+    grid_block_add(g, b);
+    clear_lines(g);
+  }
 }
 
 void check_consistency ( grid* g )	{
@@ -462,13 +478,6 @@ int main(int argc, char* argv[])
 
 /*
   class Block (object):
-
-    def __init__ (self, model):
-        self.offset = [0,0]
-        self.rotation = 0
-        self.model = model
-        assert (assert2(isinstance (model, Shape), model.__class__))
-        self.index = 0
 
     def __str__ (self):
         str = "[ "
@@ -509,18 +518,5 @@ int main(int argc, char* argv[])
         return self.grid[y][x]
 
 
-    def apply_move_stream ( self, stream ):
-         count = 0
-         for move in stream:
-              count+=1
-              (m, r, x) = move
-              block = Block(Game.defaultShapeSet[m])
-              block.rotation = r
-              block.offset[0] = x
-              block.offset[1] = self.height - block.model.rotationWH[block.rotation][1]
-              drop_amount = self.drop(block)
-              self.addBlock(block)
-              self.checkClearing()
-         # print "applied %d moves" % (count)
 
 */
