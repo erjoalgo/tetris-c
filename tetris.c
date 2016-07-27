@@ -13,7 +13,7 @@ typedef struct {
   int* rots_wh[2];
   int** crust[2];
   int* crust_count;
-  int count;
+  int len;
   int max_dim_length;
 } shape;
 
@@ -66,7 +66,7 @@ typedef struct {
 
 
 
-
+// TODO consistent function naming, prefix with grid_ or block_
 grid* grid_new ( int width, int height )	{
   grid* g = malloc(sizeof(grid));
   g->rows = malloc(sizeof(int)*height);
@@ -89,6 +89,7 @@ int max(int* heights, int count){
   }
   return mx;
 }
+
 int max_dim(int** coords, int count, int dim) {
   int mx = coords[0][dim];
   int i;
@@ -139,7 +140,7 @@ int grid_block_set_color ( grid* g, block* b, int color )	{
   int i = 0;
   int delta = color == 0? -1 : 1;
   coord c;
-  for ( i = 0; i < b->shape->count; i++ )	{
+  for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &c);
     int x = c[0];
     int y = c[1];
@@ -288,10 +289,10 @@ int eql(grid* a, grid* b){
 int extreme ( block* b, direction d )	{
   switch(d){
   case LEFT:
-    assert(min_dim(b->shape->rots[b->rot], b->shape->count, 0) == 0);
+    assert(min_dim(b->shape->rots[b->rot], b->shape->len, 0) == 0);
     return b->offset[0];
   case BOT:
-    assert(min_dim(b->shape->rots[b->rot], b->shape->count, 1) == 0);
+    assert(min_dim(b->shape->rots[b->rot], b->shape->len, 1) == 0);
     return b->offset[1];
   case RIGHT:
     return b->shape->rots_wh[b->rot][0] + b->offset[0];
@@ -324,7 +325,7 @@ int intersects ( grid* g, block* b )	{
   }
   int i;
   coord rc;
-  for ( i = 0; i < b->shape->count; i++ )	{
+  for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &rc);
     int r = rc[0];
     int c = rc[1];
@@ -436,7 +437,7 @@ void print_block ( block* b )	{
   int i;
   // TODO rename shape.count to shape.len
   coord rc;
-  for ( i = 0; i < b->shape->count; i++ )	{
+  for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &rc);
     printf( "[%d %d]", rc[1], rc[0] );
   }
