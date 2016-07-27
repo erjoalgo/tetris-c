@@ -443,70 +443,6 @@ int main(int argc, char* argv[])
         assert (assert2(isinstance (model, Shape), model.__class__))
         self.index = 0
 
-    def __clone__ (self):
-        return Block ()
-        clone = Block (model)
-        clone.offset = self.offset[:]
-        clone.rotation = self.rotation
-        clone.index = 0
-        return clone
-    
-    def rotate (self, count):
-        self.rotation = (self.rotation+count)%self.model.rotationC
-        assert(assert2( self.model.rotations[self.rotation]))
-
-    def next (self):
-        #reusable iterator: can  only be iterated by one thread, atomically! use yield?
-        if self.index < len( self.model.shape):
-            ab = [self.model.rotations[self.rotation][self.index][0] + self.offset[0], self.model.rotations[self.rotation][self.index][1] + self.offset[1]]
-            self.index+=1
-            return tuple(ab)
-            #return self.ith (self.index-1)
-        else:
-            self.index = 0
-            raise StopIteration
-        #check this. can not iterate concurrently!
-        
-    def ith (self, i):
-        return map(operator.add, self.model.rotations[self.rotation][i], self.offset)
-
-    def applyFunc (self, fun):
-        index = 0
-        rotation = self.model.rotations[self.rotation]
-        xoff = self.offset[0]
-        yoff = self.offset[1]
-        while index < self.model.len:
-            fun (rotation[index][0] + xoff, rotation[index][1] + yoff)
-            index+=1
-
-    def applyFuncOverCrust (self, direction, fun):
-        if direction == BOT:
-            crust = self.model.botCrust[self.rotation]
-            length = self.model.botCrustLen[self.rotation]
-        elif direction == TOP:
-            crust = self.model.topCrust[self.rotation]
-            length = self.model.topCrustLen[self.rotation]
-        else:
-            assert(assert2 (False, "Not implemented"))
-        index =0
-        while index < length:
-            fun (crust[index][0] + self.offset[0], crust[index][1] + self.offset[1])
-            index+=1
-        
-        """for index in xrange (length):
-            fun (crust[index][0] + self.offset[0], crust[index][1] + self.offset[1])"""
-            
-    def __iter__ (self):
-        return self
-    def __len__ (self):
-        return len (self.model.shape)
-
-
-    def extremeOld (self, extreme):
-        hori = extreme == LEFT or extreme == RIGHT
-        fun = min if extreme == BOT or extreme == LEFT else max
-        return fun(map (lambda(coords): coords[ 0 if hori else 1],self.model.rotations[self.rotation])) + self.offset[0 if hori else 1]
-
     def extreme (self, extreme):
         if extreme == LEFT:
             return self.offset[0]
@@ -525,14 +461,6 @@ int main(int argc, char* argv[])
             str += "[%d, %d] "%tuple ( self.ith (i))
         str += "]"
         return str
-    
-    def move (self, direction, amount):
-        self.offset[0 if direction == LEFT or direction == RIGHT else 1] += amount * (1 if direction == TOP or direction == RIGHT else -1)
-
-    def botCrust (self):
-        #return map(self.model.botCrust[self.rotation]
-        return imap (lambda xy: map (operator.add, xy, self.offset),self.model.botCrust[self.rotation])
-	*/
 
 
 
