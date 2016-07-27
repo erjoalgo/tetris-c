@@ -3,16 +3,43 @@
 
 
 
+// typedef int[2] coord;
+typedef int coord[2];
+// typedef struct coord { int x[2]; } coord;
+
 typedef struct {
   int** rots[2];
-  
-}
+  int rots_count;
+  int** crust[2];
+  int* crust_count;
+} shape;
+
 typedef struct {
-  int* block[2];
+  int offset[2];
+  int rot;
+  coord* block;
   int count;
-  // int** crust[2];
-  // int* crust_count;
+  shape* shape;
 } block;
+
+typedef enum {BOT, LEFT, TOP, RIGHT} direction;
+
+void block_get ( block* b, int i, coord* result )	{
+  int* rot = b->shape->rots[b->rot][i];
+  // TODO make sure this is correct order
+  (*result)[0] = rot[0] + b->offset[0];
+  // "sizeof will be wrong"?
+  // http://stackoverflow.com/questions/4523497/typedef-fixed-length-array
+  (*result)[1] = rot[1] + b->offset[1];
+}
+
+void block_crust_get ( block* b, direction d, int i, coord* result )	{
+  int* crust = b->shape->crust[d][i];
+  // TODO make sure this is correct order
+  (*result)[0] = crust[0] + b->offset[0];
+  *result[1] = crust[1] + b->offset[1];
+}
+
 
 typedef struct {
   int** rows;
@@ -83,9 +110,11 @@ int grid_block_set_color ( grid* g, block* b, int color )	{
   // add block, updating relief, row_fill_count, needs_clear
   int i = 0;
   int delta = color == 0? -1 : 1;
+  coord c;
   for ( i = 0; i < b->count; i++ )	{
-    int x = b->block[i][0];
-    int y = b->block[i][1];
+    block_get(b, i, &c);
+    int x = c[0];
+    int y = c[1];
     g->rows[x][y] = color;
     if (color == 0)	{
       g->row_fill_count -= 1;
@@ -226,14 +255,18 @@ int eql(grid* a, grid* b){
   return 1;
 }
 
-typedef enum {BOT, LEFT, TOP, RIGHT} direction;
+
 
 int extreme ( block* b, direction d )	{
-  int coord = (d == BOT || d == TOP)? 1 : 0;
+  coord c;
+  int dim = (d == BOT || d == TOP)? 1 : 0;
   int i;
-  int mx = b->crust[d][0][coord];
-  for ( i = 1; i < b->crust_count[d]; i++ )	{
-    int curr = b->crust[d][i][coord];
+  block_crust_get(b, d, 0, &c);
+  int mx = c[dim];
+  for ( i = 1; i < b->shape->crust_count[d]; i++ )	{
+    // int curr = b->crust[d][i][dim];
+    block_crust_get(b, d, i, &c);
+    int curr = c[dim];
     if (d == BOT || d == RIGHT)	{
       mx = curr > mx? curr: mx;
     }else 	{
@@ -243,9 +276,22 @@ int extreme ( block* b, direction d )	{
   return mx;
 }
 
-int move ( block* b, direction d, int amount )	{
-  
+void move ( block* b, direction d, int amount )	{
+  int dim = (d == BOT || d == TOP)? 1 : 0;
+  if (d == LEFT ||  d == BOT)	{
+    amount*=-1;
+  }
+  b->offset[dim]+=amount;
 }
+
+void rotate ( block* b, int amount )	{
+  int rots = b->shape->rots_count;
+  b->rot = (b->rot+amount)%rots;
+  if (b->rot<0)	{
+    b->rot+=rots;
+  }
+}
+
 
 int intersects ( grid* g, block* b )	{
   assert(in_bounds(g, b));
@@ -253,9 +299,11 @@ int intersects ( grid* g, block* b )	{
     return 0;
   }
   int i;
+  coord rc;
   for ( i = 0; i < b->count; i++ )	{
-    int r = b->block[i][0];
-    int c = b->block[i][1];
+    block_get(b, i, &rc);
+    int r = rc[0];
+    int c = rc[1];
     if (g->rows[r][c])	{
       return 1;
     }
@@ -281,20 +329,21 @@ void move_safe ( grid* g, block* b, int direction, int amount )	{
   }
 }
 
-void rot_safe ( grid* g, block* b, int direction, int amount )	{
-  rot(b, direction, amount);
+void rotate_safe ( grid* g, block* b, int amount )	{
+  rotate(b, amount);
   if (!block_valid(g, b))	{
-    rot(b, direction, -amount);
+    rotate(b, -amount);
   }
 }
 
-// TODO remove references to x, y
 int drop_amount ( grid* g, block* b )	{
   int i;
   int min_amnt = g->height-1;
-  for ( i = 0; i < b->crust_count[BOT]; i++ )	{
-    int r = b->crust[BOT][i][0];
-    int c = b->crust[BOT][i][1];
+  coord rc;
+  for ( i = 0; i < b->shape->crust_count[BOT]; i++ )	{
+    block_crust_get(b, BOT, i, &rc);
+    int r = rc[0];
+    int c = rc[1];
     int amnt = c-g->relief[r];
     if (amnt<min_amnt)	{
       min_amnt = amnt;
@@ -307,9 +356,10 @@ int drop_amount ( grid* g, block* b )	{
     int max_amnt = extreme(b, BOT);
     for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
       int next_amnt = min_amnt+1;
-      for ( i = 0; i < b->crust_count[BOT]; i++ )	{
-	int r = b->crust[BOT][i][0];
-	int c = b->crust[BOT][i][1];
+      for ( i = 0; i < b->shape->crust_count[BOT]; i++ )	{
+	block_crust_get(b, BOT, i, &rc);
+	int r = rc[0];
+	int c = rc[1];
 	if (g->rows[r][c+next_amnt])	{
 	  // break a;
 	  goto a;
@@ -323,7 +373,7 @@ int drop_amount ( grid* g, block* b )	{
 
 void drop ( grid* g, block* b )	{
   int amount = drop_amount(g, b);
-  move(g, b, BOT, amount);
+  move(b, BOT, amount);
   assert(block_valid(g, b));
 }
 
@@ -352,14 +402,14 @@ void check_consistency ( grid* g )	{
   for ( i = 0; i < g->width; i++ )	{
     assert(g->relief[i] == grid_height_at(g, i));
   }
-  int y;
-  for ( y = 0; y < g->height; y++ )	{
+  int r;
+  for ( r = 0; r < g->height; r++ )	{
     int count = 0;
-    int x;
-    for ( x = 0; x < g->width; x++ )	{
-      count += g->rows[y][x]?1:0;
+    int c;
+    for ( c = 0; c < g->width; c++ )	{
+      count += g->rows[r][c]?1:0;
     }
-    assert(g->row_fill_count[y] == count);
+    assert(g->row_fill_count[r] == count);
   }
 }
 
