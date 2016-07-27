@@ -432,6 +432,17 @@ void print_grid ( grid* g )	{
   printf( "\n" );
 }
 
+void print_block ( block* b )	{
+  int i;
+  // TODO rename shape.count to shape.len
+  coord rc;
+  for ( i = 0; i < b->shape->count; i++ )	{
+    block_get(b, i, &rc);
+    printf( "[%d %d]", rc[1], rc[0] );
+  }
+}
+
+
 void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   int i;
   for ( i = 0; i < stream_count; i++ )	{
@@ -475,21 +486,6 @@ int main(int argc, char* argv[])
     printf( "bot %d", BOT );
     return 0;
 }
-
-/*
-  class Block (object):
-
-    def __str__ (self):
-        str = "[ "
-        for i in xrange (len(self.model.shape)):
-            #str += "[%d, %d] "%(a,b)
-            str += "[%d, %d] "%tuple ( self.ith (i))
-        str += "]"
-        return str
-
-
-
-
 
 /* class Grid (object):
 
