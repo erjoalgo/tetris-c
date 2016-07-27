@@ -10,6 +10,7 @@ typedef int coord[2];
 typedef struct {
   int** rots[2];
   int rots_count;
+  int* rots_wh[2];
   int** crust[2];
   int* crust_count;
   int count;
@@ -284,22 +285,18 @@ int eql(grid* a, grid* b){
 
 
 int extreme ( block* b, direction d )	{
-  coord c;
-  int dim = (d == BOT || d == TOP)? 1 : 0;
-  int i;
-  block_crust_get(b, d, 0, &c);
-  int mx = c[dim];
-  for ( i = 1; i < b->shape->crust_count[d]; i++ )	{
-    // int curr = b->crust[d][i][dim];
-    block_crust_get(b, d, i, &c);
-    int curr = c[dim];
-    if (d == BOT || d == RIGHT)	{
-      mx = curr > mx? curr: mx;
-    }else 	{
-      mx = curr < mx? curr: mx;
-    }
+  switch(d){
+  case LEFT:
+    assert(min_dim(b->shape->rots[b->rot], b->shape->count, 0) == 0);
+    return b->offset[0];
+  case BOT:
+    assert(min_dim(b->shape->rots[b->rot], b->shape->count, 1) == 0);
+    return b->offset[1];
+  case RIGHT:
+    return b->shape->rots_wh[b->rot][0] + b->offset[0];
+  case TOP:
+    return b->shape->rots_wh[b->rot][1] + b->offset[1];
   }
-  return mx;
 }
 
 void move ( block* b, direction d, int amount )	{
@@ -461,17 +458,6 @@ int main(int argc, char* argv[])
         self.model = model
         assert (assert2(isinstance (model, Shape), model.__class__))
         self.index = 0
-
-    def extreme (self, extreme):
-        if extreme == LEFT:
-            return self.offset[0]
-        elif extreme == RIGHT:
-            return self.offset[0]+self.model.rotationWH[self.rotation][0] - 1
-        elif extreme == TOP:
-            return self.offset[1] + self.model.rotationWH[self.rotation][1] - 1
-        else:
-            return self.offset[1]
-
 
     def __str__ (self):
         str = "[ "
