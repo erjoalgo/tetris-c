@@ -14,7 +14,7 @@ typedef struct {
   int*** crust;
   int* crust_count;
   int len;
-  int max_dim_length;
+  int max_dim_len;
 } shape;
 
 typedef struct {
@@ -408,7 +408,7 @@ void block_center_top (grid* g, block* b){
   b->offset[1] = g->height - b->shape->rots_wh[rot][1];
   b->offset[0] = (g->width - b->shape->rots_wh[rot][0])/2;
   assert(in_bounds(g, b));
-  assert(b->shape->max_dim_length<g->width);
+  assert(b->shape->max_dim_len<g->width);
 }
 
 
