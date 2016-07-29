@@ -8,10 +8,10 @@ typedef int coord[2];
 // typedef struct coord { int x[2]; } coord;
 
 typedef struct {
-  int** rots[2];
+  int*** rots;//4xlenx2
   int rots_count;
-  int* rots_wh[2];
-  int** crust[2];
+  int** rots_wh;//4x2
+  int*** crust;
   int* crust_count;
   int len;
   int max_dim_length;
