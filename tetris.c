@@ -628,10 +628,24 @@ void print_shape ( shape* s )	{
 
   int roti;
   for ( roti = 0; roti < s->rot_count; roti++ )	{
-    print_coords(grid, s->max_dim_len+1,
+    printf( "\n\nrot %d\n", roti );
+    print_coords(grid, s->max_dim_len,s->max_dim_len+1,
 		 s->rot[roti], s->len);
-  }
 
+    int d;
+    for ( d = 0; d < 4; d++ )	{
+      printf( "\nrot %d, crust ", roti);
+      switch(d){
+      case TOP: printf("TOP");break;
+      case RIGHT: printf("RIGHT");break;
+      case LEFT: printf("LEFT");break;
+      case BOT: printf("BOT");break;
+      }
+      printf( "\n" );
+      print_coords(grid, s->max_dim_len,s->max_dim_len+1,
+		   s->crust[roti][d], s->crust_count[roti][d]);
+    }
+  }
 }
 
 
