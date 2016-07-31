@@ -22,11 +22,12 @@ typedef struct {
   shape* shape;
 } block;
 
-block* block_new ( int shape )	{
+block* block_new ( shape* s )	{
   block* b = malloc(sizeof(block));
   b->rot = 0;
   b->offset[0] = 0;
   b->offset[1] = 0;
+  b->shape = s;
   return b;
 }
 
@@ -428,7 +429,7 @@ void block_center_top (grid* g, block* b){
 
 
 typedef struct {
-  int shape;
+  shape* shape;
   int rot;//abs rot
   int col;
 } game_move;
