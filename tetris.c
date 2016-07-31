@@ -619,11 +619,12 @@ void print_coords ( char* grid, int rows, int  cols,
 
 
 void print_shape ( shape* s )	{
-  char grid[s->max_dim_len*(1+s->max_dim_len)];
+  char grid[s->max_dim_len*(1+s->max_dim_len) + 1];
   int i;
   for ( i = 0; i < s->max_dim_len*(1+s->max_dim_len); i++ )	{
     grid[i] = (i+1)%(s->max_dim_len+1) ? ' ' : '\n';
   }
+  grid[s->max_dim_len*(1+s->max_dim_len)] = '\0';
 
   int roti;
   for ( roti = 0; roti < s->rot_count; roti++ )	{
