@@ -492,7 +492,7 @@ int max_ab ( int a, int b )	{
   return a>b?a:b;
 }
 
-shape shape_new ( int* shape_rot[2], int shape_len )	{
+shape* shape_new ( int* shape_rot[2], int shape_len )	{
   // shape_rot is one rotation of the shape
   shape* s = malloc(sizeof(shape));
   s->len = shape_len;
@@ -594,6 +594,7 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
       }
     }
   }
+  return s;
 }
 
 void print_shape ( shape* s )	{
