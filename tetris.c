@@ -131,7 +131,7 @@ int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // or -1 if no such y exists
   int y;
   for ( y = start_at; y >= 0; y-- )	{
-    if (g->rows[x][y] != 0)	{
+    if (g->rows[y][x] != 0)	{
       break;
     }
   }
@@ -152,8 +152,9 @@ int grid_block_set_color ( grid* g, block* b, int color )	{
     block_get(b, i, &c);
     int x = c[0];
     int y = c[1];
-    g->rows[x][y] = color;
+    g->rows[y][x] = color;
     if (color == 0)	{
+      // TODO remove x, y refs
       g->row_fill_count -= 1;
       if (g->relief[x] == y)	{
 	g->relief[x] = grid_height_at_start_at(g, x, y-1);
@@ -332,11 +333,11 @@ int intersects ( grid* g, block* b )	{
     return 0;
   }
   int i;
-  coord rc;
+  coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
-    block_get(b, i, &rc);
-    int r = rc[0];
-    int c = rc[1];
+    block_get(b, i, &cr);
+    int r = cr[1];
+    int c = cr[0];
     if (g->rows[r][c])	{
       return 1;
     }
@@ -372,12 +373,12 @@ void rotate_safe ( grid* g, block* b, int amount )	{
 int drop_amount ( grid* g, block* b )	{
   int i;
   int min_amnt = g->height-1;
-  coord rc;
+  coord cr;
   for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
-    block_crust_get(b, BOT, i, &rc);
-    int r = rc[0];
-    int c = rc[1];
-    int amnt = c-g->relief[r];
+    block_crust_get(b, BOT, i, &cr);
+    int c = cr[0];
+    int r = cr[1];
+    int amnt = r-g->relief[c];
     if (amnt<min_amnt)	{
       min_amnt = amnt;
     }
@@ -390,9 +391,9 @@ int drop_amount ( grid* g, block* b )	{
     for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
       int next_amnt = min_amnt+1;
       for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
-	block_crust_get(b, BOT, i, &rc);
-	int r = rc[0];
-	int c = rc[1];
+	block_crust_get(b, BOT, i, &cr);
+	int r = cr[0];
+	int c = cr[1];
 	if (g->rows[r][c+next_amnt])	{
 	  // break a;
 	  goto a;
@@ -447,7 +448,7 @@ void print_block ( block* b )	{
   coord rc;
   for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &rc);
-    printf( "[%d %d]", rc[1], rc[0] );
+    printf( "[%d %d]", rc[0], rc[1] );
   }
 }
 
