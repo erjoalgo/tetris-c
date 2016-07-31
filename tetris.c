@@ -598,20 +598,22 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   return s;
 }
 
-void print_coords ( char* grid, int grid_row_len,
-		    int* coords[2], int coords_len )	{
+void print_coords ( char* grid, int rows, int  cols,
+		    int* coords[2], int coords_len)	{
   int i;
   for ( i = 0; i < coords_len; i++ )	{
-    int r = coords[i][0];
-    int c = coords[i][1];
-    grid[r*grid_row_len+c] = '*';
+    int c = coords[i][0];
+    int r = rows - 1 - coords[i][1];
+    printf( "[%d %d] ", c, coords[i][1] );
+
+    grid[r*cols+c] = '*';
   }
   printf("\n\n");
   printf(grid);
   for ( i = 0; i < coords_len; i++ )	{
-    int r = coords[i][0];
-    int c = coords[i][1];
-    grid[r*grid_row_len+c] = ' ';
+    int c = coords[i][0];
+    int r = rows - 1 - coords[i][1];
+    grid[r*cols+c] = ' ';
   }
 }
 
