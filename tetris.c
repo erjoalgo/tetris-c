@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 // typedef int[2] coord;
 typedef int coord[2];
@@ -127,11 +128,6 @@ int min_dim(int* coords[2], int count, int dim) {
 void fatal(char* msg){
   printf("FATAL: %s", msg);
   exit(1);
-}
-void assert(int val){
-  if (!val)	{
-    fatal("assertion error");
-  }
 }
 int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // return the largest y s.t. g.grid[x][y]==1,
