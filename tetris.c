@@ -590,6 +590,33 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
     }
   }
 }
+
+void print_shape ( shape* s )	{
+  char grid[s->max_dim_len*(1+s->max_dim_len)];
+  int i;
+  for ( i = 0; i < s->max_dim_len*(1+s->max_dim_len); i++ )	{
+    grid[i] = (i+1)%(s->max_dim_len+1) ? ' ' : '\n';
+  }
+
+  int roti;
+  for ( roti = 0; roti < s->rot_count; roti++ )	{
+    int ii;
+    for ( ii = 0; ii < s->len; ii++ )	{
+      int r = s->rot[roti][ii][0];
+      int c = s->rot[roti][ii][1];
+      grid[r*(s->max_dim_len+1)+c] = '*';
+    }
+    printf("\n\n");
+    printf(grid);
+    for ( ii = 0; ii < s->len; ii++ )	{
+      int r = s->rot[roti][ii][0];
+      int c = s->rot[roti][ii][1];
+      grid[r*(s->max_dim_len+1)+c] = ' ';
+    }
+  }
+}
+
+
 int main(int argc, char* argv[])
 {
     int x[] = {4,5,2,3,1,0,9,8,6,7};
@@ -599,7 +626,23 @@ int main(int argc, char* argv[])
     for (i = 0 ; i < 10 ; i++)
         printf ("%d ", x[i]);
 
-    printf( "bot %d", BOT );
+    // int tri_rot[4][2] = {{0, 0},{0, 1},{1, 0},{1, 1}};
+    int* tri_rot[2];
+    tri_rot[0] = malloc(2*sizeof(int));
+    tri_rot[1] = malloc(2*sizeof(int));
+    tri_rot[2] = malloc(2*sizeof(int));
+    tri_rot[3] = malloc(2*sizeof(int));
+    // tri_rot[0] = malloc(2*sizeof(tri_rot[0]));
+
+    tri_rot[0][0] = 1;tri_rot[0][1] = 0;
+    tri_rot[1][0] = 0;tri_rot[1][1] = 1;
+    tri_rot[2][0] = 1;tri_rot[2][1] = 1;
+    // tri_rot[2][0] = 1;tri_rot[2][1] = 0;
+    // tri_rot[3][0] = 1;tri_rot[3][1] = 1;//tri
+    tri_rot[3][0] = 2;tri_rot[3][1] = 1;
+
+    shape* tri = shape_new(tri_rot, 4);
+    print_shape(tri);
     return 0;
 }
 
