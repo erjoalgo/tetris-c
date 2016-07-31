@@ -393,7 +393,7 @@ int drop_amount ( grid* g, block* b )	{
       }
     }
   }
-  a: return min_amnt;
+ a: return min_amnt;
 }
 
 
@@ -511,7 +511,7 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
     s->rot[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
   s->max_dim_len = max_ab(max_dim(s->rot[0], shape_len, 0),
-			 max_dim(s->rot[0], shape_len, 1)) + 1;
+			  max_dim(s->rot[0], shape_len, 1)) + 1;
   // define 1-4 rotations
   int roti;
   for ( roti = 1; roti < 4; roti++ )	{
@@ -559,40 +559,40 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
     int d;
     for ( d = 0; d < 4; d++ )	{
 
-    int extremes[s->max_dim_len][2];//value, index
-    int dim = (d == BOT || d == TOP)? 1 : 0;
-    int keep_max = (d == TOP || d == RIGHT);
-    for ( i = 0; i < s->max_dim_len; i++ )	{
-      extremes[i][0] = -1;
-    }
-    int crust_count = 0;
-    for ( i = 0; i < shape_len; i++ )	{
-      int key = s->rot[roti][i][(dim+1)%2];
-      int val = s->rot[roti][i][dim];
-      int curr = extremes[key][0];
-      int replace = curr == -1 ||
-	keep_max && val>curr ||
-	!keep_max && val<curr;
-      if (curr == -1)	{
-	crust_count++;
+      int extremes[s->max_dim_len][2];//value, index
+      int dim = (d == BOT || d == TOP)? 1 : 0;
+      int keep_max = (d == TOP || d == RIGHT);
+      for ( i = 0; i < s->max_dim_len; i++ )	{
+	extremes[i][0] = -1;
       }
-      if (replace)	{
-	extremes[key][0] = val;
-	extremes[key][1] = i;
+      int crust_count = 0;
+      for ( i = 0; i < shape_len; i++ )	{
+	int key = s->rot[roti][i][(dim+1)%2];
+	int val = s->rot[roti][i][dim];
+	int curr = extremes[key][0];
+	int replace = curr == -1 ||
+	  keep_max && val>curr ||
+	  !keep_max && val<curr;
+	if (curr == -1)	{
+	  crust_count++;
+	}
+	if (replace)	{
+	  extremes[key][0] = val;
+	  extremes[key][1] = i;
+	}
       }
-    }
-    s->crust_count[roti][d] = crust_count;
-    s->crust[roti][d] = malloc(crust_count*sizeof(*s->crust[roti]));
-    int ii = 0;
-    for ( i = 0; i < s->max_dim_len; i++ )	{
-      if (extremes[i][0] != -1)	{
-	int index = extremes[i][1];
-	s->crust[roti][d][ii] = malloc(2*sizeof(*s->crust[roti][i]));
-	s->crust[roti][d][ii][0] = s->rot[roti][index][0];
-	s->crust[roti][d][ii][1] = s->rot[roti][index][1];
-	ii++;
+      s->crust_count[roti][d] = crust_count;
+      s->crust[roti][d] = malloc(crust_count*sizeof(*s->crust[roti]));
+      int ii = 0;
+      for ( i = 0; i < s->max_dim_len; i++ )	{
+	if (extremes[i][0] != -1)	{
+	  int index = extremes[i][1];
+	  s->crust[roti][d][ii] = malloc(2*sizeof(*s->crust[roti][i]));
+	  s->crust[roti][d][ii][0] = s->rot[roti][index][0];
+	  s->crust[roti][d][ii][1] = s->rot[roti][index][1];
+	  ii++;
+	}
       }
-    }
     }
   }
   return s;
@@ -651,31 +651,31 @@ void print_shape ( shape* s )	{
 
 int main(int argc, char* argv[])
 {
-    int x[] = {4,5,2,3,1,0,9,8,6,7};
+  int x[] = {4,5,2,3,1,0,9,8,6,7};
 
-    qsort (x, sizeof(x)/sizeof(*x), sizeof(*x), cmp_rev);
-    int i;
-    for (i = 0 ; i < 10 ; i++)
-        printf ("%d ", x[i]);
+  qsort (x, sizeof(x)/sizeof(*x), sizeof(*x), cmp_rev);
+  int i;
+  for (i = 0 ; i < 10 ; i++)
+    printf ("%d ", x[i]);
 
-    // int tri_rot[4][2] = {{0, 0},{0, 1},{1, 0},{1, 1}};
-    int* tri_rot[2];
-    tri_rot[0] = malloc(2*sizeof(int));
-    tri_rot[1] = malloc(2*sizeof(int));
-    tri_rot[2] = malloc(2*sizeof(int));
-    tri_rot[3] = malloc(2*sizeof(int));
-    // tri_rot[0] = malloc(2*sizeof(tri_rot[0]));
+  // int tri_rot[4][2] = {{0, 0},{0, 1},{1, 0},{1, 1}};
+  int* tri_rot[2];
+  tri_rot[0] = malloc(2*sizeof(int));
+  tri_rot[1] = malloc(2*sizeof(int));
+  tri_rot[2] = malloc(2*sizeof(int));
+  tri_rot[3] = malloc(2*sizeof(int));
+  // tri_rot[0] = malloc(2*sizeof(tri_rot[0]));
 
-    tri_rot[0][0] = 1;tri_rot[0][1] = 0;
-    tri_rot[1][0] = 0;tri_rot[1][1] = 1;
-    tri_rot[2][0] = 1;tri_rot[2][1] = 1;
-    // tri_rot[2][0] = 1;tri_rot[2][1] = 0;
-    // tri_rot[3][0] = 1;tri_rot[3][1] = 1;//tri
-    tri_rot[3][0] = 2;tri_rot[3][1] = 1;
+  tri_rot[0][0] = 1;tri_rot[0][1] = 0;
+  tri_rot[1][0] = 0;tri_rot[1][1] = 1;
+  tri_rot[2][0] = 1;tri_rot[2][1] = 1;
+  // tri_rot[2][0] = 1;tri_rot[2][1] = 0;
+  // tri_rot[3][0] = 1;tri_rot[3][1] = 1;//tri
+  tri_rot[3][0] = 2;tri_rot[3][1] = 1;
 
-    shape* tri = shape_new(tri_rot, 4);
-    print_shape(tri);
-    return 0;
+  shape* tri = shape_new(tri_rot, 4);
+  print_shape(tri);
+  return 0;
 }
 
 /* class Grid (object):
