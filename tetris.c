@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-
+#include <string.h>
 
 // typedef int[2] coord;
 typedef int coord[2];
@@ -67,16 +66,30 @@ typedef struct {
 
 
 // TODO consistent function naming, prefix with grid_ or block_
-grid* grid_new ( int width, int height )	{
+grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
-  g->rows = malloc(sizeof(int)*height);
-  g->relief = malloc(sizeof(int)*width);
-  g->row_fill_count = malloc(sizeof(int)*width);
-  g->full_rows = malloc(sizeof(int)*width);
+  g->height = height;
+  g->width = width;
+  g->rows = malloc(height*sizeof(*g->rows));
   int r;
   for ( r = 0; r < height; r++ )	{
-    g->rows[r] = malloc(sizeof(int)*width);
+    g->rows[r] = malloc(width*sizeof(*g->rows));
+    memset(g->rows[r], 0, g->width*sizeof(*g->rows[r]));
   }
+
+  g->relief = malloc(width*sizeof(g->relief));
+  int c;
+  for ( c = 0; c < g->width; c++ )	{
+    g->relief[c] = -1;
+  }
+
+  g->row_fill_count = malloc(height*sizeof(g->row_fill_count));
+  memset(g->row_fill_count, 0, g->width*sizeof(*g->row_fill_count));
+
+  g->full_rows = malloc(height*sizeof(g->full_rows));
+
+  g->virtual_blocks_c = 0;
+  g->cleared_count = 0;
   return g;
 }
 
