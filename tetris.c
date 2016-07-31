@@ -10,11 +10,11 @@ typedef int coord[2];
 typedef struct {
   int rot_count;
   int rot_wh[4][2];
-  int*** crust;
-  int crust_count[4];
+  int** crust[4][4];
+  int crust_count[4][4];
   int len;
   int max_dim_len;
-  int*** rot;//4xlenx2
+  int** rot[4];
 } shape;
 
 typedef struct {
@@ -43,7 +43,7 @@ void block_get ( block* b, int i, coord* result )	{
 }
 
 void block_crust_get ( block* b, direction d, int i, coord* result )	{
-  int* crust = b->shape->crust[d][i];
+  int* crust = b->shape->crust[b->rot][d][i];
   // TODO make sure this is correct order
   (*result)[0] = crust[0] + b->offset[0];
   *result[1] = crust[1] + b->offset[1];
@@ -366,7 +366,7 @@ int drop_amount ( grid* g, block* b )	{
   int i;
   int min_amnt = g->height-1;
   coord rc;
-  for ( i = 0; i < b->shape->crust_count[BOT]; i++ )	{
+  for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
     block_crust_get(b, BOT, i, &rc);
     int r = rc[0];
     int c = rc[1];
@@ -382,7 +382,7 @@ int drop_amount ( grid* g, block* b )	{
     int max_amnt = extreme(b, BOT);
     for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
       int next_amnt = min_amnt+1;
-      for ( i = 0; i < b->shape->crust_count[BOT]; i++ )	{
+      for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
 	block_crust_get(b, BOT, i, &rc);
 	int r = rc[0];
 	int c = rc[1];
@@ -502,7 +502,6 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   int extreme_bot = min_dim(shape_rot, shape_len, 1);
 
   // define all rotations
-  s->rot = malloc(4 * sizeof(*s->rot));
   s->rot[0] = malloc(shape_len * sizeof(*s->rot[0]));
   int i;
   // first rotation: normalize to (0, 0)
@@ -556,10 +555,11 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
  a: s->rot_count = roti;
 
   // define crusts
-  s->crust = malloc(4 * sizeof(*s->crust));
   for ( roti = 0; roti < 4; roti++ )	{
+    int d;
+    for ( d = 0; d < 4; d++ )	{
+
     int extremes[s->max_dim_len][2];//value, index
-    int d = roti;
     int dim = (d == BOT || d == TOP)? 1 : 0;
     int keep_max = (d == TOP || d == RIGHT);
     for ( i = 0; i < s->max_dim_len; i++ )	{
@@ -581,17 +581,18 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
 	extremes[key][1] = i;
       }
     }
-    s->crust_count[roti] = crust_count;
-    s->crust[roti] = malloc(crust_count*sizeof(*s->crust[roti]));
+    s->crust_count[roti][d] = crust_count;
+    s->crust[roti][d] = malloc(crust_count*sizeof(*s->crust[roti]));
     int ii = 0;
     for ( i = 0; i < s->max_dim_len; i++ )	{
       if (extremes[i][0] != -1)	{
 	int index = extremes[i][1];
-	s->crust[roti][ii] = malloc(2*sizeof(*s->crust[roti][i]));
-	s->crust[roti][ii][0] = s->rot[roti][index][0];
-	s->crust[roti][ii][1] = s->rot[roti][index][1];
+	s->crust[roti][d][ii] = malloc(2*sizeof(*s->crust[roti][i]));
+	s->crust[roti][d][ii][0] = s->rot[roti][index][0];
+	s->crust[roti][d][ii][1] = s->rot[roti][index][1];
 	ii++;
       }
+    }
     }
   }
   return s;
