@@ -471,6 +471,20 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   }
 }
 
+void print_relief ( grid* g )	{
+  int i;
+  printf( "relief:   " );
+  for ( i = 0; i < g->width; i++ )	{
+    printf( "%d ", g->relief[i] );
+  }
+  printf( "\n" );
+  printf( "heigh at: " );
+  for ( i = 0; i < g->width; i++ )	{
+    printf( "%d ", grid_height_at(g, i) );
+  }
+  printf( "\n" );
+}
+
 void check_consistency ( grid* g )	{
   int i;
   for ( i = 0; i < g->width; i++ )	{
