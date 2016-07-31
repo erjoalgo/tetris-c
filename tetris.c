@@ -11,7 +11,7 @@ typedef struct {
   int rot_count;
   int rot_wh[4][2];
   int** crust[4][4];
-  int crust_count[4][4];
+  int crust_len[4][4];
   int len;
   int max_dim_len;
   int** rot[4];
@@ -374,7 +374,7 @@ int drop_amount ( grid* g, block* b )	{
   int i;
   int min_amnt = g->height-1;
   coord cr;
-  for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
+  for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
     block_crust_get(b, BOT, i, &cr);
     int c = cr[0];
     int r = cr[1];
@@ -390,7 +390,7 @@ int drop_amount ( grid* g, block* b )	{
     int max_amnt = extreme(b, BOT);
     for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
       int next_amnt = min_amnt+1;
-      for ( i = 0; i < b->shape->crust_count[b->rot][BOT]; i++ )	{
+      for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
 	block_crust_get(b, BOT, i, &cr);
 	int r = cr[0];
 	int c = cr[1];
@@ -592,7 +592,7 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
       for ( i = 0; i < s->max_dim_len; i++ )	{
 	extremes[i][0] = -1;
       }
-      int crust_count = 0;
+      int crust_len = 0;
       for ( i = 0; i < shape_len; i++ )	{
 	int key = s->rot[roti][i][(dim+1)%2];
 	int val = s->rot[roti][i][dim];
@@ -601,15 +601,15 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
 	  keep_max && val>curr ||
 	  !keep_max && val<curr;
 	if (curr == -1)	{
-	  crust_count++;
+	  crust_len++;
 	}
 	if (replace)	{
 	  extremes[key][0] = val;
 	  extremes[key][1] = i;
 	}
       }
-      s->crust_count[roti][d] = crust_count;
-      s->crust[roti][d] = malloc(crust_count*sizeof(*s->crust[roti]));
+      s->crust_len[roti][d] = crust_len;
+      s->crust[roti][d] = malloc(crust_len*sizeof(*s->crust[roti]));
       int ii = 0;
       for ( i = 0; i < s->max_dim_len; i++ )	{
 	if (extremes[i][0] != -1)	{
@@ -670,7 +670,7 @@ void print_shape ( shape* s )	{
       }
       printf( "\n" );
       print_coords(grid, s->max_dim_len,s->max_dim_len+1,
-		   s->crust[roti][d], s->crust_count[roti][d]);
+		   s->crust[roti][d], s->crust_len[roti][d]);
     }
   }
 }
