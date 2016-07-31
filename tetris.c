@@ -155,7 +155,7 @@ int grid_block_set_color ( grid* g, block* b, int color )	{
     g->rows[y][x] = color;
     if (color == 0)	{
       // TODO remove x, y refs
-      g->row_fill_count -= 1;
+      g->row_fill_count[y] -= 1;
       if (g->relief[x] == y)	{
 	g->relief[x] = grid_height_at_start_at(g, x, y-1);
       }
