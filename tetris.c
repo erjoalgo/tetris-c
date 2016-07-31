@@ -58,7 +58,8 @@ typedef struct {
   int width;
 
   int virtual_blocks_c;
-  int cleared_count;
+  int total_cleared_count;
+  int last_cleared_count;
   block** virtual_blocks;
 } grid;
 
@@ -88,7 +89,8 @@ grid* grid_new ( int height, int width )	{
   g->full_rows = malloc(height*sizeof(g->full_rows));
 
   g->virtual_blocks_c = 0;
-  g->cleared_count = 0;
+  g->total_cleared_count = 0;
+  g->last_cleared_count = 0;
   return g;
 }
 
@@ -248,6 +250,8 @@ void clear_lines ( grid* g )	{
   }
   // now there are left-over rows that were cleared
   // they need to be zeroed-out, and replaces into rows[y...ymax]
+  g->total_cleared_count+=cleared_count;
+  g->last_cleared_count=cleared_count;
   while (cleared_count)	{
     g->rows[y] = cleared[cleared_count];
     g->row_fill_count[y] = 0;
@@ -728,22 +732,6 @@ int main(int argc, char* argv[])
 }
 
 /* class Grid (object):
-
-    def __init__ (self, dim = None, repaint=False, trackHeuristicData = False, name="Unnamed grid", track_on_cells = False):
-        dim = dim or (grid_height, 10)
-        self.dim = dim
-        self.grid = [[0]*dim[1] for _ in xrange(dim[0])]
-        self.relief = [-1]*dim[1]
-        self.virtualBlocks = []
-        self.needClear = []
-        self.height, self.width = dim
-        self.rowFillC = [0]*self.height
-        self.lastCleared = 0
-        self.name = name
-        self.totalCleared = 0
-        self.repaint = repaint
-        # self.on_cells = LLGrid(self.dim) if track_on_cells else None
-        self.on_cells = [ LL(LL.NONE) for _ in xrange(self.height)] if track_on_cells else None
 
     def get (self, y, x):
         coords = [x,y]
