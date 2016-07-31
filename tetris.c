@@ -698,19 +698,31 @@ shape** read_shapes ( char* file, int* shape_count)	{
 
 int main(int argc, char* argv[])
 {
-  int x[] = {4,5,2,3,1,0,9,8,6,7};
-
-  qsort (x, sizeof(x)/sizeof(*x), sizeof(*x), cmp_rev);
-  int i;
-  for (i = 0 ; i < 10 ; i++)
-    printf ("%d ", x[i]);
-  printf( "\n" );
-
   int shape_count;
   shape** shapes = read_shapes("shapes.in", &shape_count);
+  int i;
   for ( i = 0; i < shape_count; i++ )	{
     printf( "shape %d/%d\n", i+1, shape_count );
     print_shape(shapes[i]);
+  }
+  grid* g = grid_new(19, 10);
+  print_grid(g);
+  srand(time(NULL));
+  while (1)	{
+    int r = rand()%shape_count;
+    block* b = block_new(shapes[r]);
+    block_center_top(g, b);
+    if (intersects(g, b))	{
+      break;
+    }
+    grid_block_add(g, b);
+    grid_block_remove(g, b);
+    grid_block_add(g, b);
+    print_grid(g);
+    grid_block_remove(g, b);
+    drop(g, b);
+    grid_block_add(g, b);
+    print_grid(g);
   }
   return 0;
 }
