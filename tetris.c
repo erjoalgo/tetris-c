@@ -36,10 +36,7 @@ typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 
 void block_get ( block* b, int i, coord* result )	{
   int* rot = b->shape->rot[b->rot][i];
-  // TODO make sure this is correct order
   (*result)[0] = rot[0] + b->offset[0];
-  // "sizeof will be wrong"?
-  // http://stackoverflow.com/questions/4523497/typedef-fixed-length-array
   (*result)[1] = rot[1] + b->offset[1];
 }
 
@@ -47,7 +44,7 @@ void block_crust_get ( block* b, direction d, int i, coord* result )	{
   int* crust = b->shape->crust[b->rot][d][i];
   // TODO make sure this is correct order
   (*result)[0] = crust[0] + b->offset[0];
-  *result[1] = crust[1] + b->offset[1];
+  (*result)[1] = crust[1] + b->offset[1];
 }
 
 
