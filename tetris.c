@@ -8,13 +8,13 @@ typedef int coord[2];
 // typedef struct coord { int x[2]; } coord;
 
 typedef struct {
-  int*** rots;//4xlenx2
   int rots_count;
-  int** rots_wh;//4x2
-  int*** crust;
-  int* crust_count;
+  int rots_wh[4][2];
+  int** crust[2];
+  int crust_count[4];
   int len;
   int max_dim_len;
+  int** rots[2];//4xlenx2
 } shape;
 
 typedef struct {
@@ -90,7 +90,7 @@ int max(int* heights, int count){
   return mx;
 }
 
-int max_dim(int** coords, int count, int dim) {
+int max_dim(int* coords[2], int count, int dim) {
   int mx = coords[0][dim];
   int i;
   for ( i = 1; i < count; i++ )	{
@@ -99,7 +99,8 @@ int max_dim(int** coords, int count, int dim) {
   }
   return mx;
 }
-int min_dim(int** coords, int count, int dim) {
+// int min_dim(int count; int coords[count][2], int count, int dim) {
+int min_dim(int* coords[2], int count, int dim) {
   int mn = coords[0][dim];
   int i;
   for ( i = 1; i < count; i++ )	{
@@ -502,11 +503,11 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
 
   // define all rotations
   // TODO rename rots to rot
-  s->rots = malloc(4*shape_len*2*sizeof(int));
-  s->rots_wh = malloc(4*2*sizeof(int));
+  s->rots[0] = malloc(shape_len * sizeof(*s->rots[0]));
   int i;
   // first rotation: normalize to (0, 0)
   for ( i = 0; i < shape_len; i++ )	{
+    s->rots[0][i] = malloc(2*sizeof(*s->rots[0][i]));
     s->rots[0][i][0] = shape_rot[i][0] - extreme_left;;
     s->rots[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
@@ -515,7 +516,9 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
   // define 1-4 rotations
   int roti;
   for ( roti = 1; roti < 4; roti++ )	{
+    s->rots[roti] = malloc(shape_len * sizeof(*s->rots[roti]));
     for ( i = 0; i < shape_len; i++ )	{
+      s->rots[roti][i] = malloc(2*sizeof(*s->rots[roti][i]));
       s->rots[roti][i][0] = s->rots[roti-1][i][1];
       s->rots[roti][i][1] = s->max_dim_len - 1 - s->rots[roti-1][i][0];
     }
@@ -553,6 +556,7 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
  a: s->rots_count = roti;
 
   // define crusts
+  // s->crust = malloc(4 * sizeof(*s->crust));
   for ( roti = 0; roti < 4; roti++ )	{
     int extremes[s->max_dim_len][2];//value, index
     int d = roti;
@@ -578,11 +582,12 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
       }
     }
     s->crust_count[roti] = crust_count;
-    s->crust[roti] = malloc(2*sizeof(int)*crust_count);
+    s->crust[roti] = malloc(crust_count*sizeof(*s->crust[roti]));
     int ii = 0;
     for ( i = 0; i < s->max_dim_len; i++ )	{
       if (extremes[i][0] != -1)	{
 	int index = extremes[i][1];
+	s->crust[roti][ii] = malloc(2*sizeof(*s->crust[roti][i]));
 	s->crust[roti][ii][0] = s->rots[roti][index][0];
 	s->crust[roti][ii][1] = s->rots[roti][index][1];
 	ii++;
