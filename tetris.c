@@ -8,13 +8,13 @@ typedef int coord[2];
 // typedef struct coord { int x[2]; } coord;
 
 typedef struct {
-  int rots_count;
-  int rots_wh[4][2];
+  int rot_count;
+  int rot_wh[4][2];
   int** crust[2];
   int crust_count[4];
   int len;
   int max_dim_len;
-  int** rots[2];//4xlenx2
+  int** rot[2];//4xlenx2
 } shape;
 
 typedef struct {
@@ -34,7 +34,7 @@ block* block_new ( int shape )	{
 typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 
 void block_get ( block* b, int i, coord* result )	{
-  int* rot = b->shape->rots[b->rot][i];
+  int* rot = b->shape->rot[b->rot][i];
   // TODO make sure this is correct order
   (*result)[0] = rot[0] + b->offset[0];
   // "sizeof will be wrong"?
@@ -290,15 +290,15 @@ int eql(grid* a, grid* b){
 int extreme ( block* b, direction d )	{
   switch(d){
   case LEFT:
-    assert(min_dim(b->shape->rots[b->rot], b->shape->len, 0) == 0);
+    assert(min_dim(b->shape->rot[b->rot], b->shape->len, 0) == 0);
     return b->offset[0];
   case BOT:
-    assert(min_dim(b->shape->rots[b->rot], b->shape->len, 1) == 0);
+    assert(min_dim(b->shape->rot[b->rot], b->shape->len, 1) == 0);
     return b->offset[1];
   case RIGHT:
-    return b->shape->rots_wh[b->rot][0] + b->offset[0];
+    return b->shape->rot_wh[b->rot][0] + b->offset[0];
   case TOP:
-    return b->shape->rots_wh[b->rot][1] + b->offset[1];
+    return b->shape->rot_wh[b->rot][1] + b->offset[1];
   }
 }
 
@@ -311,10 +311,10 @@ void move ( block* b, direction d, int amount )	{
 }
 
 void rotate ( block* b, int amount )	{
-  int rots = b->shape->rots_count;
-  b->rot = (b->rot+amount)%rots;
+  int rot = b->shape->rot_count;
+  b->rot = (b->rot+amount)%rot;
   if (b->rot<0)	{
-    b->rot+=rots;
+    b->rot+=rot;
   }
 }
 
@@ -406,8 +406,8 @@ void drop ( grid* g, block* b )	{
 void block_center_top (grid* g, block* b){
   // assert(extreme(b, BOT) == 0); this makes no sense here
   int rot = b->rot;
-  b->offset[1] = g->height - b->shape->rots_wh[rot][1];
-  b->offset[0] = (g->width - b->shape->rots_wh[rot][0])/2;
+  b->offset[1] = g->height - b->shape->rot_wh[rot][1];
+  b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
   assert(in_bounds(g, b));
   assert(b->shape->max_dim_len<g->width);
 }
@@ -451,7 +451,7 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
     game_move move = stream[i];
     block* b = block_new(move.shape);
     b->offset[0] = move.col;
-    b->offset[1] = g->height - b->shape->rots_wh[b->rot][1];
+    b->offset[1] = g->height - b->shape->rot_wh[b->rot][1];
     assert(block_valid(g, b));
     b->rot = move.rot;
     drop(g, b);
@@ -502,39 +502,38 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   int extreme_bot = min_dim(shape_rot, shape_len, 1);
 
   // define all rotations
-  // TODO rename rots to rot
-  s->rots[0] = malloc(shape_len * sizeof(*s->rots[0]));
+  s->rot[0] = malloc(shape_len * sizeof(*s->rot[0]));
   int i;
   // first rotation: normalize to (0, 0)
   for ( i = 0; i < shape_len; i++ )	{
-    s->rots[0][i] = malloc(2*sizeof(*s->rots[0][i]));
-    s->rots[0][i][0] = shape_rot[i][0] - extreme_left;;
-    s->rots[0][i][1] = shape_rot[i][1] - extreme_bot;
+    s->rot[0][i] = malloc(2*sizeof(*s->rot[0][i]));
+    s->rot[0][i][0] = shape_rot[i][0] - extreme_left;;
+    s->rot[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
-  s->max_dim_len = max_ab(max_dim(s->rots[0], shape_len, 0),
-			 max_dim(s->rots[0], shape_len, 1)) + 1;
+  s->max_dim_len = max_ab(max_dim(s->rot[0], shape_len, 0),
+			 max_dim(s->rot[0], shape_len, 1)) + 1;
   // define 1-4 rotations
   int roti;
   for ( roti = 1; roti < 4; roti++ )	{
-    s->rots[roti] = malloc(shape_len * sizeof(*s->rots[roti]));
+    s->rot[roti] = malloc(shape_len * sizeof(*s->rot[roti]));
     for ( i = 0; i < shape_len; i++ )	{
-      s->rots[roti][i] = malloc(2*sizeof(*s->rots[roti][i]));
-      s->rots[roti][i][0] = s->rots[roti-1][i][1];
-      s->rots[roti][i][1] = s->max_dim_len - 1 - s->rots[roti-1][i][0];
+      s->rot[roti][i] = malloc(2*sizeof(*s->rot[roti][i]));
+      s->rot[roti][i][0] = s->rot[roti-1][i][1];
+      s->rot[roti][i][1] = s->max_dim_len - 1 - s->rot[roti-1][i][0];
     }
     // we need to normalize to detect uniqueness later
-    extreme_left = min_dim(s->rots[roti], shape_len, 0);
-    extreme_bot = min_dim(s->rots[roti], shape_len, 1);
+    extreme_left = min_dim(s->rot[roti], shape_len, 0);
+    extreme_bot = min_dim(s->rot[roti], shape_len, 1);
     for ( i = 0; i < shape_len; i++ )	{
-      s->rots[roti][i][0] -= extreme_left;
-      s->rots[roti][i][1] -= extreme_bot;
+      s->rot[roti][i][0] -= extreme_left;
+      s->rot[roti][i][1] -= extreme_bot;
     }
   }
 
-  // initialize s->rots_wh
+  // initialize s->rot_wh
   for ( roti = 0; roti < 4; roti++ )	{
-    s->rots_wh[roti][0] = max_dim(s->rots[roti], shape_len, 0);
-    s->rots_wh[roti][1] = max_dim(s->rots[roti], shape_len, 1);
+    s->rot_wh[roti][0] = max_dim(s->rot[roti], shape_len, 0);
+    s->rot_wh[roti][1] = max_dim(s->rot[roti], shape_len, 1);
   }
 
 
@@ -542,10 +541,10 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   char rot_str[4][shape_len*2+1];
   for ( roti = 0; roti < 4; roti++ )	{
     rot_str[roti][shape_len*2] = '\0';
-    qsort(s->rots[roti], shape_len, sizeof(int)*2, cmp_coord);
+    qsort(s->rot[roti], shape_len, sizeof(int)*2, cmp_coord);
     for ( i = 0; i < shape_len; i+=2 )	{
-      rot_str[roti][i] = '0' + s->rots[roti][i][0];
-      rot_str[roti][i+1] = '0' + s->rots[roti][i][1];
+      rot_str[roti][i] = '0' + s->rot[roti][i][0];
+      rot_str[roti][i+1] = '0' + s->rot[roti][i][1];
     }
     for ( i = 0; i < roti; i++ )	{
       if (strcmp(rot_str[i], rot_str[roti]) == 0)	{
@@ -553,7 +552,7 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
       }
     }
   }
- a: s->rots_count = roti;
+ a: s->rot_count = roti;
 
   // define crusts
   // s->crust = malloc(4 * sizeof(*s->crust));
@@ -567,8 +566,8 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
     }
     int crust_count = 0;
     for ( i = 0; i < shape_len; i++ )	{
-      int key = s->rots[roti][i][dim];
-      int val = s->rots[roti][i][(dim+1)%2];
+      int key = s->rot[roti][i][dim];
+      int val = s->rot[roti][i][(dim+1)%2];
       int curr = extremes[key][0];
       int replace = curr == -1 ||
 	keep_max && val>curr ||
@@ -588,8 +587,8 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
       if (extremes[i][0] != -1)	{
 	int index = extremes[i][1];
 	s->crust[roti][ii] = malloc(2*sizeof(*s->crust[roti][i]));
-	s->crust[roti][ii][0] = s->rots[roti][index][0];
-	s->crust[roti][ii][1] = s->rots[roti][index][1];
+	s->crust[roti][ii][0] = s->rot[roti][index][0];
+	s->crust[roti][ii][1] = s->rot[roti][index][1];
 	ii++;
       }
     }
