@@ -10,11 +10,11 @@ typedef int coord[2];
 typedef struct {
   int rot_count;
   int rot_wh[4][2];
-  int** crust[2];
+  int*** crust;
   int crust_count[4];
   int len;
   int max_dim_len;
-  int** rot[2];//4xlenx2
+  int*** rot;//4xlenx2
 } shape;
 
 typedef struct {
@@ -502,6 +502,7 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   int extreme_bot = min_dim(shape_rot, shape_len, 1);
 
   // define all rotations
+  s->rot = malloc(4 * sizeof(*s->rot));
   s->rot[0] = malloc(shape_len * sizeof(*s->rot[0]));
   int i;
   // first rotation: normalize to (0, 0)
@@ -555,7 +556,7 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
  a: s->rot_count = roti;
 
   // define crusts
-  // s->crust = malloc(4 * sizeof(*s->crust));
+  s->crust = malloc(4 * sizeof(*s->crust));
   for ( roti = 0; roti < 4; roti++ )	{
     int extremes[s->max_dim_len][2];//value, index
     int d = roti;
