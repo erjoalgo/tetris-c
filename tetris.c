@@ -378,7 +378,7 @@ int drop_amount ( grid* g, block* b )	{
     block_crust_get(b, BOT, i, &cr);
     int c = cr[0];
     int r = cr[1];
-    int amnt = r-g->relief[c];
+    int amnt = r-(g->relief[c]+1);
     if (amnt<min_amnt)	{
       min_amnt = amnt;
     }
@@ -414,7 +414,7 @@ void drop ( grid* g, block* b )	{
 void block_center_top (grid* g, block* b){
   // assert(extreme(b, BOT) == 0); this makes no sense here
   int rot = b->rot;
-  b->offset[1] = g->height - b->shape->rot_wh[rot][1];
+  b->offset[1] = g->height - 1 - b->shape->rot_wh[rot][1];
   b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
   assert(in_bounds(g, b));
   assert(b->shape->max_dim_len<g->width);
