@@ -512,7 +512,7 @@ shape shape_new ( int* shape_rot[2], int shape_len )	{
     s->rots[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
   s->max_dim_len = max_ab(max_dim(s->rots[0], shape_len, 0),
-			 max_dim(s->rots[0], shape_len, 1));
+			 max_dim(s->rots[0], shape_len, 1)) + 1;
   // define 1-4 rotations
   int roti;
   for ( roti = 1; roti < 4; roti++ )	{
