@@ -567,8 +567,8 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
     }
     int crust_count = 0;
     for ( i = 0; i < shape_len; i++ )	{
-      int key = s->rot[roti][i][dim];
-      int val = s->rot[roti][i][(dim+1)%2];
+      int key = s->rot[roti][i][(dim+1)%2];
+      int val = s->rot[roti][i][dim];
       int curr = extremes[key][0];
       int replace = curr == -1 ||
 	keep_max && val>curr ||
