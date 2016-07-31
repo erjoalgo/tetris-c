@@ -437,7 +437,10 @@ void print_grid ( grid* g )	{
     for ( col = 0; col < g->width; col++ )	{
       printf("%c", g->rows[row][col]? '*' : ' ');
     }
-    printf( "\n" );
+    printf( "|\n" );
+  }
+  for ( col = 0; col < g->width; col++ )	{
+    printf("%c", 'T');
   }
   printf( "\n" );
 }
@@ -450,8 +453,8 @@ void print_block ( block* b )	{
     block_get(b, i, &rc);
     printf( "[%d %d]", rc[0], rc[1] );
   }
+  printf( "\n" );
 }
-
 
 void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   int i;
