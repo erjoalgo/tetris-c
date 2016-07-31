@@ -596,6 +596,24 @@ shape* shape_new ( int* shape_rot[2], int shape_len )	{
   return s;
 }
 
+void print_coords ( char* grid, int grid_row_len,
+		    int* coords[2], int coords_len )	{
+  int i;
+  for ( i = 0; i < coords_len; i++ )	{
+    int r = coords[i][0];
+    int c = coords[i][1];
+    grid[r*grid_row_len+c] = '*';
+  }
+  printf("\n\n");
+  printf(grid);
+  for ( i = 0; i < coords_len; i++ )	{
+    int r = coords[i][0];
+    int c = coords[i][1];
+    grid[r*grid_row_len+c] = ' ';
+  }
+}
+
+
 void print_shape ( shape* s )	{
   char grid[s->max_dim_len*(1+s->max_dim_len)];
   int i;
@@ -605,20 +623,10 @@ void print_shape ( shape* s )	{
 
   int roti;
   for ( roti = 0; roti < s->rot_count; roti++ )	{
-    int ii;
-    for ( ii = 0; ii < s->len; ii++ )	{
-      int r = s->rot[roti][ii][0];
-      int c = s->rot[roti][ii][1];
-      grid[r*(s->max_dim_len+1)+c] = '*';
-    }
-    printf("\n\n");
-    printf(grid);
-    for ( ii = 0; ii < s->len; ii++ )	{
-      int r = s->rot[roti][ii][0];
-      int c = s->rot[roti][ii][1];
-      grid[r*(s->max_dim_len+1)+c] = ' ';
-    }
+    print_coords(grid, s->max_dim_len+1,
+		 s->rot[roti], s->len);
   }
+
 }
 
 
