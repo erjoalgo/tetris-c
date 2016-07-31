@@ -539,20 +539,22 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
 
   // determine number of unique rotations
   char rot_str[4][shape_len*2+1];
+  s->rot_count = 0;
   for ( roti = 0; roti < 4; roti++ )	{
     rot_str[roti][shape_len*2] = '\0';
     qsort(s->rot[roti], shape_len, sizeof(int)*2, cmp_coord);
-    for ( i = 0; i < shape_len; i+=2 )	{
-      rot_str[roti][i] = '0' + s->rot[roti][i][0];
-      rot_str[roti][i+1] = '0' + s->rot[roti][i][1];
+    for ( i = 0; i < shape_len; i++ )	{
+      rot_str[roti][2*i] = '0' + s->rot[roti][i][0];
+      rot_str[roti][2*i+1] = '0' + s->rot[roti][i][1];
     }
     for ( i = 0; i < roti; i++ )	{
       if (strcmp(rot_str[i], rot_str[roti]) == 0)	{
 	goto a;
       }
     }
+    s->rot_count++;
   }
- a: s->rot_count = roti;
+ a: roti = 0;
 
   // define crusts
   for ( roti = 0; roti < 4; roti++ )	{
