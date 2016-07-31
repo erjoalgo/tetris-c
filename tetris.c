@@ -648,6 +648,26 @@ void print_shape ( shape* s )	{
   }
 }
 
+shape** read_shapes ( char* file, int* shape_count)	{
+  FILE* fh = fopen(file, "r");
+  *shape_count = 0;
+  shape** shapes = malloc(1*sizeof(shape*));
+  while (!feof (fh))	{
+    int len;
+    fscanf(fh, "%d", &len);
+    int i;
+    // int rot[len][2];
+    int** rot = malloc(len*sizeof(*rot));
+    for ( i = 0; i < len; i++ )	{
+      rot[i] = malloc(2*sizeof(*rot[i]));
+      fscanf(fh, "%d", &rot[i][0]);
+      fscanf(fh, "%d", &rot[i][1]);
+    }
+    shapes = realloc(shapes, (*shape_count+1)*sizeof(shape*));
+    shapes[(*shape_count)++] = shape_new(rot, len);
+  }
+  return shapes;
+}
 
 int main(int argc, char* argv[])
 {
@@ -657,24 +677,14 @@ int main(int argc, char* argv[])
   int i;
   for (i = 0 ; i < 10 ; i++)
     printf ("%d ", x[i]);
+  printf( "\n" );
 
-  // int tri_rot[4][2] = {{0, 0},{0, 1},{1, 0},{1, 1}};
-  int* tri_rot[2];
-  tri_rot[0] = malloc(2*sizeof(int));
-  tri_rot[1] = malloc(2*sizeof(int));
-  tri_rot[2] = malloc(2*sizeof(int));
-  tri_rot[3] = malloc(2*sizeof(int));
-  // tri_rot[0] = malloc(2*sizeof(tri_rot[0]));
-
-  tri_rot[0][0] = 1;tri_rot[0][1] = 0;
-  tri_rot[1][0] = 0;tri_rot[1][1] = 1;
-  tri_rot[2][0] = 1;tri_rot[2][1] = 1;
-  // tri_rot[2][0] = 1;tri_rot[2][1] = 0;
-  // tri_rot[3][0] = 1;tri_rot[3][1] = 1;//tri
-  tri_rot[3][0] = 2;tri_rot[3][1] = 1;
-
-  shape* tri = shape_new(tri_rot, 4);
-  print_shape(tri);
+  int shape_count;
+  shape** shapes = read_shapes("shapes.in", &shape_count);
+  for ( i = 0; i < shape_count; i++ )	{
+    printf( "shape %d/%d\n", i+1, shape_count );
+    print_shape(shapes[i]);
+  }
   return 0;
 }
 
