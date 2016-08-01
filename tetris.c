@@ -728,6 +728,15 @@ int main(int argc, char* argv[])
     grid_block_add(g, b);
     print_grid(g);
   }
+
+  game_move moves[3];
+  moves[0] = (game_move) { .shape = shapes[2], .rot = 0, .col = 0 };
+  moves[1] = (game_move) { .shape = shapes[2], .rot = 0, .col = 4 };
+  moves[2] = (game_move) { .shape = shapes[0], .rot = 0, .col = 8 };
+  g = grid_new(19, 10);
+  grid_apply_moves(g, moves, 3);
+  print_grid(g);
+  // clear_lines(g);
   return 0;
 }
 
