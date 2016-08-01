@@ -514,6 +514,10 @@ void check_consistency ( grid* g )	{
     }
     assert(g->row_fill_count[r] == count);
   }
+  for ( i = 0; i < g->full_rows_count; i++ )	{
+    r = g->full_rows[i];
+    assert(g->row_fill_count[r] == g->width);
+  }
 }
 
 
