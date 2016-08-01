@@ -200,7 +200,7 @@ void clear_lines ( grid* g )	{
     return ;
   }
   assert(g->full_rows_count>0);
-  int cleared_count = g->full_rows_count;
+  int cleared_count = 0;
   int* cleared[g->full_rows_count];
   //smallest last. small values means near bottom of the grid
   // that is, descending order.
@@ -252,7 +252,8 @@ void clear_lines ( grid* g )	{
   // they need to be zeroed-out, and replaces into rows[y...ymax]
   g->total_cleared_count+=cleared_count;
   g->last_cleared_count=cleared_count;
-  while (cleared_count)	{
+  assert(cleared_count>0);
+  while (cleared_count--)	{
     g->rows[y] = cleared[cleared_count];
     g->row_fill_count[y] = 0;
     int i;
@@ -260,7 +261,6 @@ void clear_lines ( grid* g )	{
       g->rows[y][i] = 0;
     }
     y++;
-    cleared_count--;
   }
 
   // now we need to update relief
