@@ -308,9 +308,9 @@ int extreme ( block* b, direction d )	{
     assert(min_dim(b->shape->rot[b->rot], b->shape->len, 1) == 0);
     return b->offset[1];
   case RIGHT:
-    return b->shape->rot_wh[b->rot][0] + b->offset[0];
+    return b->shape->rot_wh[b->rot][0] + b->offset[0] -1;
   case TOP:
-    return b->shape->rot_wh[b->rot][1] + b->offset[1];
+    return b->shape->rot_wh[b->rot][1] + b->offset[1] -1;
   }
 }
 
@@ -561,8 +561,8 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
 
   // initialize s->rot_wh
   for ( roti = 0; roti < 4; roti++ )	{
-    s->rot_wh[roti][0] = max_dim(s->rot[roti], shape_len, 0);
-    s->rot_wh[roti][1] = max_dim(s->rot[roti], shape_len, 1);
+    s->rot_wh[roti][0] = max_dim(s->rot[roti], shape_len, 0) + 1;
+    s->rot_wh[roti][1] = max_dim(s->rot[roti], shape_len, 1) + 1;
   }
 
 
