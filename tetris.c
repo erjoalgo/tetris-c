@@ -480,13 +480,19 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   }
 }
 
+void print_arr ( int* arr, int len )	{
+  printf( "[ " );
+  int i;
+  for ( i = 0; i < len; i++ )	{
+    printf( "%d ", arr[i] );
+  }
+  printf( "]\n" );
+}
+
 void print_relief ( grid* g )	{
   int i;
   printf( "relief:   " );
-  for ( i = 0; i < g->width; i++ )	{
-    printf( "%d ", g->relief[i] );
-  }
-  printf( "\n" );
+  print_arr(g->relief, g->width);
   printf( "heigh at: " );
   for ( i = 0; i < g->width; i++ )	{
     printf( "%d ", grid_height_at(g, i) );
