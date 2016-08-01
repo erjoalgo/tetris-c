@@ -226,8 +226,8 @@ void clear_lines ( grid* g )	{
     if (nextNonFull>ymax)	{
       break;
     }
-    // invariant: nextNonfull should be full
-    assert(g->row_fill_count[nextNonFull] == g->width);
+    // invariant: nextNonfull should be not full
+    assert(g->row_fill_count[nextNonFull] != g->width);
 
     // if rows[y] is full
     if (g->row_fill_count[y]==g->width) {
