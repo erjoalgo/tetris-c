@@ -465,8 +465,8 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
     block* b = block_new(move.shape);
+    block_center_top(g, b);
     b->offset[0] = move.col;
-    b->offset[1] = g->height - b->shape->rot_wh[b->rot][1];
     assert(block_valid(g, b));
     b->rot = move.rot;
     drop(g, b);
