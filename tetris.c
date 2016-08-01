@@ -206,16 +206,22 @@ void clear_lines ( grid* g )	{
   // that is, descending order.
   // why did I pick descending order?
   qsort(g->full_rows, g->full_rows_count, sizeof(int), cmp_rev);
+  // smallest
   int y = g->full_rows[g->full_rows_count-1];
   int ymax = max (g->relief, g->width);
   assert(ymax<g->height);
+  assert(g->row_fill_count[y] == g->width);
+  assert(g->full_rows[g->full_rows_count-1] == y);
+
   int nextNonFull = y+1;
   while (nextNonFull<=ymax)	{
-    // swap y with the next non-full
+    // copy next non-full row into y
+    // y is either full or has already been copied by a lower y
+    // if it is full, we zero it and save it for the end
 
     // find the next nonFull
+    assert(nextNonFull<g->height);
     while (g->row_fill_count[nextNonFull] == g->width)	{
-      assert(nextNonFull<g->height);
       nextNonFull++;
       // it should be (almost) impossible for the highest row to get full
       // however, it is still possible,eg if new shape exactly fits into top row
@@ -224,26 +230,27 @@ void clear_lines ( grid* g )	{
       assert(nextNonFull<g->height);
     }
     if (nextNonFull>ymax)	{
+      // there is no next non full to copy into a row below
       break;
     }
     // invariant: nextNonfull should be not full
     assert(g->row_fill_count[nextNonFull] != g->width);
 
-    // if rows[y] is full
     if (g->row_fill_count[y]==g->width) {
-      // y should be the lowest row that is full
-      assert(g->full_rows[g->full_rows_count] == y);
+      // in this case, save row y for the end
+      assert(g->full_rows[g->full_rows_count-1] == y);
       g->full_rows_count--;
       cleared[cleared_count++] = g->rows[y];
     }
     // reuse the row, no need to allocate new memory
-    // swap y and next-non-full
+    // copy next-non-full into y
+    // y was previously a next-non-full and already copied
+    // or y is full and we saved it
     g->rows[y] = g->rows[nextNonFull];
     // g->row_fill_count[y] must have already been used by some lower row
     // or it was a full row, and it is appened to cleared
     // cleared.length + ?  = y- ymin
     g->row_fill_count[y] = g->row_fill_count[nextNonFull];
-
 
     y++;
     nextNonFull ++;
