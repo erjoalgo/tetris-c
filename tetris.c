@@ -263,10 +263,8 @@ void clear_lines ( grid* g )	{
   while (cleared_count--)	{
     g->rows[y] = cleared[cleared_count];
     g->row_fill_count[y] = 0;
-    int i;
-    for ( i = 0; i < g->width; i++ )	{
-      g->rows[y][i] = 0;
-    }
+    memset(g->rows[y], 0, g->width*sizeof(*g->rows[y]));
+
     y++;
   }
 
