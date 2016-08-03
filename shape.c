@@ -121,8 +121,8 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
 	int val = s->rot[roti][i][dim];
 	int curr = extremes[key][0];
 	int replace = curr == -1 ||
-	  keep_max && val>curr ||
-	  !keep_max && val<curr;
+	  (keep_max && val>curr) ||
+	  (!keep_max && val<curr);
 	if (curr == -1)	{
 	  crust_len++;
 	}
