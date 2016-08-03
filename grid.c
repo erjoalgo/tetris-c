@@ -200,9 +200,19 @@ void check_consistency ( grid* g )	{
     }
     assert(g->row_fill_count[r] == count);
   }
+  int checked[g->height];
+  memset(checked, 0, sizeof(checked));
   for ( i = 0; i < g->full_rows_count; i++ )	{
     r = g->full_rows[i];
     assert(g->row_fill_count[r] == g->width);
+    assert(checked[r] == 0);
+    checked[r] = 1;
+  }
+
+  for ( i = 0; i < g->height; i++ )	{
+    if (!checked[i])	{
+      assert(g->row_fill_count[i] != g->width);
+    }
   }
 }
 
