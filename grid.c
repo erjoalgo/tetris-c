@@ -230,16 +230,16 @@ int grid_equal(grid* a, grid* b){
   return 1;
 }
 
-int in_bounds ( grid* g, block* b )	{
-  return extreme(b, LEFT)>=0 &&
-    extreme(b, RIGHT)<g->width &&
-    extreme(b, BOT)>=0 &&
-    extreme(b, TOP)<g->height;
+int grid_block_in_bounds ( grid* g, block* b )	{
+  return block_extreme(b, LEFT)>=0 &&
+    block_extreme(b, RIGHT)<g->width &&
+    block_extreme(b, BOT)>=0 &&
+    block_extreme(b, TOP)<g->height;
 }
 
-int intersects ( grid* g, block* b )	{
-  assert(in_bounds(g, b));
-  if (max(g->relief, g->width)<extreme(b, BOT))	{
+int grid_block_intersects ( grid* g, block* b )	{
+  assert(grid_block_in_bounds(g, b));
+  if (max(g->relief, g->width)<block_extreme(b, BOT))	{
     return 0;
   }
   int i;
@@ -255,20 +255,60 @@ int intersects ( grid* g, block* b )	{
   return 0;
 }
 
-int block_valid ( grid* g, block* b )	{
-  return in_bounds(g, b) && !intersects(g, b);
+int grid_block_valid ( grid* g, block* b )	{
+  return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
-void block_center_top (grid* g, block* b){
+void grid_block_center_top (grid* g, block* b){
   // assert(extreme(b, BOT) == 0); this makes no sense here
   int rot = b->rot;
   b->offset[1] = g->height - 1 - b->shape->rot_wh[rot][1];
   b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
-  assert(in_bounds(g, b));
+  assert(grid_block_in_bounds(g, b));
   assert(b->shape->max_dim_len<g->width);
 }
 
-void print_grid ( grid* g )	{
+int drop_amount ( grid* g, block* b )	{
+  int i;
+  int min_amnt = g->height-1;
+  coord cr;
+  for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
+    block_crust_get(b, BOT, i, &cr);
+    int c = cr[0];
+    int r = cr[1];
+    int amnt = r-(g->relief[c]+1);
+    if (amnt<min_amnt)	{
+      min_amnt = amnt;
+    }
+  }
+  if (min_amnt<0)	{
+    // relief can not help us, as we are under the relief
+    min_amnt = 0;
+    // assert(!intersects(g, b));
+    int max_amnt = block_extreme(b, BOT);
+    for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
+      int next_amnt = min_amnt+1;
+      for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
+	block_crust_get(b, BOT, i, &cr);
+	int r = cr[0];
+	int c = cr[1];
+	if (g->rows[r][c+next_amnt])	{
+	  // break a;
+	  goto a;
+	}
+      }
+    }
+  }
+ a: return min_amnt;
+}
+
+void grid_block_drop ( grid* g, block* b )	{
+  int amount = drop_amount(g, b);
+  block_move(b, BOT, amount);
+  // assert(block_valid(g, b));
+}
+
+void grid_print ( grid* g )	{
   printf( "\n" );
   int row, col;
   for ( row = g->height-1; row >= 0; row-- )	{
@@ -290,11 +330,11 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
     block* b = block_new(move.shape);
-    block_center_top(g, b);
+    grid_block_center_top(g, b);
     b->offset[0] = move.col;
-    assert(block_valid(g, b));
+    assert(grid_block_valid(g, b));
     b->rot = move.rot;
-    drop(g, b);
+    grid_block_drop(g, b);
     grid_block_add(g, b);
     clear_lines(g);
   }
@@ -320,16 +360,16 @@ void print_relief ( grid* g )	{
   printf( "\n" );
 }
 
-void block_move_safe ( grid* g, block* b, int direction, int amount )	{
-  move(b, direction, amount);
-  if (!block_valid(g, b))	{
-    move(b, direction, -amount);
+void grid_block_move_safe ( grid* g, block* b, int direction, int amount )	{
+  block_move(b, direction, amount);
+  if (!grid_block_valid(g, b))	{
+    block_move(b, direction, -amount);
   }
 }
 
-void block_rotate_safe ( grid* g, block* b, int amount )	{
-  rotate(b, amount);
-  if (!block_valid(g, b))	{
-    rotate(b, -amount);
+void grid_block_rotate_safe ( grid* g, block* b, int amount )	{
+  block_rotate(b, amount);
+  if (!grid_block_valid(g, b))	{
+    block_rotate(b, -amount);
   }
 }

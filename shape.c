@@ -148,7 +148,6 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
   return s;
 }
 
-
 void print_coords ( char* grid, int rows, int  cols,
 		    int* coords[2], int coords_len)	{
   int i;
@@ -168,7 +167,7 @@ void print_coords ( char* grid, int rows, int  cols,
   }
 }
 
-void print_shape ( shape* s )	{
+void shape_print ( shape* s )	{
   char grid[s->max_dim_len*(1+s->max_dim_len) + 1];
   int i;
   for ( i = 0; i < s->max_dim_len*(1+s->max_dim_len); i++ )	{
@@ -198,7 +197,7 @@ void print_shape ( shape* s )	{
   }
 }
 
-shape** read_shapes ( char* file, int* shape_count)	{
+shape** shapes_read ( char* file, int* shape_count)	{
   FILE* fh = fopen(file, "r");
   *shape_count = 0;
   shape** shapes = malloc(1*sizeof(shape*));

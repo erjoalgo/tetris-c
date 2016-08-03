@@ -41,22 +41,23 @@ typedef struct {
 
 
 grid* grid_new(int height, int width);
-void print_grid(grid* g);
-void grid_apply_moves( grid* g, game_move* stream, int stream_count );
 void grid_block_add(grid* g, block* b);
 void grid_block_remove(grid* g, block* b);
-int block_valid(grid* g, block* b);
-int intersects(grid* g, block* b);
-void block_center_top(grid* g, block* b);
-void print_grid(grid* g);
-void drop(grid* g, block* b);
+void grid_block_center_top(grid* g, block* b);
+int grid_block_valid(grid* g, block* b);
+int grid_block_intersects(grid* g, block* b);
+void grid_apply_moves( grid* g, game_move* stream, int stream_count );
+void grid_block_drop(grid* g, block* b);
+void grid_print(grid* g);
 
 
-void print_shape(shape* s);
-shape** read_shapes(char* file, int* shape_count);
+void shape_print(shape* s);
+shape** shapes_read(char* file, int* shape_count);
+
+void block_get(block* b, int i, coord* result);
+void block_rotate(block* b, int amount);
+void block_move ( block* b, direction d, int amount );
+void block_crust_get ( block* b, direction d, int i, coord* result );
 
 block* block_new(shape* s);
-void block_get(block* b, int i, coord* result);
-void rotate(block* b, int amount);
-void move ( block* b, direction d, int amount );
-int extreme(block* b, direction d);
+int block_extreme(block* b, direction d);
