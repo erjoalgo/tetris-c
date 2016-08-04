@@ -41,6 +41,7 @@ typedef struct {
 
 
 grid* grid_new(int height, int width);
+void grid_set_color ( grid* g, int r, int c, int color );
 void grid_block_add(grid* g, block* b);
 void grid_block_remove(grid* g, block* b);
 void grid_block_center_top(grid* g, block* b);

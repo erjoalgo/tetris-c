@@ -48,31 +48,34 @@ int grid_height_at ( grid* g, int x ){
   return grid_height_at_start_at(g, x, g->height-1);
 }
 
+void grid_set_color ( grid* g, int r, int c, int color )	{
+  g->rows[r][c] = color;
+  if (color == 0)	{
+    g->row_fill_count[r] -= 1;
+    if (g->relief[c] == r)	{
+      g->relief[c] = grid_height_at_start_at(g, c, r-1);
+    }
+  }else 	{
+    g->row_fill_count[r] += 1;
+    if (g->row_fill_count[r] == g->width)	{
+      g->full_rows[g->full_rows_count++] = r;
+    }
+    assert(g->relief[c] != r);
+    if (g->relief[c]<r)	{
+      g->relief[c] = r;
+    }
+  }
+}
+
 void grid_block_set_color ( grid* g, block* b, int color )	{
   // add block, updating relief, row_fill_count, needs_clear
   int i = 0;
-  coord c;
+  coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
-    block_get(b, i, &c);
-    int x = c[0];
-    int y = c[1];
-    g->rows[y][x] = color;
-    if (color == 0)	{
-      // TODO remove x, y refs
-      g->row_fill_count[y] -= 1;
-      if (g->relief[x] == y)	{
-	g->relief[x] = grid_height_at_start_at(g, x, y-1);
-      }
-    }else 	{
-      g->row_fill_count[y] += 1;
-      if (g->row_fill_count[y] == g->width)	{
-	g->full_rows[g->full_rows_count++] = y;
-      }
-      assert(g->relief[x] != y);
-      if (g->relief[x]<y)	{
-	g->relief[x] = y;
-      }
-    }
+    block_get(b, i, &cr);
+    int c = cr[0];
+    int r = cr[1];
+    grid_set_color(g, r, c, color);
   }
 }
 
