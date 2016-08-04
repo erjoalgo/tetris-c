@@ -1,3 +1,7 @@
+typedef enum {BOT, LEFT, TOP, RIGHT} direction;
+
+typedef int coord[2];//TODO do away with this?
+
 typedef struct {
   int rot_count;
   int rot_wh[4][2];
@@ -7,14 +11,32 @@ typedef struct {
   int max_dim_len;
   int** rot[4];
 } shape;
+void shape_print(shape* s);
+shape** shapes_read(char* file, int* shape_count);
+void shape_test();
+//global shapes and count
+shape** SHAPES;
+int SHAPE_COUNT;
 
 typedef struct {
   int offset[2];
   int rot;
   shape* shape;
 } block;
+block* block_new(shape* s);
+void block_init(block* b, shape* s);
+void block_get(block* b, int i, coord* result);
+void block_rotate(block* b, int amount);
+void block_move ( block* b, direction d, int amount );
+void block_crust_get ( block* b, direction d, int i, coord* result );
+int block_extreme(block* b, direction d);
 
-typedef enum {BOT, LEFT, TOP, RIGHT} direction;
+
+typedef struct {
+  shape* shape;
+  int rot;//abs rot
+  int col;
+} game_move;
 
 typedef struct {
   int** rows;
@@ -30,16 +52,6 @@ typedef struct {
   int last_cleared_count;
   block** virtual_blocks;
 } grid;
-
-typedef int coord[2];//TODO do away with this?
-
-typedef struct {
-  shape* shape;
-  int rot;//abs rot
-  int col;
-} game_move;
-
-
 grid* grid_new(int height, int width);
 void grid_set_color ( grid* g, int r, int c, int color );
 void grid_block_add(grid* g, block* b);
@@ -51,23 +63,8 @@ void grid_apply_moves( grid* g, game_move* stream, int stream_count );
 void grid_block_drop(grid* g, block* b);
 void grid_print(grid* g);
 void grid_test();
-
-void shape_print(shape* s);
-shape** shapes_read(char* file, int* shape_count);
-void shape_test();
-
-//global shapes and count
-shape** SHAPES;
-int SHAPE_COUNT;
-
-
-block* block_new(shape* s);
-void block_init(block* b, shape* s);
-void block_get(block* b, int i, coord* result);
-void block_rotate(block* b, int amount);
-void block_move ( block* b, direction d, int amount );
-void block_crust_get ( block* b, direction d, int i, coord* result );
-int block_extreme(block* b, direction d);
-
 #define GRID_HEIGHT 19
 #define GRID_WIDTH 10
+
+
+
