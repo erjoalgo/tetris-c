@@ -145,7 +145,7 @@ void feature_gaps ( grid* g, double* ordered_raws )	{
 }
 
 void test_feature (  )	{
-  grid* g = grid_new(19, 10);
+  grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   grid_set_color(g, 2, 0, 1);
   double raws[FEAT_COUNT];
   feature_gaps(g, raws);
