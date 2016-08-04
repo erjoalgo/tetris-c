@@ -55,6 +55,10 @@ void grid_print(grid* g);
 void shape_print(shape* s);
 shape** shapes_read(char* file, int* shape_count);
 
+//global shapes and count
+shape** SHAPES;
+int SHAPE_COUNT;
+
 block* block_new(shape* s);
 void block_init(block* b, shape* s);
 void block_get(block* b, int i, coord* result);
