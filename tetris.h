@@ -54,10 +54,10 @@ void grid_print(grid* g);
 void shape_print(shape* s);
 shape** shapes_read(char* file, int* shape_count);
 
+block* block_new(shape* s);
+void block_init(block* b, shape* s);
 void block_get(block* b, int i, coord* result);
 void block_rotate(block* b, int amount);
 void block_move ( block* b, direction d, int amount );
 void block_crust_get ( block* b, direction d, int i, coord* result );
-
-block* block_new(shape* s);
 int block_extreme(block* b, direction d);
