@@ -15,7 +15,7 @@ int cmp_coord (const void* a, const void* b  )	{
   }
 }
 
-int max_dim(int* coords[2], int count, int dim) {
+int max_dim(int** coords, int count, int dim) {
   int mx = coords[0][dim];
   int i;
   for ( i = 1; i < count; i++ )	{
@@ -26,7 +26,7 @@ int max_dim(int* coords[2], int count, int dim) {
 }
 
 // int min_dim(int count; int coords[count][2], int count, int dim) {
-int min_dim(int* coords[2], int count, int dim) {
+int min_dim(int** coords, int count, int dim) {
   int mn = coords[0][dim];
   int i;
   for ( i = 1; i < count; i++ )	{
