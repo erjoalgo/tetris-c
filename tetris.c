@@ -11,7 +11,7 @@ void fatal(char* msg){
   exit(1);
 }
 
-int main(int argc, char* argv[])
+int main()
 {
   int shape_count;
   shape** shapes = shapes_read("shapes.in", &shape_count);

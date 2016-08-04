@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g -W -Wall -Werror -Wextra
 DEPS=tetris.h
 OBJ=tetris.o grid.o block.o shape.o
 
