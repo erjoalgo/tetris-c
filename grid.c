@@ -124,28 +124,28 @@ void clear_lines ( grid* g )	{
   assert(g->row_fill_count[y] == g->width);
   assert(g->full_rows[g->full_rows_count-1] == y);
 
-  int nextNonFull = y+1;
-  while (nextNonFull<=ymax)	{
+  int next_non_full = y+1;
+  while (next_non_full<=ymax)	{
     // copy next non-full row into y
     // y is either full or has already been copied by a lower y
     // if it is full, we zero it and save it for the end
 
     // find the next nonFull
-    assert(nextNonFull<g->height);
-    while (g->row_fill_count[nextNonFull] == g->width)	{
-      nextNonFull++;
+    assert(next_non_full<g->height);
+    while (g->row_fill_count[next_non_full] == g->width)	{
+      next_non_full++;
       // it should be (almost) impossible for the highest row to get full
       // however, it is still possible,eg if new shape exactly fits into top row
       // this could happen only intentionally
       // so for now ignore this rare edge case
-      assert(nextNonFull<g->height);
+      assert(next_non_full<g->height);
     }
-    if (nextNonFull>ymax)	{
+    if (next_non_full>ymax)	{
       // there is no next non full to copy into a row below
       break;
     }
     // invariant: nextNonfull should be not full
-    assert(g->row_fill_count[nextNonFull] != g->width);
+    assert(g->row_fill_count[next_non_full] != g->width);
 
     if (g->row_fill_count[y]==g->width) {
       // in this case, save row y for the end
@@ -157,25 +157,24 @@ void clear_lines ( grid* g )	{
     // copy next-non-full into y
     // y was previously a next-non-full and already copied
     // or y is full and we saved it
-    g->rows[y] = g->rows[nextNonFull];
+    g->rows[y] = g->rows[next_non_full];
     // g->row_fill_count[y] must have already been used by some lower row
     // or it was a full row, and it is appened to cleared
     // cleared.length + ?  = y- ymin
-    g->row_fill_count[y] = g->row_fill_count[nextNonFull];
+    g->row_fill_count[y] = g->row_fill_count[next_non_full];
 
     y++;
-    nextNonFull ++;
+    next_non_full ++;
   }
   // now there are left-over rows that were cleared
   // they need to be zeroed-out, and replaces into rows[y...ymax]
+  assert(cleared_count>0);
   g->total_cleared_count+=cleared_count;
   g->last_cleared_count=cleared_count;
-  assert(cleared_count>0);
   while (cleared_count--)	{
     g->rows[y] = cleared[cleared_count];
     g->row_fill_count[y] = 0;
     memset(g->rows[y], 0, g->width*sizeof(*g->rows[y]));
-
     y++;
   }
 
