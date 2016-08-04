@@ -217,3 +217,11 @@ shape** shapes_read ( char* file, int* shape_count)	{
   }
   return shapes;
 }
+
+void shape_test (  )	{
+  int i;
+  for ( i = 0; i < SHAPE_COUNT; i++ )	{
+    printf( "shape %d/%d\n", i+1, SHAPE_COUNT );
+    shape_print(SHAPES[i]);
+  }
+}

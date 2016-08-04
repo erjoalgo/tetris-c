@@ -50,14 +50,16 @@ int grid_block_intersects(grid* g, block* b);
 void grid_apply_moves( grid* g, game_move* stream, int stream_count );
 void grid_block_drop(grid* g, block* b);
 void grid_print(grid* g);
-
+void grid_test();
 
 void shape_print(shape* s);
 shape** shapes_read(char* file, int* shape_count);
+void shape_test();
 
 //global shapes and count
 shape** SHAPES;
 int SHAPE_COUNT;
+
 
 block* block_new(shape* s);
 void block_init(block* b, shape* s);

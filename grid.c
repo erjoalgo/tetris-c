@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "tetris.h"
+#define RAND(len) (rand()%(len))
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
@@ -384,4 +385,41 @@ void grid_block_rotate_safe ( grid* g, block* b, int amount )	{
   if (!grid_block_valid(g, b))	{
     block_rotate(b, -amount);
   }
+}
+
+void grid_test (  )	{
+  block* b = block_new(NULL);
+  grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  check_consistency(g);
+  // test a simple flow until grid gets full
+  while (1)	{
+    block_init(b, SHAPES[RAND(SHAPE_COUNT)]);
+    grid_block_center_top(g, b);
+    if (grid_block_intersects(g, b))	{
+      break;
+    }
+    grid_block_add(g, b);
+    check_consistency(g);
+    grid_block_remove(g, b);
+    check_consistency(g);
+    grid_block_add(g, b);
+    check_consistency(g);
+    grid_print(g);
+    grid_block_remove(g, b);
+    check_consistency(g);
+    grid_block_drop(g, b);
+    check_consistency(g);
+    grid_block_add(g, b);
+    check_consistency(g);
+    grid_print(g);
+  }
+
+  // exercise clearing lines
+  game_move moves[3];
+  moves[0] = (game_move) { .shape = SHAPES[2], .rot = 0, .col = 0 };
+  moves[1] = (game_move) { .shape = SHAPES[2], .rot = 0, .col = 4 };
+  moves[2] = (game_move) { .shape = SHAPES[0], .rot = 0, .col = 8 };
+  g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  grid_apply_moves(g, moves, 3);
+  grid_print(g);
 }
