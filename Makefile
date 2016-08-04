@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -g -W -Wall -Werror -Wextra
 DEPS=tetris.h
-OBJ=tetris.o grid.o block.o shape.o
+OBJ=tetris.o game.c grid.o block.o shape.o
 
 tetris: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(CFLAGS)

@@ -68,3 +68,13 @@ void grid_test();
 
 
 
+
+typedef struct{
+  int max_len;
+  int i;
+  int* is_defined;
+  shape** stream;
+} shape_stream;
+shape_stream* shape_stream_new ( int max_len );
+shape* shape_stream_peek ( shape_stream* stream, int idx );
+shape* shape_stream_pop ( shape_stream* stream );
