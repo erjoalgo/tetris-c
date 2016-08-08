@@ -368,7 +368,7 @@ void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
     b->rot = move.rot;
     grid_block_drop(g, b);
     grid_block_add(g, b);
-    clear_lines(g);
+    grid_clear_lines(g);
   }
 }
 
