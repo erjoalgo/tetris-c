@@ -17,7 +17,6 @@ int main()
   srand(time(NULL));
   shape_test();
   grid_test();
-  // clear_lines(g);
   return 0;
 }
 
