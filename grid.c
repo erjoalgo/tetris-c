@@ -442,4 +442,15 @@ void grid_test (  )	{
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   grid_apply_moves(g, moves, 3);
   grid_print(g);
+
+  g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  int MV_COUNT = 5;
+  game_move moves[MV_COUNT];
+  moves[0] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 0 };
+  moves[1] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 2 };
+  moves[2] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 4 };
+  moves[3] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 6 };
+  moves[4] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 8 };
+  grid_apply_moves(g, moves, MV_COUNT);
+  grid_print(g);
 }
