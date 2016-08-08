@@ -65,10 +65,10 @@ void block_rotate ( block* b, int amount )	{
 void block_print ( block* b )	{
   int i;
   // TODO rename shape.count to shape.len
-  coord rc;
+  coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
-    block_get(b, i, &rc);
-    printf( "[%d %d]", rc[0], rc[1] );
+    block_get(b, i, &cr);
+    printf( "[%d %d]", cr[0], cr[1] );
   }
   printf( "\n" );
 }
