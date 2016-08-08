@@ -2,8 +2,6 @@
 #include <assert.h>
 #include "tetris.h"
 
-#define RAND(len) (rand()%(len))
-
 shape_stream* shape_stream_new ( int max_len )	{
   shape_stream* s = malloc(sizeof(shape_stream*));
   s->is_defined = malloc(s->max_len*sizeof(*s->is_defined));

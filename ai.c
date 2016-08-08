@@ -5,8 +5,6 @@
 #include <assert.h>
 #include "tetris.h"
 
-#define RAND(len) (rand()%(len))
-
 #define FEATIDX_RELIEF 0
 #define FEATIDX_RELIEF_AVG 1
 #define FEATIDX_RELIEF_VAR 2
