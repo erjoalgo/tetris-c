@@ -113,6 +113,7 @@ int grid_clear_lines ( grid* g )	{
     return 0;
   }
   assert(g->full_rows_count>0);
+  int expected_cleared_count = g->full_rows_count;
   int cleared_count = 0;
   int* cleared[g->full_rows_count];
   // smallest last. small values means near bottom of the grid
@@ -173,11 +174,16 @@ int grid_clear_lines ( grid* g )	{
   }
   // now there might be left-over rows that were cleared
   // they need to be zeroed-out, and replaces into rows[y...ymax]
-  assert(cleared_count>0);
-  g->total_cleared_count+=cleared_count;
-  g->last_cleared_count=cleared_count;
-  while (cleared_count--)	{
-    g->rows[y] = cleared[cleared_count];
+  assert(cleared_count+g->full_rows_count>0);
+  assert(cleared_count+g->full_rows_count
+	 == expected_cleared_count);
+  g->total_cleared_count+=expected_cleared_count;
+  g->last_cleared_count=expected_cleared_count;
+
+  while (cleared_count+g->full_rows_count)	{
+    g->rows[y] = g->full_rows_count?
+      g->rows[g->full_rows[--g->full_rows_count]]:
+      cleared[--cleared_count];
     g->row_fill_count[y] = 0;
     memset(g->rows[y], 0, g->width*sizeof(*g->rows[y]));
     y++;
