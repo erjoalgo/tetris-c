@@ -27,12 +27,11 @@ int main() {
   for ( col = 0; col < g->width; col++ )	{
     mvaddch(g->height, col, COL_SHORTCUT_KEYS[col]);
   }
-  int new_block = 1;
-  int drop, cleared = 0;
+  int dropped = 1, cleared = 0;
   int color;
 
   while(1) {
-    if (new_block)	{
+    if (dropped)	{
       color = RAND(SHAPE_COUNT);
       block_init(b, SHAPES[color]);
       grid_block_center_top(g, b);
@@ -42,7 +41,7 @@ int main() {
       }
       ncurses_block_print(b, 1, g->height);
       refresh();
-      new_block = 0;
+      dropped = 0;
     }else 	{
       int ch = wgetch(w);
       ncurses_block_print(b, 0, g->height);//delete block
@@ -52,7 +51,7 @@ int main() {
       case KEY_DOWN: grid_block_move_safe(g, b, BOT, 1); break;
       case KEY_UP: grid_block_rotate_safe(g, b, 1); break;
       case ' ': {
-	drop = 1;
+	dropped = 1;
 	break;
       }
       default: {
@@ -60,13 +59,13 @@ int main() {
 	for ( i = 0; i < g->width; i++ )	{
 	  if (ch == COL_SHORTCUT_KEYS[i])	{
 	    b->offset[0] = i;
-	    drop = 1;
+	    dropped = 1;
 	    break;
 	  }
 	}
       }
       }
-      if (drop)	{
+      if (dropped)	{
 	grid_block_drop(g, b);
 	grid_block_add(g, b);
 	cleared = grid_clear_lines(g);
@@ -74,8 +73,6 @@ int main() {
 	  // need to repaint the whole grid
 	  ncurses_grid_print(g);
 	}
-	new_block = 1;
-	drop = 0;
 	ncurses_grid_print_fill_count(g);
       }else 	{
 	cleared = 0;
