@@ -114,12 +114,13 @@ int grid_clear_lines ( grid* g )	{
   assert(g->full_rows_count>0);
   int cleared_count = 0;
   int* cleared[g->full_rows_count];
-  //smallest last. small values means near bottom of the grid
+  // smallest last. small values means near bottom of the grid
   // that is, descending order.
-  // why did I pick descending order?
+  // this is so we can just decrement the count to "pop" the smallest row
   qsort(g->full_rows, g->full_rows_count, sizeof(int), cmp_rev);
-  // smallest
+  // smallest full row
   int y = g->full_rows[g->full_rows_count-1];
+  // largest occupied (full or non-full) row.
   int ymax = max (g->relief, g->width);
   assert(ymax<g->height);
   assert(g->row_fill_count[y] == g->width);
@@ -127,11 +128,11 @@ int grid_clear_lines ( grid* g )	{
 
   int next_non_full = y+1;
   while (next_non_full<=ymax)	{
-    // copy next non-full row into y
-    // y is either full or has already been copied by a lower y
+    // copy next non-full row into y, which is either full
+    // or has already been copied into a lower y
     // if it is full, we zero it and save it for the end
 
-    // find the next nonFull
+    // find the next non-full
     assert(next_non_full<g->height);
     while (g->row_fill_count[next_non_full] == g->width)	{
       next_non_full++;
@@ -145,7 +146,7 @@ int grid_clear_lines ( grid* g )	{
       // there is no next non full to copy into a row below
       break;
     }
-    // invariant: nextNonfull should be not full
+    // invariant: next_non_full should be not full
     assert(g->row_fill_count[next_non_full] != g->width);
 
     if (g->row_fill_count[y]==g->width) {
@@ -167,7 +168,7 @@ int grid_clear_lines ( grid* g )	{
     y++;
     next_non_full ++;
   }
-  // now there are left-over rows that were cleared
+  // now there might be left-over rows that were cleared
   // they need to be zeroed-out, and replaces into rows[y...ymax]
   assert(cleared_count>0);
   g->total_cleared_count+=cleared_count;
