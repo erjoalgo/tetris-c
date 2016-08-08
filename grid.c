@@ -359,7 +359,7 @@ void grid_print ( grid* g )	{
 
 void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   int i;
-  static block* b = block_new(NULL);
+  block* b = block_new(NULL);
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
     block_init(b, move.shape);
