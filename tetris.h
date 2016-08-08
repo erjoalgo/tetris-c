@@ -37,6 +37,7 @@ void block_rotate(block* b, int amount);
 void block_move ( block* b, direction d, int amount );
 void block_crust_get ( block* b, direction d, int i, coord* result );
 int block_extreme(block* b, direction d);
+void block_print(block* b);
 
 
 typedef struct {
@@ -69,6 +70,9 @@ int grid_block_intersects(grid* g, block* b);
 void grid_apply_moves( grid* g, game_move* stream, int stream_count );
 void grid_block_drop(grid* g, block* b);
 void grid_print(grid* g);
+void grid_block_move_safe(grid* g, block* b, int direction, int amount);
+void grid_block_rotate_safe(grid* g, block* b, int amount);
+int grid_clear_lines(grid* g);
 void grid_test();
 #define GRID_HEIGHT 19
 #define GRID_WIDTH 10
