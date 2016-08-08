@@ -107,9 +107,9 @@ int max(int* heights, int count){
   return mx;
 }
 
-void clear_lines ( grid* g )	{
+int grid_clear_lines ( grid* g )	{
   if (g->full_rows_count == 0)	{
-    return ;
+    return 0;
   }
   assert(g->full_rows_count>0);
   int cleared_count = 0;
@@ -183,13 +183,14 @@ void clear_lines ( grid* g )	{
   int i;
   for ( i = 0; i < g->width; i++ )	{
     g->relief[i] = grid_height_at_start_at(g, i, g->relief[i]);
+
   }
   // we should be done.
   // should assert consistency
-
+  return g->last_cleared_count;
 }
 
-void check_consistency ( grid* g )	{
+void grid_assert_consistency ( grid* g )	{
   int i;
   for ( i = 0; i < g->width; i++ )	{
     assert(g->relief[i] == grid_height_at(g, i));
@@ -390,7 +391,7 @@ void grid_block_rotate_safe ( grid* g, block* b, int amount )	{
 void grid_test (  )	{
   block* b = block_new(NULL);
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  check_consistency(g);
+  grid_assert_consistency(g);
   // test a simple flow until grid gets full
   while (1)	{
     block_init(b, SHAPES[RAND(SHAPE_COUNT)]);
