@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "tetris.h"
-#define RAND(len) (rand()%(len))
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));

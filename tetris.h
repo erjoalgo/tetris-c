@@ -90,6 +90,8 @@ shape_stream* shape_stream_new ( int max_len );
 shape* shape_stream_peek ( shape_stream* stream, int idx );
 shape* shape_stream_pop ( shape_stream* stream );
 
+#define RAND(len) (rand()%(len))
+
 void ncurses_grid_print ( grid* g );
 void ncurses_grid_print_fill_count ( grid* g );
 void ncurses_block_print ( block* b, int color, int grid_height );
