@@ -8,6 +8,10 @@
 
 static char COL_SHORTCUT_KEYS[] = "1234qwersd";
 
+int TETROMINO_COLORS[] = {COLOR_RED, COLOR_GREEN,
+		COLOR_YELLOW, COLOR_BLUE,
+		COLOR_MAGENTA, COLOR_CYAN};
+
 int main() {
 
   srand(time(NULL));
@@ -17,7 +21,15 @@ int main() {
   noecho();
   curs_set(0);
 
+  start_color();
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
+
+  int bg = !(use_default_colors() == OK)? COLOR_WHITE : -1;
+  int i;
+  for ( i = 0; i < SHAPE_COUNT; i++ )	{
+    init_pair(i+1, TETROMINO_COLORS[i], bg);
+  }
+  init_pair(SHAPE_COUNT+1, bg, bg);
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   block* b = block_new(NULL);
@@ -39,11 +51,17 @@ int main() {
 	mvprintw(g->height+1, 0, "game over!");
 	break;
       }
+      attron(COLOR_PAIR(color+1));
+      attrset(COLOR_PAIR(color+1)|A_STANDOUT);
+      attroff(A_BOLD);
       ncurses_block_print(b, 1, g->height);
       refresh();
       dropped = 0;
     }else 	{
       int ch = wgetch(w);
+      attron(COLOR_PAIR(-1));
+      attron(A_BOLD);
+      attrset(COLOR_PAIR(-1)|A_STANDOUT);
       ncurses_block_print(b, 0, g->height);//delete block
       switch(ch){
       case KEY_LEFT: grid_block_move_safe(g, b, LEFT, 1); break;
@@ -77,6 +95,8 @@ int main() {
       }else 	{
 	cleared = 0;
       }
+      attron(COLOR_PAIR(color+1));
+      attrset(COLOR_PAIR(color+1)|A_STANDOUT);
       if (!cleared)	{
 	ncurses_block_print(b, 1, g->height);//repaint in new location
       }
