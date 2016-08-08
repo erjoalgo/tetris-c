@@ -399,26 +399,26 @@ void grid_test (  )	{
       break;
     }
     grid_block_add(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_block_remove(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_block_add(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_print(g);
     grid_block_remove(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_block_drop(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_block_add(g, b);
-    check_consistency(g);
+    grid_assert_consistency(g);
     grid_print(g);
   }
 
   // exercise clearing lines
   game_move moves[3];
-  moves[0] = (game_move) { .shape = SHAPES[2], .rot = 0, .col = 0 };
-  moves[1] = (game_move) { .shape = SHAPES[2], .rot = 0, .col = 4 };
-  moves[2] = (game_move) { .shape = SHAPES[0], .rot = 0, .col = 8 };
+  moves[0] = (game_move) { .shape = SHAPE_I, .rot = 0, .col = 0 };
+  moves[1] = (game_move) { .shape = SHAPE_I, .rot = 0, .col = 4 };
+  moves[2] = (game_move) { .shape = SHAPE_O, .rot = 0, .col = 8 };
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   grid_apply_moves(g, moves, 3);
   grid_print(g);
