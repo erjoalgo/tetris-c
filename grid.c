@@ -342,18 +342,19 @@ void grid_block_drop ( grid* g, block* b )	{
 void grid_print ( grid* g )	{
   printf( "\n" );
   int row, col;
+  char row_s[g->width+2];
+  row_s[g->width] = '|';
+  row_s[g->width+1] = '\n';
   for ( row = g->height-1; row >= 0; row-- )	{
-    // TODO how to print entire row of memory at once
     // TODO include virtual blocks
     for ( col = 0; col < g->width; col++ )	{
-      printf("%c", g->rows[row][col]? '*' : ' ');
+      row_s[col] = g->rows[row][col]? '*' : ' ';
     }
-    printf( "|\n" );
+    printf(row_s);
   }
-  for ( col = 0; col < g->width; col++ )	{
-    printf("%c", 'T');
-  }
-  printf( "\n" );
+  memset(row_s, 'T', g->width*sizeof(char));
+  row_s[g->width] = ' ';
+  printf(row_s);
 }
 
 void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
