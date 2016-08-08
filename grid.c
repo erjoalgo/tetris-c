@@ -359,9 +359,10 @@ void grid_print ( grid* g )	{
 
 void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   int i;
+  static block* b = block_new(NULL);
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
-    block* b = block_new(move.shape);
+    block_init(b, move.shape);
     grid_block_center_top(g, b);
     b->offset[0] = move.col;
     assert(grid_block_valid(g, b));
