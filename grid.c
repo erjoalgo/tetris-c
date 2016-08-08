@@ -257,7 +257,6 @@ int grid_equal(grid* a, grid* b){
       }
     }
   }
-  // TODO virtualblocks
   return 1;
 }
 
@@ -346,7 +345,6 @@ void grid_print ( grid* g )	{
   row_s[g->width] = '|';
   row_s[g->width+1] = '\n';
   for ( row = g->height-1; row >= 0; row-- )	{
-    // TODO include virtual blocks
     for ( col = 0; col < g->width; col++ )	{
       row_s[col] = g->rows[row][col]? '*' : ' ';
     }

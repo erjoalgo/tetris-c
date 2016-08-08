@@ -6,8 +6,6 @@ void ncurses_grid_print ( grid* g )	{
   // char row_s[g->width+1];
   // row_s[g->width] = '|';
   for ( row = g->height-1; row >= 0; row-- )	{
-    // TODO how to print entire row of memory at once
-    // TODO include virtual blocks
     for ( col = 0; col < g->width; col++ )	{
       // row_s[col] = g->rows[row][col]? '█' : ' ';
       // row_s[col] = g->rows[row][col]? '*' : ' ';
@@ -16,7 +14,6 @@ void ncurses_grid_print ( grid* g )	{
     }
     mvaddch(g->height-1-row, g->width, '|');
   }
-  
   // row_s[g->width] = ' ';
   // mvprintw(g->height, col, row_s);
 }
@@ -41,7 +38,6 @@ void ncurses_block_print ( block* b, int color, int grid_height )	{
   // char* c = add? "█" : " ";
   char c = !!color? '*' : ' ';
   int i;
-  // TODO rename shape.count to shape.len
   coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &cr);

@@ -24,7 +24,6 @@ void block_get ( block* b, int i, coord* result )	{
 
 void block_crust_get ( block* b, direction d, int i, coord* result )	{
   int* crust = b->shape->crust[b->rot][d][i];
-  // TODO make sure this is correct order
   (*result)[0] = crust[0] + b->offset[0];
   (*result)[1] = crust[1] + b->offset[1];
 }
@@ -64,7 +63,6 @@ void block_rotate ( block* b, int amount )	{
 
 void block_print ( block* b )	{
   int i;
-  // TODO rename shape.count to shape.len
   coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &cr);
