@@ -17,6 +17,13 @@ void shape_test();
 //global shapes and count
 shape** SHAPES;
 int SHAPE_COUNT;
+#define SHAPE_O SHAPES[0]
+#define SHAPE_T SHAPES[1]
+#define SHAPE_I SHAPES[2]
+#define SHAPE_L SHAPES[3]
+#define SHAPE_J SHAPES[4]
+#define SHAPE_S SHAPES[5]
+#define SHAPE_Z SHAPES[6]
 
 typedef struct {
   int offset[2];
