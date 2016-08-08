@@ -50,6 +50,7 @@ int grid_height_at ( grid* g, int x ){
 }
 
 void grid_set_color ( grid* g, int r, int c, int color )	{
+  assert(!!g->rows[r][c] != !!color);
   g->rows[r][c] = color;
   if (color == 0)	{
     g->row_fill_count[r] -= 1;
@@ -143,6 +144,8 @@ int grid_clear_lines ( grid* g )	{
       assert(next_non_full<g->height);
     }
     if (next_non_full>ymax)	{
+      assert(next_non_full>=g->height ||
+	     g->row_fill_count[next_non_full] == 0);
       // there is no next non full to copy into a row below
       break;
     }
@@ -205,6 +208,14 @@ void grid_assert_consistency ( grid* g )	{
     }
     assert(g->row_fill_count[r] == count);
   }
+
+  int* sorted_rows[g->height];
+  memcpy(sorted_rows, g->rows, sizeof(*g->rows)*g->height);
+  qsort(sorted_rows, g->height, sizeof(*g->rows), cmp_rev);
+  for ( i = 1; i < g->height; i++ )	{
+    assert(sorted_rows[i+1] != sorted_rows[i]);
+  }
+
   int checked[g->height];
   memset(checked, 0, sizeof(checked));
   for ( i = 0; i < g->full_rows_count; i++ )	{
