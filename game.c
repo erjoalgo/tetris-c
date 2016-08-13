@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "tetris.h"
 
@@ -39,4 +40,29 @@ shape* shape_stream_peek ( shape_stream* stream, int idx )	{
 
 shape* shape_stream_pop ( shape_stream* stream ) {
   return shape_stream_get_set(stream, -1, NULL);
+}
+
+void shape_stream_test (  )	{
+  int max_len = 5;
+  shape_stream* ss = shape_stream_new(max_len);
+  int i;
+  for ( i = 0; i < 10; i++ )	{
+    assert(shape_stream_pop(ss) != NULL);
+  }
+  for ( i = 0; i < max_len; i++ )	{
+    shape_stream_get_set(ss, i, SHAPES[i]);
+    assert(shape_stream_peek(ss, i) == SHAPES[i]);
+  }
+
+  for ( i = 0; i < max_len; i++ )	{
+    printf( "\n\n\n\npeek %d. actual: \n", i );
+    shape_print(shape_stream_peek(ss, i), 1);
+    printf( "\nexpected:\n" );
+    shape_print(SHAPES[i], 1);
+    assert(shape_stream_peek(ss, i) == SHAPES[i]);
+  }
+
+  for ( i = 0; i < max_len; i++ )	{
+    assert(shape_stream_pop(ss) == SHAPES[i]);
+  }
 }
