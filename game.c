@@ -12,7 +12,8 @@ shape_stream* shape_stream_new ( int max_len )	{
 }
 
 
-shape* shape_stream_peek ( shape_stream* stream, int idx )	{
+shape* shape_stream_get_set ( shape_stream* stream, int idx,
+			      shape* set_shape )	{
   assert(idx<stream->max_len);
   int i, pop = 0;
   if (idx == -1)	{
@@ -20,8 +21,9 @@ shape* shape_stream_peek ( shape_stream* stream, int idx )	{
     pop = 1;
   }
   i = (stream->i+idx)%stream->max_len;
-  if (!stream->is_defined[i])	{
-    stream->stream[i] = SHAPES[RAND(SHAPE_COUNT)];
+  if (!stream->is_defined[i] || set_shape != NULL)	{
+    stream->stream[i] = set_shape == NULL?
+      SHAPES[RAND(SHAPE_COUNT)] : set_shape;
     stream->is_defined[i] = 1;
   }
   if (pop)	{
@@ -31,6 +33,10 @@ shape* shape_stream_peek ( shape_stream* stream, int idx )	{
   return stream->stream[i];
 }
 
+shape* shape_stream_peek ( shape_stream* stream, int idx )	{
+  return shape_stream_get_set(stream, idx, NULL);
+}
+
 shape* shape_stream_pop ( shape_stream* stream ) {
-  return shape_stream_peek(stream, -1);
+  return shape_stream_get_set(stream, -1, NULL);
 }
