@@ -167,13 +167,19 @@ void print_coords ( char* grid, int rows, int  cols,
   }
 }
 
-void shape_print ( shape* s )	{
+void shape_print ( shape* s, int quiet )	{
   char grid[s->max_dim_len*(1+s->max_dim_len) + 1];
   int i;
   for ( i = 0; i < s->max_dim_len*(1+s->max_dim_len); i++ )	{
     grid[i] = (i+1)%(s->max_dim_len+1) ? ' ' : '\n';
   }
   grid[s->max_dim_len*(1+s->max_dim_len)] = '\0';
+
+  if (quiet)	{
+    print_coords(grid, s->max_dim_len,s->max_dim_len+1,
+		 s->rot[0], s->len);
+    return ;
+  }
 
   int roti;
   for ( roti = 0; roti < s->rot_count; roti++ )	{
@@ -222,6 +228,6 @@ void shape_test (  )	{
   int i;
   for ( i = 0; i < SHAPE_COUNT; i++ )	{
     printf( "shape %d/%d\n", i+1, SHAPE_COUNT );
-    shape_print(SHAPES[i]);
+    shape_print(SHAPES[i], 0);
   }
 }

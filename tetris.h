@@ -11,7 +11,7 @@ typedef struct {
   int max_dim_len;
   int** rot[4];
 } shape;
-void shape_print(shape* s);
+void shape_print(shape* s, int quiet);
 shape** shapes_read(char* file, int* shape_count);
 void shape_test();
 //global shapes and count
