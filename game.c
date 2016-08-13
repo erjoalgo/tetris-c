@@ -3,17 +3,18 @@
 #include "tetris.h"
 
 shape_stream* shape_stream_new ( int max_len )	{
-  shape_stream* s = malloc(sizeof(shape_stream*));
+  shape_stream* s = malloc(sizeof(*s));
   s->is_defined = malloc(s->max_len*sizeof(*s->is_defined));
   s->max_len = max_len;
   s->i = 0;
+  s->stream = malloc(s->max_len*sizeof(*s->stream));
   return s;
 }
 
 
 shape* shape_stream_peek ( shape_stream* stream, int idx )	{
   assert(idx<stream->max_len);
-  int i, pop;
+  int i, pop = 0;
   if (idx == -1)	{
     idx = 0;
     pop = 1;
