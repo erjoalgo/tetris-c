@@ -57,9 +57,15 @@ game_move* ai_best_move ( grid* g, shape_stream* stream, double* w,
   for ( r = 0; r < max_rots; r++ )	{
       int c;
       for ( c = 0; c < max_cols; c++ )	{
-	grid_block_center_top(g, b);
+	if (!grid_block_center_top(g, b))	{
+	  continue;
+	}
+	assert(grid_block_valid(g, b));
 	b->offset[0] = c;
 	b->rot = r;
+	if (!grid_block_valid(g, b))	{
+	  continue;
+	}
 	grid_block_drop(g, b);
 	grid_block_add(g, b);
 	double curr;
