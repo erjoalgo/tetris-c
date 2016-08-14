@@ -14,11 +14,12 @@ void fatal(char* msg){
 int main()
 {
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
-  srand(time(NULL));
+  int seed = time(NULL);
+  printf( "seed %d \n", seed );
+  srand(seed);
   shape_test();
   grid_test();
   shape_stream_test();
-  // clear_lines(g);
   return 0;
 }
 
