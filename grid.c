@@ -290,9 +290,10 @@ int grid_block_valid ( grid* g, block* b )	{
 }
 
 void grid_block_center_top (grid* g, block* b){
-  // assert(extreme(b, BOT) == 0); this makes no sense here
+  // note: offset[1] needs to be in-bounds for all rotations
+  // so assert(extreme(b, TOP) == 0) == g->height-1 won't always be the case
   int rot = b->rot;
-  b->offset[1] = g->height - 1 - b->shape->rot_wh[rot][1];
+  b->offset[1] = g->height - b->shape->max_dim_len;
   b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
   assert(grid_block_in_bounds(g, b));
   assert(b->shape->max_dim_len<g->width);
