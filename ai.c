@@ -207,6 +207,7 @@ void ai_test (  )	{
     game_move_print(gm);
     assert(grid_apply_moves(g, moves, 1));
     applied++;
+    shape_stream_pop(ss);
   }
   printf( "%d moves applied\n", applied );
 }
