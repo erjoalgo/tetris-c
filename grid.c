@@ -289,14 +289,15 @@ int grid_block_valid ( grid* g, block* b )	{
   return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
-void grid_block_center_top (grid* g, block* b){
+int grid_block_center_top (grid* g, block* b){
+  // return whether block was successfully centered
   // note: offset[1] needs to be in-bounds for all rotations
   // so assert(extreme(b, TOP) == 0) == g->height-1 won't always be the case
   int rot = b->rot;
   b->offset[1] = g->height - b->shape->max_dim_len;
   b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
-  assert(grid_block_in_bounds(g, b));
-  assert(b->shape->max_dim_len<g->width);
+  // TODO can be optimized to grid_block_intersects(g, b)
+  return grid_block_valid(g, b);
 }
 
 int drop_amount ( grid* g, block* b )	{
@@ -356,20 +357,29 @@ void grid_print ( grid* g )	{
   printf(row_s);
 }
 
-void grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
+int grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
+  int applied_count = 0;
   int i;
   block* b = block_new(NULL);
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
     block_init(b, move.shape);
-    grid_block_center_top(g, b);
+    if (!grid_block_center_top(g, b))	{
+      return applied_count;
+    }
     b->offset[0] = move.col;
-    assert(grid_block_valid(g, b));
     b->rot = move.rot;
+    assert(grid_block_in_bounds(g, b));
+    if (grid_block_intersects(g, b))	{
+      return applied_count;
+    }
+    assert(grid_block_valid(g, b));
     grid_block_drop(g, b);
     grid_block_add(g, b);
     grid_clear_lines(g);
+    applied_count++;
   }
+  return applied_count;
 }
 
 void print_arr ( int* arr, int len )	{
