@@ -111,6 +111,18 @@ double* mutate_weights ( double* weights )	{
   return mutated;
 }
 
+void mutate_weights_test (  )	{
+  double* w = malloc(FEAT_COUNT*sizeof(*w));
+  memset(w, 0, FEAT_COUNT*sizeof(*w));
+  double* w_prime = mutate_weights(w);
+  int i;
+  int mutated_count = 0;
+  for ( i = 0; i < FEAT_COUNT; i++ )	{
+    mutated_count += w_prime[i] != 0;
+    assert(abs(w_prime[i])<=MAX_MUTATION);
+  }
+}
+
 void feature_variance ( grid* g, double* ordered_raws )	{
   double avg, var, max;
   max = 0;
