@@ -50,6 +50,7 @@ game_move* ai_best_move ( grid* g, shape_stream* stream, double* w,
 
   int depth = stream->max_len-depth_left;
   shape* s = shape_stream_peek(stream, depth);
+  best_move->shape = s;
   block* b = block_new(s);
   int max_cols = g->width - b->shape->rot_wh[b->rot][0];
   int max_rots = b->shape->rot_count;
