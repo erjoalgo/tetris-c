@@ -322,9 +322,9 @@ int drop_amount ( grid* g, block* b )	{
       int next_amnt = min_amnt+1;
       for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
 	block_crust_get(b, BOT, i, &cr);
-	int r = cr[0];
-	int c = cr[1];
-	if (g->rows[r][c+next_amnt])	{
+	int c = cr[0];
+	int r = cr[1];
+	if (g->rows[r-next_amnt][c])	{
 	  // break a;
 	  goto a;
 	}
@@ -335,9 +335,10 @@ int drop_amount ( grid* g, block* b )	{
 }
 
 void grid_block_drop ( grid* g, block* b )	{
+  assert(grid_block_valid(g, b));
   int amount = drop_amount(g, b);
   block_move(b, BOT, amount);
-  // assert(block_valid(g, b));
+  assert(grid_block_valid(g, b));
 }
 
 void grid_print ( grid* g )	{
