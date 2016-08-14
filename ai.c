@@ -183,3 +183,30 @@ void test_feature (  )	{
   assert(raws[FEATIDX_GAPS] == 3);
   assert(raws[FEATIDX_OBS] == 1);
 }
+
+void ai_test (  )	{
+  mutate_weights_test();
+  grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  shape_stream* ss = shape_stream_new(3);
+  g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  double w[FEAT_COUNT];
+  int i;
+  for ( i = 0; i < FEAT_COUNT; i++ )	{
+    w[i] = 1;
+  }
+  game_move moves[1];
+  int applied = 0;
+  while (1)	{
+    grid_print(g);
+    game_move* gm = ai_best_move(g, ss, w);
+    if (gm == NULL)	{
+      printf( "ai can't place move\n" );
+      break;
+    }
+    moves[0] = *gm;
+    game_move_print(gm);
+    assert(grid_apply_moves(g, moves, 1));
+    applied++;
+  }
+  printf( "%d moves applied\n", applied );
+}

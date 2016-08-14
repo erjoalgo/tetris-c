@@ -98,3 +98,4 @@ void ncurses_grid_print_fill_count ( grid* g );
 void ncurses_block_print ( block* b, int color, int grid_height );
 
 void shape_stream_test();
+void ai_test();

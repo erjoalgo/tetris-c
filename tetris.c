@@ -20,6 +20,7 @@ int main()
   shape_test();
   grid_test();
   shape_stream_test();
+  ai_test();
   return 0;
 }
 
