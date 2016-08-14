@@ -16,6 +16,7 @@
 // #define FEAT_COUNT 9
 #define FEAT_COUNT 8
 #define MAX_MUTATION 2.5
+#define MOST_NEG_DBL (-DBL_MAX)
 
 
 /*typedef struct {
@@ -40,15 +41,15 @@ double grid_eval ( grid* g, double* weights )	{
   return val;
 }
 
-game_move* ai_best_move ( grid* g, shape_stream* stream, double* weights,
+game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
 		       int depth_left, double* result_value );
 
-game_move* ai_best_move ( grid* g, shape_stream* stream, double* w,
+game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 		      int depth_left, double* value )	{
-  double best_score = -DBL_MAX;
+  double best_score = MOST_NEG_DBL;
   game_move* best_move = malloc(sizeof(game_move));
 
-  int depth = stream->max_len-depth_left;
+  int depth = stream->max_len-depth_left-1;
   shape* s = shape_stream_peek(stream, depth);
   best_move->shape = s;
   block* b = block_new(s);
@@ -71,7 +72,7 @@ game_move* ai_best_move ( grid* g, shape_stream* stream, double* w,
 	grid_block_add(g, b);
 	double curr;
 	if (depth_left)	{
-	  ai_best_move(g, stream, w, depth_left-1, &curr);
+	  ai_best_move_rec(g, stream, w, depth_left-1, &curr);
 	}else 	{
 	  curr = grid_eval(g, w);
 	}
@@ -85,6 +86,16 @@ game_move* ai_best_move ( grid* g, shape_stream* stream, double* w,
   }
   *value = best_score;
   return best_move;
+}
+
+game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
+  double best_value;
+  game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value);
+  if (best_value == MOST_NEG_DBL)	{
+    return NULL;
+  }else 	{
+    return best_move;
+  }
 }
 
 double* mutate_weights ( double* weights )	{
