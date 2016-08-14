@@ -46,6 +46,7 @@ typedef struct {
   int col;
 } game_move;
 
+void game_move_print(game_move* g);
 typedef struct {
   int** rows;
   int* relief;

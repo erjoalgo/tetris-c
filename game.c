@@ -42,6 +42,15 @@ shape* shape_stream_pop ( shape_stream* stream ) {
   return shape_stream_get_set(stream, -1, NULL);
 }
 
+void game_move_print ( game_move* gm )	{
+  block b;
+  b.shape = gm->shape;
+  b.offset[0] = gm->col;
+  b.offset[1] = 0;
+  b.rot = gm->rot;
+  block_print(&b);
+}
+
 void shape_stream_test (  )	{
   int max_len = 5;
   shape_stream* ss = shape_stream_new(max_len);
