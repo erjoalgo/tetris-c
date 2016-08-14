@@ -5,13 +5,14 @@
 #include <assert.h>
 #include "tetris.h"
 
-#define FEATIDX_RELIEF 0
+#define FEATIDX_RELIEF_MAX 0
 #define FEATIDX_RELIEF_AVG 1
 #define FEATIDX_RELIEF_VAR 2
 #define FEATIDX_GAPS 3
 #define FEATIDX_GAPS_EXP 4
 #define FEATIDX_OBS 5
 #define FEATIDX_OBS_EXP 6
+#define FEATIDX_ROWS_FULL_CTR 7
 // #define FEATIDX_CLEARED_COUNT 8
 // #define FEAT_COUNT 9
 #define FEAT_COUNT 8
@@ -141,7 +142,7 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     double diff = avg-g->relief[i];
     var += diff*diff;
   }
-  ordered_raws[FEATIDX_RELIEF] = max;
+  ordered_raws[FEATIDX_RELIEF_MAX] = max;
   ordered_raws[FEATIDX_RELIEF_AVG] = avg;
   ordered_raws[FEATIDX_RELIEF_VAR] = var;
   // return var;
@@ -169,6 +170,7 @@ void feature_gaps ( grid* g, double* ordered_raws )	{
   ordered_raws[FEATIDX_GAPS_EXP] = gaps;
   ordered_raws[FEATIDX_OBS] = gaps;
   ordered_raws[FEATIDX_OBS_EXP] = gaps;
+  ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
   // ordered_raws[FEATIDX_CLEARED_COUNT] = ;
 }
 
@@ -194,6 +196,13 @@ void ai_test (  )	{
   for ( i = 0; i < FEAT_COUNT; i++ )	{
     w[i] = 1;
   }
+  w[FEATIDX_RELIEF_MAX] = -1;
+  w[FEATIDX_RELIEF_AVG] = 0;
+  w[FEATIDX_RELIEF_VAR] = -1;
+  w[FEATIDX_GAPS_EXP] = -1;
+  w[FEATIDX_OBS] = -1;
+  w[FEATIDX_OBS_EXP] = -1;
+  w[FEATIDX_ROWS_FULL_CTR] = 20;
   game_move moves[1];
   int applied = 0;
   while (1)	{
@@ -209,5 +218,6 @@ void ai_test (  )	{
     applied++;
     shape_stream_pop(ss);
   }
-  printf( "%d moves applied\n", applied );
+  printf( "%d moves applied, %d lines cleared\n",
+	  applied, g->total_cleared_count );
 }
