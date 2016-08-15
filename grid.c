@@ -352,7 +352,10 @@ int grid_block_intersects ( grid* g, block* b )	{
 }
 
 int grid_block_valid ( grid* g, block* b )	{
-  return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
+  // checking in bounds should never fail for legal, known shapes
+  // it is a function of the grid dimensions and shape structure only
+  // return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
+  return !grid_block_intersects(g, b);
 }
 
 inline int grid_block_center_top (grid* g, block* b){
