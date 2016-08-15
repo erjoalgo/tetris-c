@@ -17,9 +17,9 @@ int main()
   int seed = time(NULL);
   printf( "seed %d \n", seed );
   srand(seed);
-  shape_test();
-  grid_test();
-  shape_stream_test();
+  // shape_test();
+  // grid_test();
+  // shape_stream_test();
   ai_test();
   return 0;
 }

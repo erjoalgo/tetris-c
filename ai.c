@@ -200,7 +200,7 @@ void test_feature (  )	{
 void ai_test (  )	{
   mutate_weights_test();
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  shape_stream* ss = shape_stream_new(3);
+  shape_stream* ss = shape_stream_new(4);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   double w[FEAT_COUNT];
   int i;
