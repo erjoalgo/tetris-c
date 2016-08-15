@@ -56,10 +56,8 @@ typedef struct {
   int height;
   int width;
 
-  int virtual_blocks_c;
   int total_cleared_count;
   int last_cleared_count;
-  block** virtual_blocks;
 } grid;
 grid* grid_new(int height, int width);
 void grid_cpy(grid* dest, grid* src);

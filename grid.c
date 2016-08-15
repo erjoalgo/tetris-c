@@ -26,7 +26,6 @@ grid* grid_new ( int height, int width )	{
 
   g->full_rows = malloc(height*sizeof(g->full_rows));
 
-  g->virtual_blocks_c = 0;
   g->total_cleared_count = 0;
   g->last_cleared_count = 0;
   return g;
@@ -282,14 +281,6 @@ void grid_assert_consistency ( grid* g )	{
       assert(g->row_fill_count[i] != g->width);
     }
   }
-}
-
-void add_virtual_block(grid* g, block* b){
-  g->virtual_blocks[0] = b;
-}
-
-void remove_virtual_block(grid* g){
-  g->virtual_blocks[0] = NULL;
 }
 
 int grid_equal(grid* a, grid* b){
