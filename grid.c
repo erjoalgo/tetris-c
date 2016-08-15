@@ -115,11 +115,14 @@ void grid_set_color ( grid* g, int r, int c, int color )	{
 void grid_block_set_color ( grid* g, block* b, int color )	{
   // add block, updating relief, row_fill_count, needs_clear
   int i = 0;
-  coord cr;
+  // coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
-    block_get(b, i, &cr);
-    int c = cr[0];
-    int r = cr[1];
+    // block_get(b, i, &cr);
+    // int c = cr[0];
+    // int r = cr[1];
+    int* rot = b->shape->rot[b->rot][i];
+    int c = rot[0] + b->offset[0];
+    int r = rot[1] + b->offset[1];
     grid_set_color(g, r, c, color);
   }
 }
@@ -346,11 +349,14 @@ inline int grid_block_center_top (grid* g, block* b){
 int drop_amount ( grid* g, block* b )	{
   int i;
   int min_amnt = g->height-1;
-  coord cr;
+  // coord cr;
   for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
-    block_crust_get(b, BOT, i, &cr);
-    int c = cr[0];
-    int r = cr[1];
+    // block_crust_get(b, BOT, i, &cr);
+    // int c = cr[0];
+    // int r = cr[1];
+    int* crust = b->shape->crust[b->rot][BOT][i];
+    int c = crust[0] + b->offset[0];
+    int r = crust[1] + b->offset[1];
     int amnt = r-(g->relief[c]+1);
     if (amnt<min_amnt)	{
       min_amnt = amnt;
@@ -364,9 +370,9 @@ int drop_amount ( grid* g, block* b )	{
     for ( min_amnt = 0; min_amnt<max_amnt; min_amnt++ )	{
       int next_amnt = min_amnt+1;
       for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
-	block_crust_get(b, BOT, i, &cr);
-	int c = cr[0];
-	int r = cr[1];
+	int* crust = b->shape->crust[b->rot][BOT][i];
+	int c = crust[0] + b->offset[0];
+	int r = crust[1] + b->offset[1];
 	if (g->rows[r-next_amnt][c])	{
 	  // break a;
 	  goto a;
