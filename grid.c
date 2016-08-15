@@ -6,6 +6,11 @@
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
+  grid_init(g, height, width);
+  return g;
+}
+
+void grid_init ( grid* g, int height, int width )	{
   g->height = height;
   g->width = width;
   g->rows = malloc(height*sizeof(*g->rows));
@@ -28,7 +33,6 @@ grid* grid_new ( int height, int width )	{
 
   g->total_cleared_count = 0;
   g->last_cleared_count = 0;
-  return g;
 }
 
 void grid_cpy ( grid* dest, grid* src )	{
