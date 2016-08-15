@@ -257,6 +257,7 @@ void grid_assert_consistency ( grid* g )	{
   }
   for ( i = 0; i < g->full_rows_count; i++ )	{
     int y = g->full_rows[i];
+    (void)y;
     assert(g->row_fill_count[y] == g->width);
   }
 

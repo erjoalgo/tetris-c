@@ -137,8 +137,7 @@ void mutate_weights_test (  )	{
 }
 
 void feature_variance ( grid* g, double* ordered_raws )	{
-  double avg, var, max;
-  max = 0;
+  double avg = 0, var = 0, max = 0;
   int width = g->width;
   int i;
 
@@ -216,7 +215,7 @@ void ai_test (  )	{
   w[FEATIDX_OBS_EXP] = -1;
   w[FEATIDX_ROWS_FULL_CTR] = 20;
   game_move moves[1];
-  int applied = 0;
+  int applied = 0, succ;
   while (1)	{
     grid_print(g);
     game_move* gm = ai_best_move(g, ss, w);
@@ -226,10 +225,12 @@ void ai_test (  )	{
     }
     moves[0] = *gm;
     game_move_print(gm);
-    assert(grid_apply_moves(g, moves, 1));
+    succ = grid_apply_moves(g, moves, 1);
+    assert(succ);
     applied++;
     shape_stream_pop(ss);
   }
+  (void)succ;
   printf( "%d moves applied, %d lines cleared\n",
 	  applied, g->total_cleared_count );
 }
