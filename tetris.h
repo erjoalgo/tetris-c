@@ -73,6 +73,7 @@ void grid_print(grid* g);
 void grid_block_move_safe(grid* g, block* b, int direction, int amount);
 void grid_block_rotate_safe(grid* g, block* b, int amount);
 int grid_clear_lines(grid* g);
+int grid_equal(grid* a, grid* b);
 void grid_test();
 #define GRID_HEIGHT 19
 #define GRID_WIDTH 10
