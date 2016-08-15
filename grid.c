@@ -154,6 +154,26 @@ int max(int* heights, int count){
   return mx;
 }
 
+void sort_cleared_rows ( int* full_rows, int count )	{
+  // too much overhead for sorting an array of <= 4 elms
+  // qsort(g->full_rows, g->full_rows_count, sizeof(int), cmp_rev);
+  assert(count<=4);
+  int i, tmp, done = 0;
+  while (!done)	{
+    done = 1;
+    for ( i = 1; i < count; i++ )	{
+      assert(full_rows[i-1] != full_rows[i]);
+      if (full_rows[i-1]>full_rows[i])	{
+	tmp = full_rows[i-1];
+	full_rows[i-1] = full_rows[i];
+	full_rows[i] = tmp;
+	done = 0;
+      }
+    }
+  }
+}
+
+
 void grid_assert_consistency ( grid* g );
 int grid_clear_lines ( grid* g )	{
   if (g->full_rows_count == 0)	{
@@ -166,7 +186,7 @@ int grid_clear_lines ( grid* g )	{
   // smallest last. small values means near bottom of the grid
   // that is, descending order.
   // this is so we can just decrement the count to "pop" the smallest row
-  qsort(g->full_rows, g->full_rows_count, sizeof(int), cmp_rev);
+  sort_cleared_rows(g->full_rows, g->full_rows_count);
   // smallest full row
   int y = g->full_rows[g->full_rows_count-1];
   // largest occupied (full or non-full) row.
