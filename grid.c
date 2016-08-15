@@ -332,7 +332,7 @@ int grid_block_valid ( grid* g, block* b )	{
   return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
-int grid_block_center_top (grid* g, block* b){
+inline int grid_block_center_top (grid* g, block* b){
   // return whether block was successfully centered
   // note: offset[1] needs to be in-bounds for all rotations
   // so assert(extreme(b, TOP) == 0) == g->height-1 won't always be the case
