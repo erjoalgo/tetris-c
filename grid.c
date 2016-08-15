@@ -174,7 +174,7 @@ void sort_cleared_rows ( int* full_rows, int count )	{
 }
 
 
-void grid_assert_consistency ( grid* g );
+int grid_assert_consistency ( grid* g );
 int grid_clear_lines ( grid* g )	{
   if (g->full_rows_count == 0)	{
     return 0;
@@ -192,7 +192,7 @@ int grid_clear_lines ( grid* g )	{
   // largest occupied (full or non-full) row.
   int ymax = max (g->relief, g->width);
   assert(ymax<g->height);
-  grid_assert_consistency(g);
+  assert(grid_assert_consistency(g));
   assert(g->row_fill_count[y] == g->width);
   assert(g->full_rows[g->full_rows_count-1] == y);
 
@@ -268,7 +268,7 @@ int grid_clear_lines ( grid* g )	{
   return g->last_cleared_count;
 }
 
-void grid_assert_consistency ( grid* g )	{
+int grid_assert_consistency ( grid* g )	{
   int i;
   for ( i = 0; i < g->width; i++ )	{
     assert(g->relief[i] == grid_height_at(g, i));
@@ -309,6 +309,7 @@ void grid_assert_consistency ( grid* g )	{
       assert(g->row_fill_count[i] != g->width);
     }
   }
+  return 1;
 }
 
 int grid_equal(grid* a, grid* b){
@@ -492,7 +493,7 @@ void grid_block_rotate_safe ( grid* g, block* b, int amount )	{
 void grid_test (  )	{
   block* b = block_new(NULL);
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  grid_assert_consistency(g);
+  assert(grid_assert_consistency(g));
   // test a simple flow until grid gets full
   while (1)	{
     block_init(b, SHAPES[RAND(SHAPE_COUNT)]);
@@ -501,18 +502,18 @@ void grid_test (  )	{
       break;
     }
     grid_block_add(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_block_remove(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_block_add(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_print(g);
     grid_block_remove(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_block_drop(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_block_add(g, b);
-    grid_assert_consistency(g);
+    assert(grid_assert_consistency(g));
     grid_print(g);
   }
 
