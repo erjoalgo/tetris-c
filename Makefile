@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -g -W -Werror -Wextra
+CFLAGS=-Wall -g -W -Werror -Wextra -DNDEBUG -Ofast -pg
 DEPS=tetris.h
 OBJ=ai.o game.o grid.o block.o shape.o
 
@@ -11,3 +11,11 @@ tetris-play: tetris-play.o tetris-ncurses.o $(OBJ)
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+gmon.out: tetris
+	./tetris
+
+call-graph.svg: gmon.out
+	gprof > prof
+	gprof2dot -f prof prof | dot -Tsvg -o > $@
+	firefox --new-tab $@
