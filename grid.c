@@ -89,7 +89,7 @@ void grid_remove_full_row ( grid* g, int r )	{
 }
 
 void grid_set_color ( grid* g, int r, int c, int color )	{
-  assert(!!g->rows[r][c] != !!color);
+  assert(!g->rows[r][c] ^ !color);
   g->rows[r][c] = color;
   if (color == 0)	{
     g->row_fill_count[r] -= 1;
