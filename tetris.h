@@ -62,6 +62,7 @@ typedef struct {
   block** virtual_blocks;
 } grid;
 grid* grid_new(int height, int width);
+void grid_cpy(grid* dest, grid* src);
 void grid_set_color ( grid* g, int r, int c, int color );
 void grid_block_add(grid* g, block* b);
 void grid_block_remove(grid* g, block* b);

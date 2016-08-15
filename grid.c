@@ -32,6 +32,27 @@ grid* grid_new ( int height, int width )	{
   return g;
 }
 
+void grid_cpy ( grid* dest, grid* src )	{
+  dest->full_rows_count = src->full_rows_count;
+  dest->height = src->height;
+  dest->width = src->width;
+  dest->last_cleared_count = src->last_cleared_count;
+  dest->total_cleared_count = src->total_cleared_count;
+  int i;
+  for ( i = 0; i < src->height; i++ )	{
+    memcpy(dest->rows[i], src->rows[i],
+	   src->height*sizeof(*src->rows[i]));
+  }
+  memcpy(dest->full_rows, src->full_rows,
+	 src->height*sizeof(*src->full_rows));
+  memcpy(dest->row_fill_count, src->row_fill_count,
+	 src->height*sizeof(*src->row_fill_count));
+  memcpy(dest->relief, src->relief,
+	   src->height*sizeof(*src->relief));
+}
+
+
+
 int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // return the largest y s.t. g.grid[x][y]==1,
   // or -1 if no such y exists
