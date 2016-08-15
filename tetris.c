@@ -15,6 +15,7 @@ int main()
 {
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
   int seed = time(NULL);
+  seed = 1471230368;
   printf( "seed %d \n", seed );
   srand(seed);
   // shape_test();
