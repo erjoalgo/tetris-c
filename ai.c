@@ -42,6 +42,8 @@ double grid_eval ( grid* g, double* weights )	{
   return val;
 }
 
+int evaled_count;
+
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
 		       int depth_left, double* result_value );
 
@@ -88,6 +90,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 	  ai_best_move_rec(g_rec, stream, w, depth_left-1, &curr);
 	}else 	{
 	  curr = grid_eval(g_rec, w);
+	  evaled_count++;
 	}
 	if (curr>best_score)	{
 	  best_score = curr;
@@ -103,7 +106,10 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
   double best_value;
+  evaled_count = 0;
   game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value);
+  printf( "%d moves evaled, %d cleared\n", evaled_count,
+	  g->last_cleared_count );
   if (best_value == MOST_NEG_DBL)	{
     return NULL;
   }else 	{
