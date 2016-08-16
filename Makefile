@@ -15,7 +15,12 @@ tetris-play: tetris-play.o tetris-ncurses.o $(OBJ)
 gmon.out: tetris
 	./tetris
 
-call-graph.svg: gmon.out
-	gprof > prof
+prof: gmon.out
+	gprof tetris gmon.out> $@
+
+call.svg: gmon.out tetris
 	gprof2dot -f prof prof | dot -Tsvg -o > $@
 	firefox --new-tab $@
+
+clean:
+	rm *o prof gmon.out call.svg
