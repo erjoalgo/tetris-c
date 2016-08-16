@@ -69,7 +69,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 	assert(grid_block_valid(g, b));
 	b->offset[0] = c;
 	b->rot = r;
-	if (!grid_block_valid(g, b))	{
+	if (grid_block_intersects(g, b))	{
 	  continue;
 	}
 	grid_block_drop(g, b);

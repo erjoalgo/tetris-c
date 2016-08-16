@@ -353,10 +353,7 @@ int grid_block_intersects ( grid* g, block* b )	{
 }
 
 int grid_block_valid ( grid* g, block* b )	{
-  // checking in bounds should never fail for legal, known shapes
-  // it is a function of the grid dimensions and shape structure only
-  // return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
-  return !grid_block_intersects(g, b);
+  return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
 inline int grid_block_center_top (grid* g, block* b){
@@ -366,8 +363,11 @@ inline int grid_block_center_top (grid* g, block* b){
   int rot = b->rot;
   b->offset[1] = g->height - b->shape->max_dim_len;
   b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
-  // TODO can be optimized to grid_block_intersects(g, b)
-  return grid_block_valid(g, b);
+  // in-bounds check should never fail here for legal, known shapes
+  // it is a function of the grid dimensions and shape structure only
+  // this property can be checked once for each shape
+
+  return !grid_block_intersects(g, b);
 }
 
 int drop_amount ( grid* g, block* b )	{
