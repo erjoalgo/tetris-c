@@ -163,7 +163,7 @@ void sort_cleared_rows ( int* full_rows, int count )	{
     done = 1;
     for ( i = 1; i < count; i++ )	{
       assert(full_rows[i-1] != full_rows[i]);
-      if (full_rows[i-1]>full_rows[i])	{
+      if (full_rows[i-1]<full_rows[i])	{
 	tmp = full_rows[i-1];
 	full_rows[i-1] = full_rows[i];
 	full_rows[i] = tmp;
