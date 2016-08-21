@@ -205,6 +205,10 @@ void shape_print ( shape* s, int quiet )	{
 
 shape** shapes_read ( char* file, int* shape_count)	{
   FILE* fh = fopen(file, "r");
+  if (!fh)	{
+    printf( "unable to open %s\n", file );
+    return NULL;
+  }
   *shape_count = 0;
   shape** shapes = malloc(1*sizeof(shape*));
   while (!feof (fh))	{
