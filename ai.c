@@ -79,11 +79,11 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   // in cases when we need to clear lines
   grid* g_prime = grid_new(g->height, g->width);
   grid* g_rec;
-  int max_cols = g->width - b->shape->rot_wh[b->rot][0];
   int max_rots = b->shape->rot_count;
   int r;
   for ( r = 0; r < max_rots; r++ )	{
       int c;
+      int max_cols = g->width - b->shape->rot_wh[r][0] +1;
       for ( c = 0; c < max_cols; c++ )	{
 	if (!grid_block_center_top(g, b))	{
 	  continue;
