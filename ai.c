@@ -25,9 +25,9 @@ void init_feat_names (  )	{
   feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
   feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
   feat_names[FEATIDX_GAPS] = "GAPS     ";
-  feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
+  // feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
   feat_names[FEATIDX_OBS] = "OBS     ";
-  feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
+  // feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
   feat_names[FEATIDX_ROWS_FULL_CTR] = "ROWS_FULL_CTR";
 }
 
@@ -181,10 +181,10 @@ void feature_gaps ( grid* g, double* ordered_raws )	{
   }
   ordered_raws[FEATIDX_GAPS] = gaps;
   // ordered_raws[FEATIDX_GAPS_EXP] = gaps_exp;
-  ordered_raws[FEATIDX_GAPS_EXP] = 0;
+  // ordered_raws[FEATIDX_GAPS_EXP] = 0;
   ordered_raws[FEATIDX_OBS] = obs;
   // ordered_raws[FEATIDX_OBS_EXP] = obs_exp;
-  ordered_raws[FEATIDX_OBS_EXP] = 0;
+  // ordered_raws[FEATIDX_OBS_EXP] = 0;
   ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
   // ordered_raws[FEATIDX_CLEARED_COUNT] = ;
 }
@@ -202,7 +202,7 @@ void test_feature (  )	{
 }
 
 void ai_init (  )	{
-  double w[FEAT_COUNT] = {-1, 0, -1, -1, -1, -1, 20};
+  double w[FEAT_COUNT] = {-0.80,-0.80,-0.18,-1.00,-1.00,19.94};;
   default_weights = malloc(sizeof(w));
   memcpy(default_weights, w, sizeof(w));
   init_feat_names();
