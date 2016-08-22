@@ -168,7 +168,7 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     if (curr>max)	{
       max = curr;
     }
-    avg+=curr;
+    avg+=curr+1;
   }
   avg/=width;
   for ( i = 0; i < g->width; i++ )	{
