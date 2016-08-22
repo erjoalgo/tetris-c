@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -g -W -Werror -Wextra -DNDEBUG -Ofast -pg
-DEPS=tetris.h
+DEPS=tetris.h tetri_ai.h
 OBJ=ai.o game.o grid.o block.o shape.o
 
 tetris: tetris.o $(OBJ)

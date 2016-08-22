@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <time.h>
 #include "tetris.h"
+#include "tetris_ai.h"
 
 
 void fatal(char* msg){

@@ -4,23 +4,10 @@
 #include <string.h>
 #include <assert.h>
 #include "tetris.h"
+#include "tetris_ai.h"
 
-#define FEATIDX_RELIEF_MAX 0
-#define FEATIDX_RELIEF_AVG 1
-#define FEATIDX_RELIEF_VAR 2
-#define FEATIDX_GAPS 3
-#define FEATIDX_GAPS_EXP 4
-#define FEATIDX_OBS 5
-#define FEATIDX_OBS_EXP 6
-#define FEATIDX_ROWS_FULL_CTR 7
-// #define FEATIDX_CLEARED_COUNT 8
-// #define FEAT_COUNT 9
-#define FEAT_COUNT 8
 #define MAX_MUTATION 2.5
 #define MOST_NEG_DBL (-DBL_MAX)
-
-double* default_weights;
-char* feat_names[FEAT_COUNT];
 
 /*typedef struct {
   double (*raw_value)(grid* g, double* ordered_raws);
