@@ -200,9 +200,9 @@ void feature_gaps ( grid* g, double* ordered_raws )	{
     }
   }
   ordered_raws[FEATIDX_GAPS] = gaps;
-  ordered_raws[FEATIDX_GAPS_EXP] = gaps;
-  ordered_raws[FEATIDX_OBS] = gaps;
-  ordered_raws[FEATIDX_OBS_EXP] = gaps;
+  ordered_raws[FEATIDX_GAPS_EXP] = gaps_exp;
+  ordered_raws[FEATIDX_OBS] = obs;
+  ordered_raws[FEATIDX_OBS_EXP] = obs_exp;
   ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
   // ordered_raws[FEATIDX_CLEARED_COUNT] = ;
 }
