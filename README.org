@@ -1,0 +1,7 @@
+#+OPTIONS: ^:nil
+#+OPTIONS: toc:nil
+#+OPTIONS: html-postamble:nil
+#+OPTIONS: num:nil
+
+[[file:tetris-ai.gif]]
+
