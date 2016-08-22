@@ -12,37 +12,27 @@
 
 
 typedef struct {
-  double* w;//weights
+  double w[FEAT_COUNT];//weights
   int mutation;
   double mutation_amt;
 } ai;
 
-ai* ai_new ( double* w )	{
-  ai* ai = malloc(sizeof(ai));
-  ai->w = w;
-  return ai;
-}
-
-ai* mutate_ai ( ai* ai, double* parent_weights )	{
-  double* mutated = malloc(FEAT_COUNT*sizeof(*mutated));
-  memcpy(mutated, parent_weights, FEAT_COUNT*sizeof(*mutated));
+void mutate_ai ( ai* ai, double* parent_weights )	{
+  memcpy(ai->w, parent_weights, FEAT_COUNT*sizeof(*ai->w));
   int r = RAND(FEAT_COUNT);
   // http://stackoverflow.com/questions/13408990
   // amount is in (-MAX_MUTATION .. MAX_MUTATION)
   double amount = (float)rand()/(float)
     (RAND_MAX/2*MAX_MUTATION) - MAX_MUTATION;
-  mutated[r] += amount;
+  ai->w[r] += amount;
   ai->mutation = r;
   ai->mutation_amt = amount;
-  ai->w = mutated;
-  return ai;
 }
 
 void mutate_weights_test (  )	{
   double* w = malloc(FEAT_COUNT*sizeof(*w));
-  memset(w, 0, FEAT_COUNT*sizeof(*w));
   ai ai;
-  ai.w = w;
+  memset(ai.w, 0, FEAT_COUNT*sizeof(*w));
   mutate_ai(&ai, w);
   int i;
   int mutated_count = 0;
@@ -52,7 +42,7 @@ void mutate_weights_test (  )	{
   }
 }
 
-ai* best_ai ( ai** ais, int ai_c, int* moves_survived )	{
+int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
   grid* g[ai_c];
   int i;
   for ( i = 0; i < ai_c; i++ )	{
@@ -75,7 +65,7 @@ ai* best_ai ( ai** ais, int ai_c, int* moves_survived )	{
       if (moves_survived[i])	{
 	continue;
       }
-      game_move* gm = ai_best_move(g[i], ss, ais[i]->w);
+      game_move* gm = ai_best_move(g[i], ss, ais[i].w);
       if (gm == NULL)	{
 	assert(move_count);
 	ai_live_count--;
@@ -101,7 +91,7 @@ ai* best_ai ( ai** ais, int ai_c, int* moves_survived )	{
   }
   assert(winner != -1);
   printf( " }   \tmax: %d\twinner:\t%d\n", moves_survived[winner], winner );
-  return ais[winner];
+  return winner;
 }
 
 void ai_print ( ai* a )	{
@@ -115,42 +105,41 @@ void ai_print ( ai* a )	{
 
 void breed_ai ( ai* initial )	{
   int ai_c = AI_BROTHER_COUNT;
-  ai* ais[ai_c];//todo rename
-  ais[0] = initial;
+  ai ais[ai_c];//todo rename
+  ais[0] = *initial;
   int survived[ai_c];
   while (1)	{
     int i;
     for ( i = 1; i < ai_c; i++ )	{
-	ais[i] = ai_new(NULL);
-	mutate_ai(ais[i], ais[0]->w);
+	mutate_ai(ais + i, ais[0].w);
 	// ai_print(ais[i]);
       }
 
-    ai* consistent_winner = NULL;
+    int consistent_winner = -1;
     for ( i = 0; i < ROUND_COUNT; i++ )	{
-      ai* winner = best_ai(ais, ai_c, survived);
-      if (!consistent_winner)	{
+      int winner = best_ai(ais, ai_c, survived);
+      if (consistent_winner == -1)	{
 	consistent_winner = winner;
       }else if (winner != consistent_winner)	{
-	consistent_winner = NULL;
+	consistent_winner = -1;
 	break;
       }
     }
-    if (consistent_winner)	{
-      if (ais[0] == consistent_winner)	{
+    if (consistent_winner != -1)	{
+      if (0 == consistent_winner)	{
 	printf( "INCUMBENT IS CONSISTENT WINNER\n" );
       }else 	{
-	int mutation = consistent_winner->mutation;
-	double mutation_amt = consistent_winner->mutation_amt;
-	ai_print(ais[0]);
-	ai_print(consistent_winner);
+	int mutation = ais[consistent_winner].mutation;
+	double mutation_amt = ais[consistent_winner].mutation_amt;
+	ai_print(ais + 0);
+	ai_print(ais + consistent_winner);
 
 	printf( "%s %s BY %.2f\n", feat_names[mutation],
 		mutation_amt>0? "UP" : "DOWN",
 		mutation_amt * (mutation_amt>0? 1 : -1) );
 	// getchar();
       }
-      ais[0] = consistent_winner;
+      ais[0] = ais[consistent_winner];
     }
     printf( "\n" );
   }
@@ -160,8 +149,8 @@ void evolution_test (  )	{
   ai_init();
   mutate_weights_test();
   double w[FEAT_COUNT];
-  memcpy(w, default_weights, sizeof(w));
-  ai* initial = ai_new(w);
-  ai_print(initial);
-  breed_ai (initial);
+  ai initial;
+  memcpy(initial.w, default_weights, sizeof(w));
+  ai_print(&initial);
+  breed_ai (&initial);
 }
