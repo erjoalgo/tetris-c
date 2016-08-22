@@ -209,6 +209,7 @@ void ai_init (  )	{
 }
 
 void ai_test (  )	{
+  ai_init();
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(3);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
