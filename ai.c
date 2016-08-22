@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <float.h>
 #include <string.h>
 #include <assert.h>
@@ -132,6 +133,7 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     }
     avg+=curr+1;
   }
+  var = sqrt(var);//stdev
   avg/=width;
   for ( i = 0; i < g->width; i++ )	{
     double diff = avg-g->relief[i];
