@@ -40,14 +40,14 @@ void grid_cpy ( grid* dest, grid* src )	{
   int i;
   for ( i = 0; i < src->height; i++ )	{
     memcpy(dest->rows[i], src->rows[i],
-	   src->height*sizeof(*src->rows[i]));
+	   src->width*sizeof(*src->rows[i]));
   }
   memcpy(dest->full_rows, src->full_rows,
 	 src->height*sizeof(*src->full_rows));
   memcpy(dest->row_fill_count, src->row_fill_count,
 	 src->height*sizeof(*src->row_fill_count));
   memcpy(dest->relief, src->relief,
-	   src->height*sizeof(*src->relief));
+	   src->width*sizeof(*src->relief));
 }
 
 
