@@ -84,10 +84,11 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
   }
   printf( "survived: { " );
   for ( i = 0; i < ai_c; i++ )	{
-    printf( "%d, ", moves_survived[i]);
+    printf( "%d%s", moves_survived[i],
+	    i != ai_c-1? ", " : " }");
   }
   assert(winner != -1);
-  printf( " }   \tmax: %d\twinner:\t%d\n", moves_survived[winner], winner );
+  printf( "\tmax: %d\twinner:\t%d\n", moves_survived[winner], winner );
   return winner;
 }
 
