@@ -120,31 +120,6 @@ game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
   }
 }
 
-double* mutate_weights ( double* weights )	{
-  double* mutated = malloc(FEAT_COUNT*sizeof(*mutated));
-  memcpy(mutated, weights, FEAT_COUNT*sizeof(*mutated));
-  int r = RAND(FEAT_COUNT);
-  // http://stackoverflow.com
-  // /questions/13408990/how-to-generate-random-float-number-in-c
-  // amount is in (-MAX_MUTATION .. MAX_MUTATION)
-  double amount = (float)rand()/(float)
-    (RAND_MAX/2*MAX_MUTATION) - MAX_MUTATION;
-  mutated[r] += amount;
-  return mutated;
-}
-
-void mutate_weights_test (  )	{
-  double* w = malloc(FEAT_COUNT*sizeof(*w));
-  memset(w, 0, FEAT_COUNT*sizeof(*w));
-  double* w_prime = mutate_weights(w);
-  int i;
-  int mutated_count = 0;
-  for ( i = 0; i < FEAT_COUNT; i++ )	{
-    mutated_count += w_prime[i] != 0;
-    assert(abs(w_prime[i])<=MAX_MUTATION);
-  }
-}
-
 void feature_variance ( grid* g, double* ordered_raws )	{
   double avg = 0, var = 0, max = 0;
   int width = g->width;
@@ -213,7 +188,6 @@ void ai_init (  )	{
   init_feat_names();
 }
 void ai_test (  )	{
-  mutate_weights_test();
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(3);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
