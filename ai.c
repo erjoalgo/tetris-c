@@ -53,6 +53,7 @@ double grid_eval ( grid* g, double* weights )	{
 }
 
 static grid** grids;
+static block** blocks;
 static int grids_count = 0;
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
@@ -66,7 +67,8 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   int depth = stream->max_len-depth_left-1;
   shape* s = shape_stream_peek(stream, depth);
   best_move->shape = s;
-  block* b = block_new(s);
+  block* b = blocks[depth_left];
+  b->shape = s;
   // in cases when we need to clear lines
   grid* g_prime = grids[depth_left];//depth_left: 0...ss->max_len-1
   grid* g_rec;
@@ -117,9 +119,11 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
   if (grids_count<ss->max_len)	{
     grids = realloc(grids, ss->max_len*sizeof(*grids));
+    blocks = realloc(blocks, ss->max_len*sizeof(*blocks));
     int i;
     for ( i = grids_count; i < ss->max_len; i++ )	{
       grids[i] = grid_new(g->height, g->width);
+      blocks[i] = block_new(NULL);
     }
     grids_count = ss->max_len;
   }
