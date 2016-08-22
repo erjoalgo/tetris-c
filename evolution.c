@@ -38,22 +38,19 @@ void mutate_weights_test (  )	{
   int mutated_count = 0;
   for ( i = 0; i < FEAT_COUNT; i++ )	{
     mutated_count += ai.w[i] != 0;
-    assert(abs(w_prime[i])<=MAX_MUTATION);
+    assert(abs(ai.w[i])<=MAX_MUTATION);
   }
 }
 
+grid* grids[AI_BROTHER_COUNT];
 int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
-  grid* g[ai_c];
+  grid** g = grids;
   int i;
   for ( i = 0; i < ai_c; i++ )	{
-    g[i] = grid_new(GRID_HEIGHT/2, GRID_WIDTH);
+    grid_reset(g[i]);
   }
-
   shape_stream* ss = shape_stream_new(MOVE_AHEAD_COUNT);
   memset(moves_survived, 0, ai_c*sizeof(*moves_survived));
-  for ( i = 0; i < ai_c; i++ )	{
-    assert(moves_survived[i] == 0);
-  }
 
   int ai_live_count = ai_c;//short-cut when only one left
   int move_count = 0;
@@ -145,8 +142,16 @@ void breed_ai ( ai* initial )	{
   }
 }
 
+void evolution_init (  )	{
+  int i;
+  for ( i = 0; i < AI_BROTHER_COUNT; i++ )	{
+    grids[i] = grid_new(GRID_HEIGHT/2, GRID_WIDTH);
+  }
+}
+
 void evolution_test (  )	{
   ai_init();
+  evolution_init();
   mutate_weights_test();
   double w[FEAT_COUNT];
   ai initial;
