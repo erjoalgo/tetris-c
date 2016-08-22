@@ -56,7 +56,7 @@ ai* best_ai ( ai** ais, int ai_c, int* moves_survived )	{
   grid* g[ai_c];
   int i;
   for ( i = 0; i < ai_c; i++ )	{
-    g[i] = grid_new(GRID_HEIGHT, GRID_WIDTH);
+    g[i] = grid_new(GRID_HEIGHT/2, GRID_WIDTH);
   }
 
   shape_stream* ss = shape_stream_new(MOVE_AHEAD_COUNT);
