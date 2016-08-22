@@ -14,3 +14,4 @@ double* default_weights;
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w );
 
 char* feat_names[FEAT_COUNT];
+void evolution_test();
