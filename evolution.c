@@ -98,11 +98,10 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
 
 void ai_print ( ai* a )	{
   int i;
-  printf( "[ " );
+  printf( "{ " );
   for ( i = 0; i < FEAT_COUNT; i++ )	{
-    printf( "%.2f ", a->w[i] );
+    printf( "%.2f%s", a->w[i], i != FEAT_COUNT-1?", ":" }\n" );
   }
-  printf( "] \n" );
 }
 
 void breed_ai ( ai* initial )	{
