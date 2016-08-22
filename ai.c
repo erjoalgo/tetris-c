@@ -52,6 +52,9 @@ double grid_eval ( grid* g, double* weights )	{
   return val;
 }
 
+grid** grids;
+int grids_count = 0;
+
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
 		       int depth_left, double* result_value );
 
@@ -65,7 +68,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   best_move->shape = s;
   block* b = block_new(s);
   // in cases when we need to clear lines
-  grid* g_prime = grid_new(g->height, g->width);
+  grid* g_prime = grids[depth_left];//depth_left: 0...ss->max_len-1
   grid* g_rec;
   int max_rots = b->shape->rot_count;
   int r;
@@ -112,8 +115,17 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 }
 
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
+  if (grids_count<ss->max_len)	{
+    grids = realloc(grids, ss->max_len*sizeof(*grids));
+    int i;
+    for ( i = grids_count; i < ss->max_len; i++ )	{
+      grids[i] = grid_new(g->height, g->width);
+    }
+    grids_count = ss->max_len;
+  }
   double best_value;
   game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value);
+
   if (best_value == MOST_NEG_DBL)	{
     return NULL;
   }else 	{
@@ -191,6 +203,7 @@ void ai_init (  )	{
   memcpy(default_weights, w, sizeof(w));
   init_feat_names();
 }
+
 void ai_test (  )	{
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(3);
