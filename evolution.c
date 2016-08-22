@@ -82,6 +82,10 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
     shape_stream_pop(ss);
     move_count++;
   }
+  if (moves_survived[0] == moves_survived[winner])	{
+    winner = 0;
+  }
+
   printf( "survived: { " );
   for ( i = 0; i < ai_c; i++ )	{
     printf( "%d%s", moves_survived[i],
@@ -116,15 +120,16 @@ void breed_ai ( ai* initial )	{
     int consistent_winner = -1;
     for ( i = 0; i < ROUND_COUNT; i++ )	{
       int winner = best_ai(ais, ai_c, survived);
-      if (consistent_winner == -1)	{
+      if (winner != 0 && consistent_winner == -1)	{
 	consistent_winner = winner;
-      }else if (winner != consistent_winner)	{
+      }else if (winner == 0 || winner != consistent_winner)	{
 	consistent_winner = -1;
 	break;
       }
     }
     if (consistent_winner != -1)	{
       if (0 == consistent_winner)	{
+	assert(0);
 	printf( "INCUMBENT IS CONSISTENT WINNER\n" );
       }else 	{
 	int mutation = ais[consistent_winner].mutation;
