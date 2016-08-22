@@ -19,6 +19,8 @@
 #define MAX_MUTATION 2.5
 #define MOST_NEG_DBL (-DBL_MAX)
 
+double* default_weights;
+char* feat_names[FEAT_COUNT];
 
 /*typedef struct {
   double (*raw_value)(grid* g, double* ordered_raws);
@@ -29,6 +31,17 @@ typedef *feature heuristic;*/
 
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
+
+void init_feat_names (  )	{
+  feat_names[FEATIDX_RELIEF_MAX] = "RELIEF_MAX";
+  feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
+  feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
+  feat_names[FEATIDX_GAPS] = "GAPS     ";
+  feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
+  feat_names[FEATIDX_OBS] = "OBS     ";
+  feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
+  feat_names[FEATIDX_ROWS_FULL_CTR] = "ROWS_FULL_CTR";
+}
 
 double grid_eval ( grid* g, double* weights )	{
   double raws[FEAT_COUNT];
@@ -197,23 +210,19 @@ void test_feature (  )	{
   assert(raws[FEATIDX_OBS] == 1);
 }
 
+void ai_init (  )	{
+  double w[FEAT_COUNT] = {-1, 0, -1, -1, -1, -1, 20};
+  default_weights = malloc(sizeof(w));
+  memcpy(default_weights, w, sizeof(w));
+  init_feat_names();
+}
 void ai_test (  )	{
   mutate_weights_test();
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(3);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   double w[FEAT_COUNT];
-  int i;
-  for ( i = 0; i < FEAT_COUNT; i++ )	{
-    w[i] = 1;
-  }
-  w[FEATIDX_RELIEF_MAX] = -1;
-  w[FEATIDX_RELIEF_AVG] = 0;
-  w[FEATIDX_RELIEF_VAR] = -1;
-  w[FEATIDX_GAPS_EXP] = -1;
-  w[FEATIDX_OBS] = -1;
-  w[FEATIDX_OBS_EXP] = -1;
-  w[FEATIDX_ROWS_FULL_CTR] = 20;
+  memcpy(w, default_weights, sizeof(w));
   game_move moves[1];
   int applied = 0, succ;
   while (1)	{
