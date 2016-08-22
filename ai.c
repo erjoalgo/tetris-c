@@ -52,6 +52,15 @@ double grid_eval ( grid* g, double* weights )	{
   for ( i = 0; i < FEAT_COUNT; i++ )	{
     val += raws[i]*weights[i];
   }
+  /*
+  grid_print(g);
+  for ( i = 0; i < FEAT_COUNT; i++ )	{
+    printf( "%s\t\t%.2f\t%.2f\t%.2f\n", feat_names[i], raws[i], weights[i],
+	    raws[i]*weights[i] );
+  }
+  printf( "TOTAL   \t\t\t\t%.2f\n", val );
+  getchar();
+  */
   return val;
 }
 
