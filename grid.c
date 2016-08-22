@@ -6,31 +6,27 @@
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
-  grid_init(g, height, width);
-  return g;
-}
-
-void grid_init ( grid* g, int height, int width )	{
   g->height = height;
   g->width = width;
   g->rows = malloc(height*sizeof(*g->rows));
+  g->relief = malloc(width*sizeof(g->relief));
+  g->row_fill_count = malloc(height*sizeof(g->row_fill_count));
+  g->full_rows = malloc(height*sizeof(g->full_rows));
+  grid_reset(g);
+  return g;
+}
+
+void grid_reset ( grid* g )	{
   int r;
-  for ( r = 0; r < height; r++ )	{
-    g->rows[r] = malloc(width*sizeof(*g->rows));
+  for ( r = 0; r < g->height; r++ )	{
+    g->rows[r] = malloc(g->width*sizeof(*g->rows));
     memset(g->rows[r], 0, g->width*sizeof(*g->rows[r]));
   }
-
-  g->relief = malloc(width*sizeof(g->relief));
   int c;
   for ( c = 0; c < g->width; c++ )	{
     g->relief[c] = -1;
   }
-
-  g->row_fill_count = malloc(height*sizeof(g->row_fill_count));
   memset(g->row_fill_count, 0, g->width*sizeof(*g->row_fill_count));
-
-  g->full_rows = malloc(height*sizeof(g->full_rows));
-
   g->total_cleared_count = 0;
   g->last_cleared_count = 0;
 }

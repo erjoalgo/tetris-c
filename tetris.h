@@ -60,7 +60,7 @@ typedef struct {
   int last_cleared_count;
 } grid;
 grid* grid_new(int height, int width);
-void grid_init(grid* g, int height, int width);
+void grid_reset ( grid* g );
 void grid_cpy(grid* dest, grid* src);
 void grid_set_color ( grid* g, int r, int c, int color );
 void grid_block_add(grid* g, block* b);
