@@ -42,7 +42,7 @@ void mutate_weights_test (  )	{
   }
 }
 
-grid* grids[AI_BROTHER_COUNT];
+static grid* grids[AI_BROTHER_COUNT];
 int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
   grid** g = grids;
   int i;

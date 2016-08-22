@@ -52,8 +52,8 @@ double grid_eval ( grid* g, double* weights )	{
   return val;
 }
 
-grid** grids;
-int grids_count = 0;
+static grid** grids;
+static int grids_count = 0;
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
 		       int depth_left, double* result_value );
