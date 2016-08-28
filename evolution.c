@@ -30,6 +30,13 @@ void mutate_ai ( ai* ai, double* parent_weights )	{
   ai->mutation_amt = amount;
 }
 
+void mutation_print ( int feat_idx, double amount )	{
+  printf( "%s %s BY %.2f\n", feat_names[feat_idx],
+	  amount>0? "UP" : "DOWN",
+	  amount * (amount>0? 1 : -1) );
+}
+
+
 void mutate_weights_test (  )	{
   double* w = malloc(FEAT_COUNT*sizeof(*w));
   ai ai;
@@ -154,14 +161,12 @@ void breed_ai ( ai* initial, int max_rounds )	{
       if (0 == ais[consistent_winner].idx)	{
 	printf( "INCUMBENT IS CONSISTENT WINNER\n" );
       }else 	{
-	int mutation = ais[consistent_winner].mutation;
-	double mutation_amt = ais[consistent_winner].mutation_amt;
 	ai_print(ais + 0);
 	ai_print(ais + consistent_winner);
 
-	printf( "%s %s BY %.2f\n", feat_names[mutation],
-		mutation_amt>0? "UP" : "DOWN",
-		mutation_amt * (mutation_amt>0? 1 : -1) );
+	int mutation = ais[consistent_winner].mutation;
+	double mutation_amt = ais[consistent_winner].mutation_amt;
+	mutation_print(mutation, mutation_amt);
 	// getchar();
       }
       ais[0] = ais[consistent_winner];
