@@ -89,8 +89,11 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
     }
     shape_stream_pop(ss);
     move_count++;
-    printf( "\r %d moves", move_count );
-    fflush(stdout);
+    if (! (move_count % 100))	{
+      printf( "\r %d moves", move_count );
+      fflush(stdout);
+    }
+
   }
   if (moves_survived[0] == moves_survived[winner])	{
     winner = 0;
