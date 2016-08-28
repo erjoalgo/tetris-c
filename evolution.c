@@ -62,7 +62,7 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
 
   int ai_live_count = ai_c;//short-cut when only one left
   int move_count = 0;
-  game_move moves[1];
+  block b;
   while (ai_live_count>1)	{
     int i;
     for ( i = ai_c-1; i >= 0; i-- )	{
@@ -80,8 +80,7 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
 	  continue;
 	}
       }
-      moves[0] = *gm;
-      int succ = grid_apply_moves(g[i], moves, 1);
+      int succ = grid_block_apply_move(g[i], &b, gm, 1);
       assert(succ);
       (void)succ;
     }

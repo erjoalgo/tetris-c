@@ -82,7 +82,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
       int max_cols = g->width - gm.shape->rot_wh[r][0] +1;
       for ( c = 0; c < max_cols; c++ )	{
 	gm.col = c;
-	if (!grid_block_apply_move(g, b, &gm))	{
+	if (!grid_block_apply_move(g, b, &gm, 0))	{
 	  continue;
 	}
 	assert(grid_block_valid(g, b));
@@ -217,8 +217,8 @@ void ai_test (  )	{
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   double w[FEAT_COUNT];
   memcpy(w, default_weights, sizeof(w));
-  game_move moves[1];
   int applied = 0, succ;
+  block b;
   while (1)	{
     grid_print(g);
     game_move* gm = ai_best_move(g, ss, w);
@@ -226,9 +226,8 @@ void ai_test (  )	{
       printf( "ai can't place move\n" );
       break;
     }
-    moves[0] = *gm;
     // game_move_print(gm);
-    succ = grid_apply_moves(g, moves, 1);
+    succ = grid_block_apply_move(g, &b, gm, 1);
     assert(succ);
     applied++;
     shape_stream_pop(ss);
