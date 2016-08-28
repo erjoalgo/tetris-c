@@ -68,25 +68,23 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   shape* s = shape_stream_peek(stream, depth);
   best_move->shape = s;
   block* b = blocks[depth_left];
-  b->shape = s;
   // in cases when we need to clear lines
   grid* g_prime = grids[depth_left];//depth_left: 0...ss->max_len-1
   grid* g_rec;
-  int max_rots = b->shape->rot_count;
+  game_move gm;
+  gm.shape = s;
+  int max_rots = gm.shape->rot_count;
   int r;
   for ( r = 0; r < max_rots; r++ )	{
+      gm.rot = r;
       int c;
-      int max_cols = g->width - b->shape->rot_wh[r][0] +1;
+      int max_cols = g->width - gm.shape->rot_wh[r][0] +1;
       for ( c = 0; c < max_cols; c++ )	{
-	if (!grid_block_center_elevate(g, b))	{
+	gm.col = c;
+	if (!grid_block_apply_move(g, b, &gm))	{
 	  continue;
 	}
 	assert(grid_block_valid(g, b));
-	b->offset[0] = c;
-	b->rot = r;
-	if (grid_block_intersects(g, b))	{
-	  continue;
-	}
 	grid_block_drop(g, b);
 	grid_block_add(g, b);
 	double curr;
