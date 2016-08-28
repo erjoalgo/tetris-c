@@ -12,6 +12,10 @@ grid* grid_new ( int height, int width )	{
   g->relief = malloc(width*sizeof(g->relief));
   g->row_fill_count = malloc(height*sizeof(g->row_fill_count));
   g->full_rows = malloc(height*sizeof(g->full_rows));
+  int r;
+  for ( r = 0; r < g->height; r++ )	{
+    g->rows[r] = malloc(g->width*sizeof(*g->rows));
+  }
   grid_reset(g);
   return g;
 }
@@ -19,7 +23,6 @@ grid* grid_new ( int height, int width )	{
 void grid_reset ( grid* g )	{
   int r;
   for ( r = 0; r < g->height; r++ )	{
-    g->rows[r] = malloc(g->width*sizeof(*g->rows));
     memset(g->rows[r], 0, g->width*sizeof(*g->rows[r]));
   }
   int c;
