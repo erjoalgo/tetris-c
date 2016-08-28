@@ -104,12 +104,12 @@ void ai_print ( ai* a )	{
   }
 }
 
-void breed_ai ( ai* initial )	{
+void breed_ai ( ai* initial, int max_rounds )	{
   int ai_c = AI_BROTHER_COUNT;
   ai ais[ai_c];//todo rename
   ais[0] = *initial;
   int survived[ai_c];
-  while (1)	{
+  while (max_rounds--)	{
     int i;
     for ( i = 1; i < ai_c; i++ )	{
 	mutate_ai(ais + i, ais[0].w);
@@ -162,5 +162,5 @@ void evolution_test (  )	{
   ai initial;
   memcpy(initial.w, default_weights, sizeof(w));
   ai_print(&initial);
-  breed_ai (&initial);
+  breed_ai (&initial, -1);
 }
