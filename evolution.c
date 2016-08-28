@@ -51,13 +51,13 @@ void mutate_weights_test (  )	{
 }
 
 static grid* grids[AI_BROTHER_COUNT];
+static shape_stream* ss;
 int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
   grid** g = grids;
   int i;
   for ( i = 0; i < ai_c; i++ )	{
     grid_reset(g[i]);
   }
-  shape_stream* ss = shape_stream_new(MOVE_AHEAD_COUNT);
   memset(moves_survived, 0, ai_c*sizeof(*moves_survived));
 
   int ai_live_count = ai_c;//short-cut when only one left
@@ -189,6 +189,7 @@ void evolution_init (  )	{
   for ( i = 0; i < AI_BROTHER_COUNT; i++ )	{
     grids[i] = grid_new(GRID_HEIGHT/2, GRID_WIDTH);
   }
+  ss = shape_stream_new(MOVE_AHEAD_COUNT);
 }
 
 void evolution_test (  )	{
