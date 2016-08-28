@@ -29,7 +29,7 @@ void grid_reset ( grid* g )	{
   for ( c = 0; c < g->width; c++ )	{
     g->relief[c] = -1;
   }
-  memset(g->row_fill_count, 0, g->width*sizeof(*g->row_fill_count));
+  memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
   g->total_cleared_count = 0;
   g->last_cleared_count = 0;
 }
