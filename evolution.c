@@ -15,6 +15,7 @@ typedef struct {
   double w[FEAT_COUNT];//weights
   int mutation;
   double mutation_amt;
+  int must_win_count, idx;//tmp vars
 } ai;
 
 void mutate_ai ( ai* ai, double* parent_weights )	{
@@ -90,7 +91,7 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
 
   printf( "\nsurvived: { " );
   for ( i = 0; i < ai_c; i++ )	{
-    printf( "%d%s", moves_survived[i],
+    printf( "%d%s", moves_survived[ais[i].idx],
 	    i != ai_c-1? ", " : " }");
   }
   assert(winner != -1);
@@ -110,27 +111,47 @@ void breed_ai ( ai* initial, int max_rounds )	{
   int ai_c = AI_BROTHER_COUNT;
   ai ais[ai_c];//todo rename
   ais[0] = *initial;
+  int must_win_count = max_rounds/2 + 1;
   int survived[ai_c];
+
   while (max_rounds<0 || max_rounds--)	{
     int i;
-    for ( i = 1; i < ai_c; i++ )	{
-	mutate_ai(ais + i, ais[0].w);
-	// ai_print(ais[i]);
-      }
-
     int consistent_winner = -1;
-    for ( i = 0; i < ROUND_COUNT; i++ )	{
-      int winner = best_ai(ais, ai_c, survived);
-      if (winner != 0 && consistent_winner == -1)	{
-	consistent_winner = winner;
-      }else if (winner == 0 || winner != consistent_winner)	{
-	consistent_winner = -1;
-	break;
+    int ai_live_count = ai_c;
+    for ( i = 1; i < ai_c; i++ )	{
+      ais[i].must_win_count = must_win_count;
+      ais[i].idx = i;
+      if (i>0)	{
+	mutate_ai(ais + i, ais[0].w);
       }
     }
+
+    int rounds_left;
+    for ( rounds_left = ROUND_COUNT;
+	  rounds_left > 0 && ai_live_count>1 ;
+	  rounds_left-- )	{
+      for ( i = ai_live_count-1; i >= 0; i-- )	{
+	if (rounds_left < ais[i].must_win_count)	{
+	  ai ai_tmp = ais[i];
+	  ais[i] = ais[ai_live_count-1];
+	  ais[ai_live_count-1] = ai_tmp;
+	  ai_live_count--;
+	}
+      }
+      if (!ai_live_count)	{
+	consistent_winner = -1;
+	break;
+      } else	{
+	int winner = best_ai(ais, ai_live_count, survived);
+	if (! --ais[winner].must_win_count)	{
+	  consistent_winner = winner;
+	  break;
+	}
+      }
+    }
+
     if (consistent_winner != -1)	{
-      if (0 == consistent_winner)	{
-	assert(0);
+      if (0 == ais[consistent_winner].idx)	{
 	printf( "INCUMBENT IS CONSISTENT WINNER\n" );
       }else 	{
 	int mutation = ais[consistent_winner].mutation;
