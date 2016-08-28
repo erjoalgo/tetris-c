@@ -54,6 +54,7 @@ double grid_eval ( grid* g, double* weights )	{
 
 static grid** grids;
 static block** blocks;
+static game_move** best_moves;
 static int grids_count = 0;
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
@@ -62,17 +63,17 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 		      int depth_left, double* value )	{
   double best_score = MOST_NEG_DBL;
-  game_move* best_move = malloc(sizeof(game_move));
 
   int depth = stream->max_len-depth_left-1;
   shape* s = shape_stream_peek(stream, depth);
-  best_move->shape = s;
   block* b = blocks[depth_left];
+  game_move* best_move = best_moves[depth_left];
   // in cases when we need to clear lines
   grid* g_prime = grids[depth_left];//depth_left: 0...ss->max_len-1
   grid* g_rec;
   game_move gm;
   gm.shape = s;
+  best_move->shape = s;
   int max_rots = gm.shape->rot_count;
   int r;
   for ( r = 0; r < max_rots; r++ )	{
@@ -116,12 +117,15 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
   if (grids_count<ss->max_len)	{
-    grids = realloc(grids, ss->max_len*sizeof(*grids));
-    blocks = realloc(blocks, ss->max_len*sizeof(*blocks));
+    int depth = ss->max_len;
+    grids = realloc(grids, depth*sizeof(*grids));
+    blocks = realloc(blocks, depth*sizeof(*blocks));
+    best_moves = realloc(best_moves, depth*sizeof(*best_moves));
     int i;
     for ( i = grids_count; i < ss->max_len; i++ )	{
       grids[i] = grid_new(g->height, g->width);
       blocks[i] = block_new(NULL);
+      best_moves[i] = malloc(sizeof(*best_moves[i]));
     }
     grids_count = ss->max_len;
   }
