@@ -34,7 +34,7 @@ int main() {
     if (dropped)	{
       color = RAND(SHAPE_COUNT);
       block_init(b, SHAPES[color]);
-      grid_block_center_top(g, b);
+      grid_block_center_elevate(g, b);
       if (grid_block_intersects(g, b))	{
 	mvprintw(g->height+1, 0, "game over!");
 	break;

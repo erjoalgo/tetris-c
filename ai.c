@@ -78,7 +78,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
       int c;
       int max_cols = g->width - b->shape->rot_wh[r][0] +1;
       for ( c = 0; c < max_cols; c++ )	{
-	if (!grid_block_center_top(g, b))	{
+	if (!grid_block_center_elevate(g, b))	{
 	  continue;
 	}
 	assert(grid_block_valid(g, b));

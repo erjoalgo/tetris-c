@@ -352,18 +352,23 @@ int grid_block_valid ( grid* g, block* b )	{
   return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
-inline int grid_block_center_top (grid* g, block* b){
-  // return whether block was successfully centered
+inline int grid_block_elevate ( grid* g, block* b )	{
   // note: offset[1] needs to be in-bounds for all rotations
-  // so assert(extreme(b, TOP) == 0) == g->height-1 won't always be the case
-  int rot = b->rot;
+  // so extreme(b, TOP) == 0 won't always be the case
   b->offset[1] = g->height - b->shape->max_dim_len;
-  b->offset[0] = (g->width - b->shape->rot_wh[rot][0])/2;
+
   // in-bounds check should never fail here for legal, known shapes
   // it is a function of the grid dimensions and shape structure only
   // this property can be checked once for each shape
 
   return !grid_block_intersects(g, b);
+}
+
+
+inline int grid_block_center_elevate (grid* g, block* b)	{
+  // return whether block was successfully centered
+  b->offset[0] = (g->width - b->shape->rot_wh[b->rot][0])/2;
+  return grid_block_elevate(g, b);
 }
 
 int drop_amount ( grid* g, block* b )	{
@@ -434,7 +439,7 @@ int grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   for ( i = 0; i < stream_count; i++ )	{
     game_move move = stream[i];
     block_init(b, move.shape);
-    if (!grid_block_center_top(g, b))	{
+    if (!grid_block_center_elevate(g, b))	{
       return applied_count;
     }
     b->offset[0] = move.col;
@@ -493,7 +498,7 @@ void grid_test (  )	{
   // test a simple flow until grid gets full
   while (1)	{
     block_init(b, SHAPES[RAND(SHAPE_COUNT)]);
-    grid_block_center_top(g, b);
+    grid_block_center_elevate(g, b);
     if (grid_block_intersects(g, b))	{
       break;
     }
