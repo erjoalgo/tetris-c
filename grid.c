@@ -32,6 +32,7 @@ void grid_reset ( grid* g )	{
   memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
   g->total_cleared_count = 0;
   g->last_cleared_count = 0;
+  g->full_rows_count = 0;
 }
 
 void grid_cpy ( grid* dest, grid* src )	{
