@@ -9,9 +9,9 @@ grid* grid_new ( int height, int width )	{
   g->height = height;
   g->width = width;
   g->rows = malloc(height*sizeof(*g->rows));
-  g->relief = malloc(width*sizeof(g->relief));
-  g->row_fill_count = malloc(height*sizeof(g->row_fill_count));
-  g->full_rows = malloc(height*sizeof(g->full_rows));
+  g->relief = malloc(width*sizeof(*g->relief));
+  g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
+  g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
   for ( r = 0; r < g->height; r++ )	{
     g->rows[r] = malloc(g->width*sizeof(*g->rows));
