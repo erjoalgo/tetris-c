@@ -223,7 +223,7 @@ void ai_test (  )	{
       break;
     }
     moves[0] = *gm;
-    game_move_print(gm);
+    // game_move_print(gm);
     succ = grid_apply_moves(g, moves, 1);
     assert(succ);
     applied++;
