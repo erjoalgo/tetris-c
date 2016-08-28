@@ -63,10 +63,9 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
   int ai_live_count = ai_c;//short-cut when only one left
   int move_count = 0;
   game_move moves[1];
-  int winner = -1;
-  while (ai_live_count)	{
+  while (ai_live_count>1)	{
     int i;
-    for ( i = 0; i < ai_c; i++ )	{
+    for ( i = ai_c-1; i >= 0; i-- )	{
       if (moves_survived[i])	{
 	continue;
       }
@@ -75,8 +74,7 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
 	assert(move_count);
 	ai_live_count--;
 	moves_survived[i] = move_count;
-	if (!ai_live_count)	{
-	  winner = i;
+	if (ai_live_count<=1)	{
 	  break;
 	}else 	{
 	  continue;
@@ -93,8 +91,17 @@ int best_ai ( ai* ais, int ai_c, int* moves_survived )	{
       printf( "\r %d moves", move_count );
       fflush(stdout);
     }
-
   }
+
+  int winner = -1;
+  for ( i = 0; i < ai_c; i++ )	{
+    if (!moves_survived[i])	{
+      winner = i;
+      break;
+    }
+  }
+  assert(winner != -1);
+
   if (moves_survived[0] == moves_survived[winner])	{
     winner = 0;
   }
