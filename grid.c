@@ -432,20 +432,22 @@ void grid_print ( grid* g )	{
   printf(row_s);
 }
 
+int grid_block_apply_move ( grid* g, block* b, game_move* m )	{
+  // if move cannot be applied, block is left in an undefined state
+  assert(m->col>=0);
+  b->rot = m->rot;
+  b->offset[0] = m->col;
+  b->shape = m->shape;
+  return grid_block_elevate(g, b);
+}
+
 int grid_apply_moves ( grid* g, game_move* stream, int stream_count )	{
   int applied_count = 0;
   int i;
   block* b = block_new(NULL);
   for ( i = 0; i < stream_count; i++ )	{
-    game_move move = stream[i];
-    block_init(b, move.shape);
-    if (!grid_block_center_elevate(g, b))	{
-      return applied_count;
-    }
-    b->offset[0] = move.col;
-    b->rot = move.rot;
-    assert(grid_block_in_bounds(g, b));
-    if (grid_block_intersects(g, b))	{
+    int succ = grid_block_apply_move(g, b, stream + i);
+    if (!succ)	{
       return applied_count;
     }
     assert(grid_block_valid(g, b));
