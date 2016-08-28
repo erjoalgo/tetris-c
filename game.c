@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -8,6 +9,7 @@ shape_stream* shape_stream_new ( int max_len )	{
   s->max_len = max_len;
   s->i = 0;
   s->is_defined = malloc(s->max_len*sizeof(*s->is_defined));
+  memset(s->is_defined, 0, s->max_len*sizeof(*s->is_defined));
   s->stream = malloc(s->max_len*sizeof(*s->stream));
   return s;
 }
