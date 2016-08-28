@@ -121,14 +121,14 @@ void breed_ai ( ai* initial, int max_rounds )	{
   int ai_c = AI_BROTHER_COUNT;
   ai ais[ai_c];//todo rename
   ais[0] = *initial;
-  int must_win_count = max_rounds/2 + 1;
+  int must_win_count = ROUND_COUNT/2 + 1;
   int survived[ai_c];
 
   while (max_rounds<0 || max_rounds--)	{
     int i;
     int consistent_winner = -1;
     int ai_live_count = ai_c;
-    for ( i = 1; i < ai_c; i++ )	{
+    for ( i = 0; i < ai_c; i++ )	{
       ais[i].must_win_count = must_win_count;
       ais[i].idx = i;
       if (i>0)	{
