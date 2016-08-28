@@ -5,9 +5,9 @@
 
 shape_stream* shape_stream_new ( int max_len )	{
   shape_stream* s = malloc(sizeof(*s));
-  s->is_defined = malloc(s->max_len*sizeof(*s->is_defined));
   s->max_len = max_len;
   s->i = 0;
+  s->is_defined = malloc(s->max_len*sizeof(*s->is_defined));
   s->stream = malloc(s->max_len*sizeof(*s->stream));
   return s;
 }
