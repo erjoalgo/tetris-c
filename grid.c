@@ -292,7 +292,7 @@ int grid_assert_consistency ( grid* g )	{
   memcpy(sorted_rows, g->rows, sizeof(*g->rows)*g->height);
   qsort(sorted_rows, g->height, sizeof(*g->rows), cmp_rev);
   for ( i = 1; i < g->height; i++ )	{
-    assert(sorted_rows[i+1] != sorted_rows[i]);
+    assert(sorted_rows[i-1] != sorted_rows[i]);
   }
 
   int checked[g->height];
