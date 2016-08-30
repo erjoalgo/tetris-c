@@ -56,7 +56,7 @@ void grid_cpy ( grid* dest, grid* src )	{
 
 
 
-int grid_height_at_start_at ( grid* g, int x, int start_at )	{
+inline int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // return the largest y s.t. g.grid[x][y]==1,
   // or -1 if no such y exists
   int y;
@@ -72,7 +72,7 @@ int grid_height_at ( grid* g, int x ){
   return grid_height_at_start_at(g, x, g->height-1);
 }
 
-void grid_remove_full_row ( grid* g, int r )	{
+inline void grid_remove_full_row ( grid* g, int r )	{
   assert(g->full_rows_count>0);
   int last_full_idx = g->full_rows_count-1;
   if (g->full_rows[last_full_idx] != r)	{
@@ -88,7 +88,7 @@ void grid_remove_full_row ( grid* g, int r )	{
   g->full_rows_count--;
 }
 
-void grid_set_color ( grid* g, int r, int c, int color )	{
+inline void grid_set_color ( grid* g, int r, int c, int color )	{
   assert(!g->rows[r][c] ^ !color);
   g->rows[r][c] = color;
   if (color == 0)	{
