@@ -339,12 +339,13 @@ int grid_block_intersects ( grid* g, block* b )	{
   if (max(g->relief, g->width)<block_extreme(b, BOT))	{
     return 0;
   }
+
+  // coord cr;
   int i;
-  coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
-    block_get(b, i, &cr);
-    int r = cr[1];
-    int c = cr[0];
+    int* rot = b->shape->rot[b->rot][i];
+    int c = rot[0] + b->offset[0];
+    int r = rot[1] + b->offset[1];
     if (g->rows[r][c])	{
       return 1;
     }
