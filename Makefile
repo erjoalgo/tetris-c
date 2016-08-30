@@ -18,7 +18,7 @@ gmon.out: tetris
 prof: gmon.out
 	gprof tetris gmon.out> $@
 
-call.svg: gmon.out tetris
+call.svg: prof
 	gprof2dot -f prof prof | dot -Tsvg -o > $@
 	firefox --new-tab $@
 
