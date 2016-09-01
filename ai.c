@@ -29,6 +29,7 @@ void init_feat_names (  )	{
   feat_names[FEATIDX_OBS] = "OBS     ";
   // feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
   feat_names[FEATIDX_ROWS_FULL_CTR] = "ROWS_FULL_CTR";
+  feat_names[FEATIDX_DISCONT] = "DISCONT";
 }
 
 double grid_eval ( grid* g, double* weights )	{
@@ -153,13 +154,19 @@ void feature_variance ( grid* g, double* ordered_raws )	{
   }
   var = sqrt(var);//stdev
   avg/=width;
+  int discont = -1, last_height = -1;
+
   for ( i = 0; i < g->width; i++ )	{
-    double diff = avg-g->relief[i];
+    int height = g->relief[i];
+    double diff = avg-height;
     var += diff*diff;
+    discont += last_height != height;
+    last_height = height;
   }
   ordered_raws[FEATIDX_RELIEF_MAX] = max;
   ordered_raws[FEATIDX_RELIEF_AVG] = avg;
   ordered_raws[FEATIDX_RELIEF_VAR] = var;
+  ordered_raws[FEATIDX_DISCONT] = discont;
   // return var;
 }
 
