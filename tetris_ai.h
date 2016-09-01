@@ -8,7 +8,7 @@
 // #define FEATIDX_OBS_EXP 6
 #define FEAT_COUNT 6
 
-void ai_test();
+void ai_run ( int max_moves, int depth, int show_grid );
 void ai_init();
 double* default_weights;
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w );

@@ -210,23 +210,29 @@ void ai_init (  )	{
   init_feat_names();
 }
 
-void ai_test (  )	{
+void ai_run ( int max_moves, int depth, int show_grid )	{
   ai_init();
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  shape_stream* ss = shape_stream_new(3);
+  shape_stream* ss = shape_stream_new(depth);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   double w[FEAT_COUNT];
   memcpy(w, default_weights, sizeof(w));
   int applied = 0, succ;
   block b;
-  while (1)	{
-    grid_print(g);
+
+  while (max_moves <0 || max_moves--)	{
+    if (show_grid)	{
+      grid_print(g);
+    }else if (!(applied%10))	{
+      printf( "\r%d moves", applied );
+      fflush(stdout);
+    }
+
     game_move* gm = ai_best_move(g, ss, w);
     if (gm == NULL)	{
       printf( "ai can't place move\n" );
       break;
     }
-    // game_move_print(gm);
     succ = grid_block_apply_move(g, &b, gm, 1);
     assert(succ);
     applied++;
