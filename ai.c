@@ -223,7 +223,7 @@ void ai_run ( int max_moves, int depth, int show_grid )	{
   while (max_moves <0 || max_moves--)	{
     if (show_grid)	{
       grid_print(g);
-    }else if (!(applied%10))	{
+    }else if (!(applied%100))	{
       printf( "\r%d moves", applied );
       fflush(stdout);
     }
