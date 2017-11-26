@@ -31,12 +31,12 @@ int main() {
 	mvprintw(g->height+1, 0, "game over!");
 	break;
       }
-      ncurses_block_print(b, 1, g->height);
+      ncurses_block_print_shadow(b, 1, g);
       ncurses_refresh();
       dropped = 0;
     }else 	{
-      ncurses_block_print(b, 0, g->height);//delete block
       int ch = getch();
+      ncurses_block_print_shadow(b, 0, g);//delete block
       switch(ch){
       case KEY_LEFT: grid_block_move_safe(g, b, LEFT, 1); break;
       case KEY_RIGHT: grid_block_move_safe(g, b, RIGHT, 1); break;
@@ -70,7 +70,7 @@ int main() {
 	cleared = 0;
       }
       if (!cleared)	{
-	ncurses_block_print(b, 1, g->height);//repaint in new location
+	ncurses_block_print_shadow(b, 1, g);//repaint in new location
       }
 
       ncurses_refresh();

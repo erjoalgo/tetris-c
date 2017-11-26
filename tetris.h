@@ -100,6 +100,7 @@ shape* shape_stream_pop ( shape_stream* stream );
 void ncurses_grid_print ( grid* g );
 void ncurses_grid_print_fill_count ( grid* g );
 void ncurses_block_print ( block* b, int color, int grid_height );
+void ncurses_block_print_shadow ( block* b, int color, grid* g );
 void ncurses_setup ( grid* g );
 void ncurses_refresh (  );
 

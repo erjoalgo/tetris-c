@@ -56,6 +56,17 @@ void ncurses_block_print ( block* b, int color, int grid_height )	{
   }
 }
 
+void ncurses_block_print_shadow ( block* b, int color, grid* g)	{
+  int shadow_color = color? 3: 0;
+
+  // first add/remove the shadow
+  int r = b->offset[1];
+  grid_block_drop(g, b);
+  ncurses_block_print(b, shadow_color, g->height);
+  b->offset[1] = r;
+  ncurses_block_print(b, color, g->height);
+}
+
 void ncurses_setup ( grid* g )	{
   int startrc[] = {3,13};// somewhat center the grid
 
