@@ -74,6 +74,7 @@ int grid_apply_moves( grid* g, game_move* stream, int stream_count );
 void grid_block_drop(grid* g, block* b);
 void grid_print(grid* g);
 void grid_block_move_safe(grid* g, block* b, int direction, int amount);
+void grid_block_move_safe_to(grid* g, block* b, int c);
 void grid_block_rotate_safe(grid* g, block* b, int amount);
 int grid_clear_lines(grid* g);
 int grid_equal(grid* a, grid* b);

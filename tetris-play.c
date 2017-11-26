@@ -58,7 +58,7 @@ int main() {
 	int i;
 	for ( i = 0; i < g->width; i++ )	{
 	  if (ch == COL_SHORTCUT_KEYS[i])	{
-	    b->offset[0] = i;
+	    grid_block_move_safe_to(g, b, i);
 	    dropped = 1;
 	    break;
 	  }

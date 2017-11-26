@@ -496,6 +496,20 @@ void grid_block_move_safe ( grid* g, block* b, int direction, int amount )	{
   }
 }
 
+void grid_block_move_safe_to ( grid* g, block* b, int c )	{
+  b->offset[0] = c;
+  assert(c>=0);
+  if (c<0)	{
+    b->offset[0] = 0;
+  }else 	{
+    int over = block_extreme(b, RIGHT)-(g->width-1);
+    if (over>0)	{
+      b->offset[0] -= over;
+    }
+  }
+  assert(grid_block_in_bounds(g, b));
+}
+
 void grid_block_rotate_safe ( grid* g, block* b, int amount )	{
   block_rotate(b, amount);
   if (!grid_block_valid(g, b))	{
