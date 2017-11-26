@@ -42,10 +42,7 @@ int main() {
       case KEY_RIGHT: grid_block_move_safe(g, b, RIGHT, 1); break;
       case KEY_DOWN: grid_block_move_safe(g, b, BOT, 1); break;
       case KEY_UP: grid_block_rotate_safe(g, b, 1); break;
-      case ' ': {
-	dropped = 1;
-	break;
-      }
+      case ' ': dropped = 1; break;
       default: {
 	int i;
 	for ( i = 0; i < g->width; i++ )	{
