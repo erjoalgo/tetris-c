@@ -4,6 +4,15 @@
 const int EDGE=1;
 
 WINDOW* win;
+inline void ncurses_paint ( int r, int c, int on )	{
+
+  r+=EDGE;
+  c+=EDGE;
+
+  int pair = 1+on;
+  wattron(win, COLOR_PAIR(pair));
+  mvwaddch(win, r,  c, ' ');
+}
 
 void ncurses_grid_print ( grid* g )	{
   int row, col;
@@ -14,9 +23,8 @@ void ncurses_grid_print ( grid* g )	{
       // row_s[col] = g->rows[row][col]? '█' : ' ';
       // row_s[col] = g->rows[row][col]? '*' : ' ';
       // mvprintw(g->height-1-row, col, g->rows[row][col]? "*" : " ");
-      mvaddch(g->height-1-row, col, g->rows[row][col]? '*' : ' ');
+      ncurses_paint(g->height-1-row, col, g->rows[row][col]);
     }
-    mvaddch(g->height-1-row, g->width, '|');
   }
   // row_s[g->width] = ' ';
   // mvprintw(g->height, col, row_s);
@@ -25,12 +33,13 @@ void ncurses_grid_print ( grid* g )	{
 void ncurses_grid_print_fill_count ( grid* g )	{
   int row;
   for ( row = 0; row < g->height; row++ )	{
-    mvaddch(g->height-1-row, g->width+1, '0'+g->row_fill_count[row]);
+    mvwaddch(win, g->height-1-row+EDGE, g->width+1+EDGE,
+	     '0'+g->row_fill_count[row]);
   }
   int col;
   for ( col = 0; col < g->width; col++ )	{
     int tall = g->relief[col];
-    mvaddch(g->height+1, col,
+    mvwaddch(win, EDGE+g->height+1, col+EDGE,
 	    tall == -1? '-' :
 	    tall<10?'0'+tall:
 	    'A'+tall%10);
@@ -39,13 +48,11 @@ void ncurses_grid_print_fill_count ( grid* g )	{
 
 
 void ncurses_block_print ( block* b, int color, int grid_height )	{
-  // char* c = add? "█" : " ";
-  char c = !!color? '*' : ' ';
   int i;
   coord cr;
   for ( i = 0; i < b->shape->len; i++ )	{
     block_get(b, i, &cr);
-    mvaddch(grid_height-1-cr[1], cr[0], c);
+    ncurses_paint(grid_height-1-cr[1], cr[0], color);
   }
 }
 
