@@ -6,27 +6,19 @@
 
 #define DELAY 300000
 
-static char COL_SHORTCUT_KEYS[] = "1234qwersd";
 
 int main() {
 
   srand(time(NULL));
 
-  WINDOW* w = initscr();
-  keypad(w, 1);
-  noecho();
-  curs_set(0);
-
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   block* b = block_new(NULL);
-  ncurses_grid_print(g);//print empty grid
-  // also print shortcut chars
-  int col;
-  for ( col = 0; col < g->width; col++ )	{
-    mvaddch(g->height, col, COL_SHORTCUT_KEYS[col]);
-  }
+
+  ncurses_setup(g);
+  ncurses_refresh();
+
   int dropped = 1, cleared = 0;
   int color;
 
@@ -40,11 +32,11 @@ int main() {
 	break;
       }
       ncurses_block_print(b, 1, g->height);
-      refresh();
+      ncurses_refresh();
       dropped = 0;
     }else 	{
-      int ch = wgetch(w);
       ncurses_block_print(b, 0, g->height);//delete block
+      int ch = getch();
       switch(ch){
       case KEY_LEFT: grid_block_move_safe(g, b, LEFT, 1); break;
       case KEY_RIGHT: grid_block_move_safe(g, b, RIGHT, 1); break;
@@ -81,7 +73,7 @@ int main() {
 	ncurses_block_print(b, 1, g->height);//repaint in new location
       }
 
-      refresh();
+      ncurses_refresh();
     }
   }
 
