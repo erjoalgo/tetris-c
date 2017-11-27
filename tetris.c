@@ -40,17 +40,3 @@ int main(int argc, char** argv)
   }
   return 0;
 }
-
-/* class Grid (object):
-
-    def get (self, y, x):
-        coords = [x,y]
-        for block in self.virtualBlocks:
-            for i in xrange (len (block)):
-                if coords == block.ith (i):
-                    return 1
-        return self.grid[y][x]
-
-
-
-*/
