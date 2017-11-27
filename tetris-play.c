@@ -53,34 +53,34 @@ ui_move human_get_move ( grid* g, block* b, shape_stream* ss, int* arg )	{
 
   (void)ss;//could be used to display the future blocks
   (void)b;//human is seeing this on the screen, not needed
-      int ch = getch();
-      switch(ch){
-      case KEY_LEFT: return MVLEFT;
-      case KEY_RIGHT: return MVRIGHT;
-      case KEY_DOWN: return MVDOWN;
-      case KEY_UP: return ROTCW;
-      case ' ': return DROP;
-      case 112: return SWITCH_PLAYER;// letter 'p'
-      default: {
-	int i;
-	for ( i = 0; i < g->width; i++ )	{
-	  if (ch == COL_SHORTCUT_KEYS[i])	{
-	    // b->offset[0] = i;
-	    // possible correction
-	    // b->offset[0] -= MAX(0, block_extreme(b, RIGHT) - (g->width-1));
-	    *arg = i;
-	    return DROP_TO_ARG;
-	  }
-	}
-	for ( i = 0; i < 4; i++ )	{
-	  if (ch == ROT_SHORTCUT_KEYS[i])	{
-	    *arg = i;
-	    return ROT_TO_ARG;
-	  }
-	}
+  int ch = getch();
+  switch(ch){
+  case KEY_LEFT: return MVLEFT;
+  case KEY_RIGHT: return MVRIGHT;
+  case KEY_DOWN: return MVDOWN;
+  case KEY_UP: return ROTCW;
+  case ' ': return DROP;
+  case 112: return SWITCH_PLAYER;// letter 'p'
+  default: {
+    int i;
+    for ( i = 0; i < g->width; i++ )	{
+      if (ch == COL_SHORTCUT_KEYS[i])	{
+	// b->offset[0] = i;
+	// possible correction
+	// b->offset[0] -= MAX(0, block_extreme(b, RIGHT) - (g->width-1));
+	*arg = i;
+	return DROP_TO_ARG;
       }
+    }
+    for ( i = 0; i < 4; i++ )	{
+      if (ch == ROT_SHORTCUT_KEYS[i])	{
+	*arg = i;
+	return ROT_TO_ARG;
       }
-      return NONE;
+    }
+  }
+  }
+  return NONE;
 }
 
 game_move* gm;
@@ -173,9 +173,9 @@ void play() {
 	grid_block_add(g, b);
 	cleared = grid_clear_lines(g);
       }
-	if (cleared)	{
-	  // need to repaint the whole grid
-	  ncurses_grid_print(g);
+      if (cleared)	{
+	// need to repaint the whole grid
+	ncurses_grid_print(g);
       }else 	{
 	ncurses_block_print_shadow(b, 1, g);//repaint in new location
       }
