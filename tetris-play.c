@@ -7,11 +7,13 @@
 #include "tetris_ai.h"
 #include "assert.h"
 #include <unistd.h>
+#include <signal.h>
 
 #define DELAY 300000
 
 void play();// human or ai
 void ai_play(int depth, int delay_secs);// ai only
+void  sig_handler(int sig);
 
 int main(int argc, char** argv)
 {
@@ -19,6 +21,8 @@ int main(int argc, char** argv)
   int seed = time(NULL);
   printf( "seed %d \n", seed );
   srand(seed);
+  // signal(SIGINT, sig_handler);
+  // signal(SIGWINCH, sig_handler);
   if (argc<2)	{
     printf("must provide subcommand");
     exit(1);
@@ -226,6 +230,23 @@ void ai_play(int depth, int delay_secs) {
   endwin();
 }
 
+void  sig_handler(int sig)
+{
+  (void)sig;
+  // char  c;
+  // signal(sig, SIG_IGN);
+  ai_playing = !ai_playing;
+  printf( "ai control is now %s (signal=%d)\n",
+	  ai_playing? "on": "off", sig );
+  // printf("OUCH, did you hit Ctrl-C?\n"
+  // 	 "Do you really want to quit? [y/n] ");
+
+  // c = getchar();
+  // if (c == 'y' || c == 'Y')
+  //   exit(0);
+  // else
+  //   signal(SIGINT, INThandler);
+}
 // Local Variables: */
 // compile-command: "make tetris-play" */
 // End: */
