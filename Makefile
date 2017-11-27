@@ -8,6 +8,9 @@ all: tetris tetris-play
 tetris: tetris.o $(OBJ) evolution.o
 	$(CC) -o $@ $< $(OBJ) evolution.o $(CFLAGS)
 
+libtetris.so: $(OBJ) evolution.o
+	$(CC) -shared -o $@ $(OBJ)
+
 tetris-play: tetris-play.o tetris-ncurses.o $(OBJ)
 	$(CC) -o $@ $< tetris-ncurses.o $(OBJ) $(CFLAGS) -lncurses
 
