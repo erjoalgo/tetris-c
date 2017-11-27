@@ -11,6 +11,7 @@
 
 
 void human_play();
+void ai_play(int depth, int delay_secs);
 
 int main(int argc, char** argv)
 {
@@ -25,6 +26,8 @@ int main(int argc, char** argv)
     char* opt = argv[1];
     if (!strcmp(argv[1], "human"))	{
       human_play();
+    }else if (!strcmp(opt, "ai"))	{
+      ai_play(3, 1);
     }else 	{
       printf( "unknown option: %s\n", opt );
       return 1;
@@ -96,5 +99,54 @@ void human_play() {
     }
   }
 
+  endwin();
+}
+
+void sleep_secs (unsigned int secs) {
+  // https://stackoverflow.com/questions/3930363/implement-time-delay-in-c
+    unsigned int retTime = time(0) + secs;   // Get finishing time.
+    while (time(0) < retTime);               // Loop until it arrives.
+}
+
+void ai_play(int depth, int delay_secs) {
+
+  grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
+  shape_stream* ss = shape_stream_new(depth);
+  ai_init();
+  ncurses_setup(g);
+  double* w = default_weights;
+  assert(w);
+  // double* w = get_default_weights();
+  block bb;
+  block* b = &bb;
+  while (1)	{
+    // show next block
+    b->shape = shape_stream_peek(ss, 0);
+    b->rot = 0;
+    grid_block_center_elevate(g, b);
+    ncurses_block_print(b, 1, g->height);
+    ncurses_refresh();
+
+    // compute next move. wait secs
+    game_move* gm = ai_best_move(g, ss, w);
+    shape_stream_pop(ss);
+    if (gm == NULL) break;
+    sleep_secs(delay_secs);
+
+    ncurses_block_print(b, 0, g->height);//erase
+    int succ = grid_block_apply_move(g, b, gm, 1);
+    (void)succ;
+    assert(succ);
+
+    // unfortunately grid_block_apply_move also clears lines
+    if (g->last_cleared_count)	{
+      ncurses_grid_print(g);// repaint the whole grid
+    }else 	{
+      ncurses_block_print(b, 1, g->height);//leave painted until next clear
+    }
+    ncurses_refresh();
+  }
+  printf( "game over\n" );
+  getch();
   endwin();
 }
