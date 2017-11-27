@@ -150,3 +150,7 @@ void ai_play(int depth, int delay_secs) {
   getch();
   endwin();
 }
+
+// Local Variables: */
+// compile-command: "make tetris-play" */
+// End: */
