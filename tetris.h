@@ -106,5 +106,6 @@ void ncurses_setup ( grid* g );
 void ncurses_refresh (  );
 
 static const char COL_SHORTCUT_KEYS[] = "1234qwersd";
+static const char ROT_SHORTCUT_KEYS[] = "zxcv";
 
 void shape_stream_test();

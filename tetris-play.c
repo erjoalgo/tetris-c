@@ -62,6 +62,12 @@ int human_get_move ( grid* g, block* b, shape_stream* ss )	{
 	    break;
 	  }
 	}
+	for ( i = 0; i < 4; i++ )	{
+	  if (ch == ROT_SHORTCUT_KEYS[i])	{
+	    b->rot = i;
+	    break;
+	  }
+	}
       }
       }
   return dropped;
