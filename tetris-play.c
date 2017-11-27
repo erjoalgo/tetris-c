@@ -54,6 +54,9 @@ int human_get_move ( grid* g, block* b, shape_stream* ss )	{
 	int i;
 	for ( i = 0; i < g->width; i++ )	{
 	  if (ch == COL_SHORTCUT_KEYS[i])	{
+	    // b->offset[0] = i;
+	    // possible correction
+	    // b->offset[0] -= MAX(0, block_extreme(b, RIGHT) - (g->width-1));
 	    grid_block_move_safe_to(g, b, i);
 	    dropped = 1;
 	    break;
