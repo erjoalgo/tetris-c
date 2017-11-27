@@ -21,7 +21,7 @@ int main(int argc, char** argv)
   int seed = time(NULL);
   printf( "seed %d \n", seed );
   srand(seed);
-  // signal(SIGINT, sig_handler);
+  signal(SIGINT, sig_handler);
   // signal(SIGWINCH, sig_handler);
   if (argc<2)	{
     printf("must provide subcommand");
@@ -162,7 +162,8 @@ void play() {
       case ROT_TO_ARG:
 	grid_block_rotate_safe(g, b, arg); break;
 
-      case SWITCH_PLAYER: ai_playing=!ai_playing; break;
+      case SWITCH_PLAYER: ai_playing=!ai_playing;
+	gm = NULL; break;
 
       case NONE: break;
       }
@@ -230,22 +231,24 @@ void ai_play(int depth, int delay_secs) {
   endwin();
 }
 
+int last_sig_secs = 0;
 void  sig_handler(int sig)
 {
   (void)sig;
-  // char  c;
-  // signal(sig, SIG_IGN);
-  ai_playing = !ai_playing;
-  printf( "ai control is now %s (signal=%d)\n",
-	  ai_playing? "on": "off", sig );
-  // printf("OUCH, did you hit Ctrl-C?\n"
-  // 	 "Do you really want to quit? [y/n] ");
+  int now_secs = time(0);
+  if (now_secs-last_sig_secs<=1)	{
+    endwin();
+    exit(0);
+  }else 	{
+    last_sig_secs = now_secs;
+    clock();
 
-  // c = getchar();
-  // if (c == 'y' || c == 'Y')
-  //   exit(0);
-  // else
-  //   signal(SIGINT, INThandler);
+    ai_playing = !ai_playing;
+    gm = NULL;
+
+    // printf( "ai control is now %s (signal=%d)\n",
+    // 	  ai_playing? "on": "off", sig );
+  }
 }
 // Local Variables: */
 // compile-command: "make tetris-play" */
