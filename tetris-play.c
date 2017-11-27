@@ -132,7 +132,6 @@ void play() {
 	if (cleared)	{
 	  // need to repaint the whole grid
 	  ncurses_grid_print(g);
-	ncurses_grid_print_fill_count(g);
       }else 	{
 	ncurses_block_print_shadow(b, 1, g);//repaint in new location
       }
