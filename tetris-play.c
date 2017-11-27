@@ -106,7 +106,6 @@ void play() {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   block* b = block_new(NULL);
-  block* b_old = block_new(NULL);
 
   ncurses_setup(g);
   ncurses_refresh();
@@ -134,7 +133,6 @@ void play() {
 
       dropped = 0;
     }else	{
-      block_cpy(b_old, b);// remember where previous block was, to erase it
       int arg = 0; //optional 'prefix arg'
       ui_move move = ai_playing? ai_get_move(g, b, ss, &arg) :
 	human_get_move(g, b, ss, &arg);
