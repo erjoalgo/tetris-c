@@ -2,16 +2,38 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 #include "tetris.h"
+#include "tetris_ai.h"
+#include "assert.h"
 
 #define DELAY 300000
 
 
-int main() {
+void human_play();
 
-  srand(time(NULL));
-
+int main(int argc, char** argv)
+{
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
+  int seed = time(NULL);
+  printf( "seed %d \n", seed );
+  srand(seed);
+  if (argc<2)	{
+    printf("must provide subcommand");
+    exit(1);
+  }else 	{
+    char* opt = argv[1];
+    if (!strcmp(argv[1], "human"))	{
+      human_play();
+    }else 	{
+      printf( "unknown option: %s\n", opt );
+      return 1;
+    }
+  }
+  return 0;
+}
+
+void human_play() {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   block* b = block_new(NULL);
@@ -75,5 +97,4 @@ int main() {
   }
 
   endwin();
-  return 0;
 }
