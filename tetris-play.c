@@ -6,6 +6,7 @@
 #include "tetris.h"
 #include "tetris_ai.h"
 #include "assert.h"
+#include <unistd.h>
 
 #define DELAY 300000
 
@@ -81,7 +82,7 @@ int ai_get_move ( grid* g, block* b, shape_stream* ss)	{
       gm = NULL;
     }
   }
-  sleep_secs(1);
+  usleep(100000);
   return drop;
 }
 
@@ -114,7 +115,7 @@ void play() {
       ncurses_block_print_shadow(b, 1, g);
       ncurses_refresh();
       if (ai_playing)	{
-	sleep_secs(1);//brief pause to simulate 'ai thinking'
+	usleep(100000);//brief pause to simulate 'ai thinking'
       }
 
       dropped = 0;
@@ -143,12 +144,6 @@ void play() {
   endwin();
 }
 
-void sleep_secs (unsigned int secs) {
-  // https://stackoverflow.com/questions/3930363/implement-time-delay-in-c
-    unsigned int retTime = time(0) + secs;   // Get finishing time.
-    while (time(0) < retTime);               // Loop until it arrives.
-}
-
 void ai_play(int depth, int delay_secs) {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
@@ -172,7 +167,7 @@ void ai_play(int depth, int delay_secs) {
     game_move* gm = ai_best_move(g, ss, w);
     shape_stream_pop(ss);
     if (gm == NULL) break;
-    sleep_secs(delay_secs);
+    usleep(delay_secs*100000);
 
     ncurses_block_print(b, 0, g->height);//erase
     int succ = grid_block_apply_move(g, b, gm, 1);
