@@ -36,20 +36,27 @@ int main(int argc, char** argv)
   return 0;
 }
 
-int human_get_move ( grid* g, block* b, shape_stream* ss )	{
+typedef enum {MVLEFT, MVRIGHT, MVDOWN, DROP,
+	      DROP_TO_ARG,
+	      ROT_TO_ARG,
+	      SWITCH_PLAYER,
+	      ROTCW, ROTCCW, NONE} ui_move;
+
+ui_move human_get_move ( grid* g, block* b, shape_stream* ss, int* arg )	{
   // provide the human's move as a mutation of b
   // return whether there was a drop request (i.e. ready for next block)
   // don't change the grid
 
   (void)ss;//could be used to display the future blocks
-  int dropped = 0;
+  (void)b;//human is seeing this on the screen, not needed
       int ch = getch();
       switch(ch){
-      case KEY_LEFT: grid_block_move_safe(g, b, LEFT, 1); break;
-      case KEY_RIGHT: grid_block_move_safe(g, b, RIGHT, 1); break;
-      case KEY_DOWN: grid_block_move_safe(g, b, BOT, 1); break;
-      case KEY_UP: grid_block_rotate_safe(g, b, 1); break;
-      case ' ': dropped = 1; break;
+      case KEY_LEFT: return MVLEFT;
+      case KEY_RIGHT: return MVRIGHT;
+      case KEY_DOWN: return MVDOWN;
+      case KEY_UP: return ROTCW;
+      case ' ': return DROP;
+      case 112: return SWITCH_PLAYER;// letter 'p'
       default: {
 	int i;
 	for ( i = 0; i < g->width; i++ )	{
@@ -57,42 +64,40 @@ int human_get_move ( grid* g, block* b, shape_stream* ss )	{
 	    // b->offset[0] = i;
 	    // possible correction
 	    // b->offset[0] -= MAX(0, block_extreme(b, RIGHT) - (g->width-1));
-	    grid_block_move_safe_to(g, b, i);
-	    dropped = 1;
-	    break;
+	    *arg = i;
+	    return DROP_TO_ARG;
 	  }
 	}
 	for ( i = 0; i < 4; i++ )	{
 	  if (ch == ROT_SHORTCUT_KEYS[i])	{
-	    b->rot = i;
-	    break;
+	    *arg = i;
+	    return ROT_TO_ARG;
 	  }
 	}
       }
       }
-  return dropped;
+      return NONE;
 }
 
 game_move* gm;
-int ai_get_move ( grid* g, block* b, shape_stream* ss)	{
-  int drop = 0;
+ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
+  (void)arg;//ai will make moves one at a time
   if (gm == NULL)	{
     // new block. just display it
     gm = ai_best_move(g, ss, default_weights);
+    return NONE;
   }else 	{
     // make moves one at a time. rotations first
     if (b->rot != gm->rot)	{
       int inc = (gm->rot-b->rot+4)%4;
-      b->rot = (b->rot+4+(inc<3? 1: -1))%4;
+      return inc<3? ROTCW: ROTCCW;
     }else if (b->offset[0] != gm->col)	{
-      b->offset[0]+=gm->col>b->offset[0]?1: -1;
+      return gm->col > b->offset[0]? MVRIGHT: MVLEFT;
     }else 	{
-      drop = 1;
       gm = NULL;
+      return DROP;
     }
   }
-  usleep(100000);
-  return drop;
 }
 
 int ai_playing = 1;
@@ -130,8 +135,36 @@ void play() {
       dropped = 0;
     }else	{
       block_cpy(b_old, b);// remember where previous block was, to erase it
-      dropped = ai_playing? ai_get_move(g, b, ss) : human_get_move(g, b, ss);
-      ncurses_block_print_shadow(b_old, 0, g);//unpaint old block
+      int arg = 0; //optional 'prefix arg'
+      ui_move move = ai_playing? ai_get_move(g, b, ss, &arg) :
+	human_get_move(g, b, ss, &arg);
+
+      if (ai_playing)	usleep(100000); // ai 'thinking'
+
+      ncurses_block_print_shadow(b, 0, g);//unpaint old block
+
+      switch(move){
+      case MVLEFT:
+      case MVRIGHT:
+	grid_block_move_safe(g, b, move==MVLEFT? LEFT: RIGHT, 1); break;
+
+      case MVDOWN: grid_block_move_safe(g, b, BOT, 1); break;
+
+      case DROP_TO_ARG:  grid_block_move_safe_to(g, b, arg);
+      case DROP: dropped = 1; break;
+
+      case ROTCW:
+      case ROTCCW:
+	grid_block_rotate_safe(g, b, 1+2*(move == ROTCCW)); break;
+
+      case ROT_TO_ARG:
+	grid_block_rotate_safe(g, b, arg); break;
+
+      case SWITCH_PLAYER: ai_playing=!ai_playing; break;
+
+      case NONE: break;
+      }
+
       int cleared = 0;
       if (dropped)	{
 	grid_block_drop(g, b);
