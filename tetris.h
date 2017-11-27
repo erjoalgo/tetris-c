@@ -38,6 +38,7 @@ void block_move ( block* b, direction d, int amount );
 void block_crust_get ( block* b, direction d, int i, coord* result );
 int block_extreme(block* b, direction d);
 void block_print(block* b);
+void block_cpy(block* dst, block* src);
 
 
 typedef struct {

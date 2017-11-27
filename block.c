@@ -10,6 +10,14 @@ void block_init ( block* b, shape* s )	{
   b->shape = s;
 }
 
+void block_cpy ( block* dst, block* src )	{
+  // could we do this with memcpy?
+  dst->rot = src->rot;
+  dst->offset[0] = src->offset[0];
+  dst->offset[1] = src->offset[1];;
+  dst->shape = src->shape;
+}
+
 block* block_new ( shape* s )	{
   block* b = malloc(sizeof(block));
   block_init(b, s);
