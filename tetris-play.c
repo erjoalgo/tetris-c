@@ -10,6 +10,7 @@
 #include <signal.h>
 
 #define DELAY 300000
+#define SEC 100000
 
 void play();// human or ai
 void ai_play(int depth, int delay_secs);// ai only
@@ -132,7 +133,7 @@ void play() {
       ncurses_block_print_shadow(b, 1, g);
       ncurses_refresh();
       if (ai_playing)	{
-	usleep(100000);//brief pause to simulate 'ai thinking'
+	usleep(.5*SEC);//brief pause to simulate 'ai thinking'
       }
 
       dropped = 0;
@@ -141,7 +142,7 @@ void play() {
       ui_move move = ai_playing? ai_get_move(g, b, ss, &arg) :
 	human_get_move(g, b, ss, &arg);
 
-      if (ai_playing)	usleep(100000); // ai 'thinking'
+      if (ai_playing)	usleep(.7*SEC); // ai 'thinking'
 
       ncurses_block_print_shadow(b, 0, g);//unpaint old block
 
@@ -211,7 +212,7 @@ void ai_play(int depth, int delay_secs) {
     game_move* gm = ai_best_move(g, ss, w);
     shape_stream_pop(ss);
     if (gm == NULL) break;
-    usleep(delay_secs*100000);
+    usleep(delay_secs*SEC);
 
     ncurses_block_print(b, 0, g->height);//erase
     int succ = grid_block_apply_move(g, b, gm, 1);
