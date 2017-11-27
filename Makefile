@@ -23,4 +23,4 @@ call.svg: prof
 	firefox --new-tab $@
 
 clean:
-	rm *o prof gmon.out call.svg
+	rm *.{,s}o prof gmon.out call.svg
