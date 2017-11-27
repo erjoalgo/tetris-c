@@ -118,7 +118,7 @@ void play() {
 
   // allow ai to make moves for human
   ai_init();
-  shape_stream* ss = shape_stream_new(1);
+  shape_stream* ss = shape_stream_new(3);
 
   while(1) {
     if (dropped)	{
