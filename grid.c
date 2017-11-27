@@ -425,16 +425,16 @@ void grid_print ( grid* g )	{
   int row, col;
   char row_s[g->width+2];
   row_s[g->width] = '|';
-  row_s[g->width+1] = '\n';
+  row_s[g->width+1] = 0;
   for ( row = g->height-1; row >= 0; row-- )	{
     for ( col = 0; col < g->width; col++ )	{
       row_s[col] = g->rows[row][col]? '*' : ' ';
     }
-    printf(row_s);
+    printf("%s\n", row_s);
   }
   memset(row_s, 'T', g->width*sizeof(char));
   row_s[g->width] = ' ';
-  printf(row_s);
+  printf("%s\n", row_s);
 }
 
 int grid_block_apply_move ( grid* g, block* b, game_move* m, int add )	{

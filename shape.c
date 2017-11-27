@@ -159,7 +159,7 @@ void print_coords ( char* grid, int rows, int  cols,
     grid[r*cols+c] = '*';
   }
   printf("\n\n");
-  printf(grid);
+  printf("%s\n", grid);
   for ( i = 0; i < coords_len; i++ )	{
     int c = coords[i][0];
     int r = rows - 1 - coords[i][1];
