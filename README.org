@@ -1,7 +1,8 @@
 * demo
-#+CAPTION: demo
-#+NAME: fig:SED-HR4049
-[[./tetris.gif]]
+
+#+BEGIN_EXPORT html
+<img src="https://raw.githubusercontent.com/erjoalgo/tetris-c/demo/tetris.gif">
+#+END_EXPORT
 
 * installation
 
