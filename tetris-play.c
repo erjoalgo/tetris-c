@@ -106,8 +106,8 @@ void ui_play() {
       if (grid_block_intersects(g, b))	{
 	break;// cannot place new block. game over
       }
-      ncurses_block_print_shadow(b, 1, g);
       ncurses_refresh();
+      ncurses_block_print_shadow(b, 1+ai_playing, g);
       if (ai_playing)	{
 	usleep(.5*SEC);//brief pause to simulate 'ai thinking'
       }
@@ -155,7 +155,8 @@ void ui_play() {
 	// need to repaint the whole grid
 	ncurses_grid_print(g);
       }else 	{
-	ncurses_block_print_shadow(b, 1, g);//repaint in new location
+	//repaint in new location
+	ncurses_block_print_shadow(b, 1+ai_playing*(!dropped), g);
       }
     }
     ncurses_refresh();

@@ -3,6 +3,7 @@
 
 const int EDGE=1;
 
+const int SHADOW_COLOR=5;
 WINDOW* win;
 inline void ncurses_paint ( int r, int c, int on )	{
 
@@ -57,12 +58,11 @@ void ncurses_block_print ( block* b, int color, int grid_height )	{
 }
 
 void ncurses_block_print_shadow ( block* b, int color, grid* g)	{
-  int shadow_color = color? 3: 0;
 
   // first add/remove the shadow
   int r = b->offset[1];
   grid_block_drop(g, b);
-  ncurses_block_print(b, shadow_color, g->height);
+  ncurses_block_print(b, SHADOW_COLOR*(!!color), g->height);
   b->offset[1] = r;
   ncurses_block_print(b, color, g->height);
 }
@@ -83,12 +83,15 @@ void ncurses_setup ( grid* g )	{
   int BG = COLOR_GREEN;
   int FG = COLOR_WHITE;
   int UNUSED = COLOR_BLUE;
-  init_pair(1, UNUSED, BG);
-  init_pair(2, UNUSED, FG);
-  init_pair(3, FG, COLOR_BLACK);
+  init_pair(1, UNUSED, BG);//blank
+  init_pair(2, UNUSED, FG);//p1
+  init_pair(3, UNUSED, COLOR_RED);//p2
+  init_pair(4, UNUSED, COLOR_BLUE);//p3
+
+  init_pair(6, FG, COLOR_BLACK);//shadow
   assume_default_colors(FG, BG);
 
-  wattron(win, COLOR_PAIR(3));//border color
+  wattron(win, COLOR_PAIR(6));//border color
   // box(win, 0 , 0); not sure what this does
   wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 
