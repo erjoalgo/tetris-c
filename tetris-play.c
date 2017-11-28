@@ -106,7 +106,6 @@ void ui_play() {
       if (grid_block_intersects(g, b))	{
 	break;// cannot place new block. game over
       }
-      ncurses_refresh();
       ncurses_block_print_shadow(b, 1+ai_playing, g);
       if (ai_playing)	{
 	usleep(.5*SEC);//brief pause to simulate 'ai thinking'
