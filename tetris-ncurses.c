@@ -62,7 +62,7 @@ void ncurses_block_print_shadow ( block* b, int color, grid* g)	{
   // first add/remove the shadow
   int r = b->offset[1];
   grid_block_drop(g, b);
-  ncurses_block_print(b, SHADOW_COLOR*(!!color), g->height);
+  ncurses_block_print(b, color, g->height);
   b->offset[1] = r;
   ncurses_block_print(b, color, g->height);
 }
