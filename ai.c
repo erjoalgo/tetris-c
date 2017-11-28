@@ -219,6 +219,7 @@ void ai_init (  )	{
 
 void ai_run ( int max_moves, int depth, int show_grid )	{
   ai_init();
+  printf( "grid height is %d, depth %d\n", GRID_HEIGHT, depth );
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
