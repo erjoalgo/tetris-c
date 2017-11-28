@@ -1,18 +1,15 @@
 CC=gcc
 CFLAGS=-Wall -W -Werror -Wextra -Ofast -ffast-math -DNDEBUG
 DEPS=tetris.h tetri_ai.h
-OBJ=ai.o game.o grid.o block.o shape.o
+OBJ=ai.o game.o grid.o block.o shape.o evolution.o tetris-ncurses.o tetris-play.o
 
-all: tetris tetris-play
+all: tetris
 
-tetris: tetris.o $(OBJ) evolution.o
-	$(CC) -o $@ $< $(OBJ) evolution.o $(CFLAGS)
+tetris: tetris.o $(OBJ)
+	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
 
 libtetris.so: $(OBJ) evolution.o
 	$(CC) -shared -o $@ $(OBJ)
-
-tetris-play: tetris-play.o tetris-ncurses.o $(OBJ)
-	$(CC) -o $@ $< tetris-ncurses.o $(OBJ) $(CFLAGS) -lncurses
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

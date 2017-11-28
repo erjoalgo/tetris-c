@@ -22,9 +22,12 @@ int main(int argc, char** argv)
     fatal("must provide subcommand");
   }else 	{
     char* opt = argv[1];
-    if (!strcmp(argv[1], "ai"))	{
-      int max_moves = -1;
-      int depth = 1;
+    if (!strcmp(argv[1], "play"))	{
+      ui_play();
+      // ai_play(3, 1);
+    }else if (!strcmp(argv[1], "ai"))	{
+      int max_moves = 100;
+      int depth = 4;
       int show_grid = 0;
       ai_run(max_moves, depth, show_grid);
     }else if (!strcmp(opt, "evolve"))	{

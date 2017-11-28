@@ -16,3 +16,6 @@ game_move* ai_best_move ( grid* g, shape_stream* ss, double* w );
 
 char* feat_names[FEAT_COUNT];
 void evolution_test();
+
+void ui_play();
+void ui_play_ai(int depth, int delay_secs);

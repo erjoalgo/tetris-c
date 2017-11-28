@@ -1,45 +1,20 @@
-#include <ncurses.h>
-#include <unistd.h>
-#include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <time.h>
 #include "tetris.h"
 #include "tetris_ai.h"
-#include "assert.h"
+#include <ncurses.h>
 #include <unistd.h>
 #include <signal.h>
 
 #define DELAY 300000
 #define SEC 100000
 
-void play();// human or ai
-void ai_play(int depth, int delay_secs);// ai only
-void  sig_handler(int sig);
-
-int main(int argc, char** argv)
-{
-  SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
-  int seed = time(NULL);
-  printf( "seed %d \n", seed );
-  srand(seed);
-  signal(SIGINT, sig_handler);
-  // signal(SIGWINCH, sig_handler);
-  if (argc<2)	{
-    printf("must provide subcommand");
-    exit(1);
-  }else 	{
-    char* opt = argv[1];
-    if (!strcmp(argv[1], "human"))	{
-      play();
-    }else if (!strcmp(opt, "ai"))	{
-      ai_play(3, 1);
-    }else 	{
-      printf( "unknown option: %s\n", opt );
-      return 1;
-    }
-  }
-  return 0;
-}
+void ui_play();// human or ai
+void ui_play_ai(int depth, int delay_secs);// ai only
+void sig_handler(int sig);
 
 typedef enum {MVLEFT, MVRIGHT, MVDOWN, DROP,
 	      DROP_TO_ARG,
@@ -107,7 +82,8 @@ ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
 
 int ai_playing = 1;
 
-void play() {
+void ui_play() {
+  signal(SIGINT, sig_handler);
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   block* b = block_new(NULL);
@@ -189,7 +165,7 @@ void play() {
   endwin();
 }
 
-void ai_play(int depth, int delay_secs) {
+void ui_play_ai(int depth, int delay_secs) {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
@@ -251,6 +227,3 @@ void  sig_handler(int sig)
     // 	  ai_playing? "on": "off", sig );
   }
 }
-// Local Variables: */
-// compile-command: "make tetris-play" */
-// End: */
