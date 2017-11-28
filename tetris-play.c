@@ -15,6 +15,7 @@
 void ui_play();// human or ai
 void ui_play_ai(int depth, int delay_secs);// ai only
 void sig_handler(int sig);
+void toggle_ai ( );
 
 typedef enum {MVLEFT, MVRIGHT, MVDOWN, DROP,
 	      DROP_TO_ARG,
@@ -138,8 +139,7 @@ void ui_play() {
       case ROT_TO_ARG:
 	grid_block_rotate_safe(g, b, arg); break;
 
-      case SWITCH_PLAYER: ai_playing=!ai_playing;
-	gm = NULL; break;
+      case SWITCH_PLAYER: toggle_ai(); break;
 
       case NONE: break;
       }
@@ -208,6 +208,10 @@ void ui_play_ai(int depth, int delay_secs) {
   endwin();
 }
 
+void toggle_ai (  )	{
+  ai_playing = !ai_playing;
+  gm = NULL;
+}
 int last_sig_secs = 0;
 void  sig_handler(int sig)
 {
@@ -218,12 +222,8 @@ void  sig_handler(int sig)
     exit(0);
   }else 	{
     last_sig_secs = now_secs;
-    clock();
+    // clock();
 
-    ai_playing = !ai_playing;
-    gm = NULL;
-
-    // printf( "ai control is now %s (signal=%d)\n",
-    // 	  ai_playing? "on": "off", sig );
+    toggle_ai();
   }
 }
