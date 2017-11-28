@@ -222,8 +222,6 @@ void  sig_handler(int sig)
     exit(0);
   }else 	{
     last_sig_secs = now_secs;
-    // clock();
-
     toggle_ai();
   }
 }
