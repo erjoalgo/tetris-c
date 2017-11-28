@@ -25,4 +25,4 @@ call.svg: prof
 	firefox --new-tab $@
 
 clean:
-	rm *.o *.s *.so prof gmon.out call.svg tetris tetris-play || true
+	rm -f *.o *.s *.so prof gmon.out call.svg tetris
