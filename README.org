@@ -1,0 +1,22 @@
+* demo
+#+CAPTION: demo
+#+NAME: fig:SED-HR4049
+[[./tetris.gif]]
+
+* installation
+
+#+BEGIN_SRC sh
+git clone https://github.com/erjoalgo/tetris-c
+make
+./tetris play
+#+END_SRC
+
+* usage
+  | *key(s)*             | *action*                    |
+  | SPACE             | drop block                  |
+  | LEFT/RIGHT        | move left/right             |
+  | UP                | rotate clockwise            |
+  | 1234qwersd        | move to ith column and drop |
+  | Ctrl+C (any key)  | switch human/ai player      |
+  | Ctrl+C Ctrl+C     | exit                        |
+  
