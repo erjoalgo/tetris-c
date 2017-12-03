@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -W -Werror -Wextra -Ofast -ffast-math -DNDEBUG
+CFLAGS=-Wall -W -Werror -Wextra -Ofast -ffast-math -DNDEBUG -fno-omit-frame-pointer
 DEPS=tetris.h tetri_ai.h
 OBJ=ai.o game.o grid.o block.o shape.o evolution.o tetris-ncurses.o tetris-play.o
 
