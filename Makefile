@@ -8,21 +8,23 @@ all: tetris
 tetris: tetris.o $(OBJ)
 	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
 
+tetris-prof: tetris.o $(OBJ)
+	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
+
 libtetris.so: $(OBJ) evolution.o
 	$(CC) -shared -o $@ $(OBJ)
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-gmon.out: tetris
-	./tetris
 
-prof: gmon.out
-	gprof tetris gmon.out> $@
 
-call.svg: prof
-	gprof2dot -f prof prof | dot -Tsvg -o > $@
+perf.data: tetris-prof
+	perf record -g ./tetris-prof ai
+
+call.svg: perf.data
+	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
 	firefox --new-tab $@
 
 clean:
-	rm -f *.o *.s *.so prof gmon.out call.svg tetris
+	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
