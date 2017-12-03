@@ -77,11 +77,7 @@ inline void grid_remove_full_row ( grid* g, int r )	{
   int last_full_idx = g->full_rows_count-1;
   if (g->full_rows[last_full_idx] != r)	{
     int i;
-    for ( i = 0; i < last_full_idx-1; i++ )	{
-      if (g->full_rows[i] == r)	{
-	break;
-      }
-    }
+    for ( i = 0; g->full_rows[i] != r; i++ )	{};
     assert(g->full_rows[i] == r);
     g->full_rows[i] = g->full_rows[last_full_idx];
   }
