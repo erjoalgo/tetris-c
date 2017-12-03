@@ -19,7 +19,7 @@ libtetris.so: $(OBJ) evolution.o
 
 
 
-perf.data: tetris-prof
+perf.data: FORCE tetris-prof
 	perf record -g ./tetris-prof ai
 
 call.svg: perf.data
@@ -28,3 +28,5 @@ call.svg: perf.data
 
 clean:
 	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
+
+FORCE:
