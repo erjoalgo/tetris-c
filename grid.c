@@ -175,7 +175,8 @@ void grid_block_set_color ( grid* g, block* b, int color )	{
 
 void grid_block_add ( grid* g, block* b )	{
   int i = 0;
-  int len = b->shape->len;
+  // int len = b->shape->len;
+  const int len = 4;
   assert(len<=4);
   for ( i = 0; i < len; i++ )	{
     int* rot = b->shape->rot[b->rot][i];
