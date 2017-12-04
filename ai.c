@@ -9,6 +9,8 @@
 #define MAX_MUTATION 2.5
 #define MOST_NEG_DBL (-DBL_MAX)
 
+#define MAX(a, b) ((a)>(b)? (a):(b))
+
 /*typedef struct {
   double (*raw_value)(grid* g, double* ordered_raws);
   double weight;
@@ -57,10 +59,10 @@ static game_move** best_moves;
 static int grids_count = 0;
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
-		       int depth_left, double* result_value );
+		       int depth_left, double* result_value, int relief_max );
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
-		      int depth_left, double* value )	{
+			      int depth_left, double* value, int relief_max )	{
   double best_score = MOST_NEG_DBL;
 
   int depth = stream->max_len-depth_left-1;
@@ -70,23 +72,32 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   // in cases when we need to clear lines
   grid* g_prime = grids[depth_left];//depth_left: 0...ss->max_len-1
   grid* g_rec;
-  game_move gm;
-  gm.shape = s;
   best_move->shape = s;
-  int max_rots = gm.shape->rot_count;
+  int max_rots = s->rot_count;
   int r;
+  b->shape = s;
+  int nocheck = g->height -1 - relief_max >=  b->shape->max_dim_len;
+  int elevated = g->height - b->shape->max_dim_len;
+  // should be taken from grid_block_elevate
+  b->offset[1] = elevated;
+  // b->offset[0] = 0;
+  // if (!nocheck && grid_block_intersects(g, b))	goto a;
   for ( r = 0; r < max_rots; r++ )	{
-      gm.rot = r;
+    b->rot = r;
       int c;
-      int max_cols = g->width - gm.shape->rot_wh[r][0] +1;
+    int max_cols = g->width - s->rot_wh[r][0] +1;
+    b->offset[1] = elevated;
+    int top_elevated = block_extreme(b, TOP);
       for ( c = 0; c < max_cols; c++ )	{
-	gm.col = c;
-	if (!grid_block_apply_move(g, b, &gm, 0))	{
+      b->offset[0] = c;
+      b->offset[1] = elevated;
+      if (!nocheck && grid_block_intersects(g, b))	{
 	  continue;
 	}
 	assert(grid_block_valid(g, b));
-	grid_block_drop(g, b);
+      int amt = grid_block_drop(g, b);
 	grid_block_add(g, b);
+      int new_relief_mx = MAX(relief_max, top_elevated-amt);
 	double curr;
 	if (g->full_rows_count)	{
 	  g_rec = g_prime;
@@ -98,7 +109,7 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 	  g_rec = g;
 	}
 	if (depth_left)	{
-	  ai_best_move_rec(g_rec, stream, w, depth_left-1, &curr);
+	ai_best_move_rec(g_rec, stream, w, depth_left-1, &curr, new_relief_mx);
 	}else 	{
 	  curr = grid_eval(g_rec, w);
 	}
@@ -129,7 +140,14 @@ game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
     grids_count = ss->max_len;
   }
   double best_value;
-  game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value);
+  int relief_mx = -1;
+  int i;
+  for ( i = 0; i < g->width; i++ ){
+    relief_mx = MAX(relief_mx, g->relief[i]);
+  }
+
+  game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value,
+					  relief_mx);
 
   if (best_value == MOST_NEG_DBL)	{
     return NULL;

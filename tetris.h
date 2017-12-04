@@ -73,7 +73,7 @@ int grid_block_valid(grid* g, block* b);
 int grid_block_intersects(grid* g, block* b);
 int grid_block_apply_move ( grid* g, block* b, game_move* m, int add );
 int grid_apply_moves( grid* g, game_move* stream, int stream_count );
-void grid_block_drop(grid* g, block* b);
+int grid_block_drop(grid* g, block* b);
 void grid_print(grid* g);
 void grid_block_move_safe(grid* g, block* b, int direction, int amount);
 void grid_block_move_safe_to(grid* g, block* b, int c);
