@@ -178,22 +178,23 @@ void feature_variance ( grid* g, double* ordered_raws )	{
 }
 
 void feature_gaps ( grid* g, double* ordered_raws )	{
-  int gaps = 0, obs = 0, obs_exp = 0, gaps_exp = 0;
+  int gaps = 0, obs = 0;
   int c;
   for ( c = 0; c < g->width; c++ )	{
     int r;
     // this is not row-major
-    for ( r = g->relief[c]; r >= 0; r-- )	{
+    int top = g->relief[c];
+    if (top<=0) continue;
+    int rgaps = 0;
+    for ( r = top-1; r >= 0; r-- )	{
       if (!g->rows[r][c])	{
-	gaps++;
+	rgaps++;
 	// penalize higher gaps more heavily
 	// this encourages to fix gaps near the top first
-	gaps_exp += 1<<r;
-      }else 	{
-	obs++;
-	obs_exp += 1<<r;
       }
     }
+    gaps+= rgaps;
+    obs += (top-rgaps);
   }
   ordered_raws[FEATIDX_GAPS] = gaps;
   // ordered_raws[FEATIDX_GAPS_EXP] = gaps_exp;
