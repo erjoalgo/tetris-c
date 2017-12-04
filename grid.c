@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "tetris.h"
+#include "limits.h"
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
@@ -451,8 +452,8 @@ inline int grid_block_center_elevate (grid* g, block* b)	{
 }
 
 int drop_amount ( grid* g, block* b )	{
+  int min_amnt = INT_MAX;
   int i;
-  int min_amnt = g->height-1;
   // coord cr;
   for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
     // block_crust_get(b, BOT, i, &cr);
