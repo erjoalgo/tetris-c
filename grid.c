@@ -186,15 +186,28 @@ void grid_block_add ( grid* g, block* b )	{
 }
 
 void grid_block_remove ( grid* g, block* b )	{
-  int i = 0;
   int len = b->shape->len;
+  (void)len;
   assert(len<=4);
-  for ( i = 0; i < len; i++ )	{
-    int* rot = b->shape->rot[b->rot][i];
-    int c = rot[0] + b->offset[0];
-    int r = rot[1] + b->offset[1];
-    grid_cell_remove(g, r, c);
-  }
+  assert(len==4);
+
+  int dc = b->offset[0];
+  int dr = b->offset[1];
+
+  int** rots = b->shape->rot[b->rot];
+  int* rot;
+
+  rot = rots[0];
+  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+
+  rot = rots[1];
+  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+
+  rot = rots[2];
+  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+
+  rot = rots[3];
+  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
 }
 
 int cmp_rev (const void* a, const void* b  )	{
