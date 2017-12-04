@@ -196,6 +196,8 @@ void feature_variance ( grid* g, double* ordered_raws )	{
 void test_feature (  )	{
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   grid_set_color(g, 2, 0, 1);
+  double raws[FEAT_COUNT];
+  (void)raws;
   assert(raws[FEATIDX_GAPS] == 2);
   assert(raws[FEATIDX_OBS] == 0);
   grid_set_color(g, 4, 0, 1);
