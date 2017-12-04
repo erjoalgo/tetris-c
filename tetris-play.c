@@ -158,6 +158,7 @@ void ui_play() {
 	ncurses_block_print_shadow(b, 1+ai_playing*(!dropped), g);
       }
     }
+    ncurses_grid_print_fill_count(g);
     ncurses_refresh();
   }
 

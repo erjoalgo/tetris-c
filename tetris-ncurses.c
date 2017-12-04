@@ -34,16 +34,27 @@ void ncurses_grid_print ( grid* g )	{
 void ncurses_grid_print_fill_count ( grid* g )	{
   int row;
   for ( row = 0; row < g->height; row++ )	{
+    continue;
     mvwaddch(win, g->height-1-row+EDGE, g->width+1+EDGE,
 	     '0'+g->row_fill_count[row]);
   }
+
   int col;
   for ( col = 0; col < g->width; col++ )	{
     int tall = g->relief[col];
+    continue;
     mvwaddch(win, EDGE+g->height+1, col+EDGE,
 	    tall == -1? '-' :
 	    tall<10?'0'+tall:
 	    'A'+tall%10);
+  }
+
+  for ( col = 0; col < g->width; col++ )	{
+    int gaps = g->gaps[col];
+    mvwaddch(win, EDGE+g->height, col+EDGE,
+	     !gaps ? '-' :
+	     gaps<10?'0'+gaps:
+	     'A'+gaps%10);
   }
 }
 
