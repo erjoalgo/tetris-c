@@ -22,7 +22,6 @@ void init_feat_names (  )	{
   // feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
   feat_names[FEATIDX_OBS] = "OBS     ";
   // feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
-  feat_names[FEATIDX_ROWS_FULL_CTR] = "ROWS_FULL_CTR";
   feat_names[FEATIDX_DISCONT] = "DISCONT";
 }
 
@@ -183,7 +182,6 @@ void feature_variance ( grid* g, double* ordered_raws )	{
 
   ordered_raws[FEATIDX_GAPS] = gaps;
   ordered_raws[FEATIDX_OBS] = obs;
-  ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
 }
 
 void test_feature (  )	{
