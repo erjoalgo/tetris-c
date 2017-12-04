@@ -413,9 +413,6 @@ int grid_block_in_bounds ( grid* g, block* b )	{
 
 int grid_block_intersects ( grid* g, block* b )	{
   assert(grid_block_in_bounds(g, b));
-  if (max(g->relief, g->width)<block_extreme(b, BOT))	{
-    return 0;
-  }
 
   // coord cr;
   int i;
