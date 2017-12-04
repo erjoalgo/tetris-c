@@ -121,7 +121,8 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
     g->row_fill_count[r] -= 1;
     int top = g->relief[c];
     if (top == r)	{
-      int new_top = grid_height_at_start_at(g, c, r-1);
+      int new_top = r-1;
+      for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
       g->relief[c] = new_top;
       g->gaps[c] -= (top-1-new_top);
     }
