@@ -54,11 +54,16 @@ inline int block_extreme ( block* b, direction d )	{
 };
 
 void block_move ( block* b, direction d, int amount )	{
-  int dim = (d == BOT || d == TOP)? 1 : 0;
-  if (d == LEFT ||  d == BOT)	{
-    amount*=-1;
+  switch(d){
+  case LEFT:
+    b->offset[0]-=amount;break;
+  case RIGHT:
+    b->offset[0]+=amount;break;
+  case BOT:
+    b->offset[1]-=amount;break;
+  case TOP:
+    b->offset[1]+=amount;break;
   }
-  b->offset[dim]+=amount;
 }
 
 void block_rotate ( block* b, int amount )	{
