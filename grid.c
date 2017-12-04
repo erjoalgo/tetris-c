@@ -84,6 +84,41 @@ inline void grid_remove_full_row ( grid* g, int r )	{
   g->full_rows_count--;
 }
 
+inline void grid_cell_add ( grid* g, int r, int c )	{
+  const int color = 1;
+  assert(!g->rows[r][c] ^ !color);
+  g->rows[r][c] = color;
+  {
+    g->row_fill_count[r] += 1;
+    if (g->row_fill_count[r] == g->width)	{
+      g->full_rows[g->full_rows_count++] = r;
+    }
+    assert(g->relief[c] != r);
+    int top = g->relief[c];
+    if (top<r)	{
+      g->relief[c] = r;
+    }
+  }
+}
+
+inline void grid_cell_remove ( grid* g, int r, int c )	{
+  const int color = 0;
+  assert(!g->rows[r][c] ^ !color);
+  g->rows[r][c] = color;
+  {
+    if (g->row_fill_count[r] == g->width)	{
+      // need to maintain g->full_rows and g->full_rows_count invariants
+      grid_remove_full_row(g, r);
+    }
+    g->row_fill_count[r] -= 1;
+    int top = g->relief[c];
+    if (top == r)	{
+      int new_top = grid_height_at_start_at(g, c, r-1);
+      g->relief[c] = new_top;
+    }
+  }
+}
+
 inline void grid_set_color ( grid* g, int r, int c, int color )	{
   assert(!g->rows[r][c] ^ !color);
   g->rows[r][c] = color;
