@@ -456,16 +456,20 @@ inline int grid_block_center_elevate (grid* g, block* b)	{
 
 int drop_amount ( grid* g, block* b )	{
   int min_amnt = INT_MAX;
+  int dc=b->offset[0];
+  int dr=b->offset[1];
+  int rot = b->rot;
   int crust_len = b->shape->crust_len[rot][BOT];
+  int** crust  = b->shape->crust[rot][BOT];
   int i;
   // coord cr;
   for ( i = 0; i < crust_len; i++ )	{
     // block_crust_get(b, BOT, i, &cr);
     // int c = cr[0];
     // int r = cr[1];
-    int* crust = b->shape->crust[b->rot][BOT][i];
-    int c = crust[0] + b->offset[0];
-    int r = crust[1] + b->offset[1];
+    int* crust_i = crust[i];
+    int c = crust_i[0] + dc;
+    int r = crust_i[1] + dr;
     int amnt = r-(g->relief[c]+1);
     if (amnt<min_amnt)	{
       min_amnt = amnt;
