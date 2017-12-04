@@ -35,7 +35,6 @@ void init_feat_names (  )	{
 double grid_eval ( grid* g, double* weights )	{
   double raws[FEAT_COUNT];
   feature_variance(g, raws);
-  feature_gaps(g, raws);
   double val = 0;
   int i;
   for ( i = 0; i < FEAT_COUNT; i++ )	{
@@ -156,18 +155,28 @@ void feature_variance ( grid* g, double* ordered_raws )	{
   avg/=width;
   int discont = -1, last_height = -1;
 
+  int gaps = 0;
+  int obs = 0;
+
   for ( i = 0; i < g->width; i++ )	{
     int height = g->relief[i];
     double diff = avg-height;
     var += diff*diff;
     discont += last_height != height;
     last_height = height;
+
+    int cgaps = g->gaps[i];
+    gaps+=cgaps;
+    obs += height-cgaps;
   }
   ordered_raws[FEATIDX_RELIEF_MAX] = max;
   ordered_raws[FEATIDX_RELIEF_AVG] = avg;
   ordered_raws[FEATIDX_RELIEF_VAR] = var;
   ordered_raws[FEATIDX_DISCONT] = discont;
-  // return var;
+
+  ordered_raws[FEATIDX_GAPS] = gaps;
+  ordered_raws[FEATIDX_OBS] = obs;
+  ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
 }
 
 void feature_gaps ( grid* g, double* ordered_raws )	{
