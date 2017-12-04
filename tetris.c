@@ -26,8 +26,8 @@ int main(int argc, char** argv)
       ui_play();
       // ai_play(3, 1);
     }else if (!strcmp(argv[1], "ai"))	{
-      int max_moves = 100;
-      int depth = 4;
+      int max_moves = 5000;
+      int depth = 3;
       int show_grid = 0;
       ai_run(max_moves, depth, show_grid);
     }else if (!strcmp(opt, "evolve"))	{
