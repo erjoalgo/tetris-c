@@ -33,6 +33,7 @@ void ncurses_grid_print ( grid* g )	{
 
 void ncurses_grid_print_fill_count ( grid* g )	{
   int row;
+  wattron(win, COLOR_PAIR(6));//border color
   for ( row = 0; row < g->height; row++ )	{
     continue;
     mvwaddch(win, g->height-1-row+EDGE, g->width+1+EDGE,
