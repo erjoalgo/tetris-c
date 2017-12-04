@@ -159,11 +159,27 @@ void grid_block_set_color ( grid* g, block* b, int color )	{
 }
 
 void grid_block_add ( grid* g, block* b )	{
-  grid_block_set_color(g, b, 1);
+  int i = 0;
+  int len = b->shape->len;
+  assert(len<=4);
+  for ( i = 0; i < len; i++ )	{
+    int* rot = b->shape->rot[b->rot][i];
+    int c = rot[0] + b->offset[0];
+    int r = rot[1] + b->offset[1];
+    grid_cell_add(g, r, c);
+  }
 }
 
 void grid_block_remove ( grid* g, block* b )	{
-  grid_block_set_color(g, b, 0);
+  int i = 0;
+  int len = b->shape->len;
+  assert(len<=4);
+  for ( i = 0; i < len; i++ )	{
+    int* rot = b->shape->rot[b->rot][i];
+    int c = rot[0] + b->offset[0];
+    int r = rot[1] + b->offset[1];
+    grid_cell_remove(g, r, c);
+  }
 }
 
 int cmp_rev (const void* a, const void* b  )	{
