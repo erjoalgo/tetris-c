@@ -65,11 +65,7 @@ inline int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // return the largest y s.t. g.grid[x][y]==1,
   // or -1 if no such y exists
   int y;
-  for ( y = start_at; y >= 0; y-- )	{
-    if (g->rows[y][x] != 0)	{
-      break;
-    }
-  }
+  for ( y = start_at; y >= 0 && !g->rows[y][x]; y-- );
   return y;
 }
 
