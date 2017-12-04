@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -W -Werror -Wextra -Ofast -DNDEBUG -fno-omit-frame-pointer
+CFLAGS=-Wall -W -Werror -Wextra -DNDEBUG -Ofast -g -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-omit-frame-pointer # -fverbose-asm -fpic
 DEPS=tetris.h tetri_ai.h
 OBJ=ai.o game.o grid.o block.o shape.o evolution.o tetris-ncurses.o tetris-play.o
 
@@ -20,7 +20,7 @@ libtetris.so: $(OBJ) evolution.o
 
 
 perf.data: FORCE tetris-prof
-	perf record -g ./tetris-prof ai
+	perf record --call-graph dwarf -g ./tetris-prof ai
 
 call.svg: perf.data
 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
