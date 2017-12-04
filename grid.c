@@ -413,12 +413,14 @@ int grid_block_in_bounds ( grid* g, block* b )	{
     block_extreme(b, TOP)<g->height;
 }
 
+__attribute__((optimize("unroll-loops")))
 int grid_block_intersects ( grid* g, block* b )	{
   assert(grid_block_in_bounds(g, b));
 
   // coord cr;
   int i;
-  for ( i = 0; i < b->shape->len; i++ )	{
+  int len = b->shape->len;
+  for ( i = 0; i < len; i++ )	{
     int* rot = b->shape->rot[b->rot][i];
     int c = rot[0] + b->offset[0];
     int r = rot[1] + b->offset[1];
@@ -454,9 +456,10 @@ inline int grid_block_center_elevate (grid* g, block* b)	{
 
 int drop_amount ( grid* g, block* b )	{
   int min_amnt = INT_MAX;
+  int crust_len = b->shape->crust_len[rot][BOT];
   int i;
   // coord cr;
-  for ( i = 0; i < b->shape->crust_len[b->rot][BOT]; i++ )	{
+  for ( i = 0; i < crust_len; i++ )	{
     // block_crust_get(b, BOT, i, &cr);
     // int c = cr[0];
     // int r = cr[1];
