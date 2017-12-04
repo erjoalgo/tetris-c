@@ -11,13 +11,6 @@
 
 #define MAX(a, b) ((a)>(b)? (a):(b))
 
-/*typedef struct {
-  double (*raw_value)(grid* g, double* ordered_raws);
-  double weight;
-} feature;
-
-typedef *feature heuristic;*/
-
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
@@ -42,13 +35,13 @@ double grid_eval ( grid* g, double* weights )	{
     val += raws[i]*weights[i];
   }
   /*
-  grid_print(g);
-  for ( i = 0; i < FEAT_COUNT; i++ )	{
+    grid_print(g);
+    for ( i = 0; i < FEAT_COUNT; i++ )	{
     printf( "%s\t\t%.2f\t%.2f\t%.2f\n", feat_names[i], raws[i], weights[i],
-	    raws[i]*weights[i] );
-  }
-  printf( "TOTAL   \t\t\t\t%.2f\n", val );
-  getchar();
+    raws[i]*weights[i] );
+    }
+    printf( "TOTAL   \t\t\t\t%.2f\n", val );
+    getchar();
   */
   return val;
 }
@@ -59,7 +52,7 @@ static game_move** best_moves;
 static int grids_count = 0;
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
-		       int depth_left, double* result_value, int relief_max );
+			      int depth_left, double* result_value, int relief_max );
 
 game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
 			      int depth_left, double* value, int relief_max )	{
@@ -84,42 +77,42 @@ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
   // if (!nocheck && grid_block_intersects(g, b))	goto a;
   for ( r = 0; r < max_rots; r++ )	{
     b->rot = r;
-      int c;
+    int c;
     int max_cols = g->width - s->rot_wh[r][0] +1;
     b->offset[1] = elevated;
     int top_elevated = block_extreme(b, TOP);
-      for ( c = 0; c < max_cols; c++ )	{
+    for ( c = 0; c < max_cols; c++ )	{
       b->offset[0] = c;
       b->offset[1] = elevated;
       if (!nocheck && grid_block_intersects(g, b))	{
-	  continue;
-	}
-	assert(grid_block_valid(g, b));
-      int amt = grid_block_drop(g, b);
-	grid_block_add(g, b);
-      int new_relief_mx = MAX(relief_max, top_elevated-amt);
-	double curr;
-	if (g->full_rows_count)	{
-	  g_rec = g_prime;
-	  // memcpy(g_rec, g, sizeof(grid));
-	  grid_cpy(g_rec, g);
-	  assert(grid_equal(g_rec, g));
-	  grid_clear_lines(g_rec);
-	}else 	{
-	  g_rec = g;
-	}
-	if (depth_left)	{
-	ai_best_move_rec(g_rec, stream, w, depth_left-1, &curr, new_relief_mx);
-	}else 	{
-	  curr = grid_eval(g_rec, w);
-	}
-	if (curr>best_score)	{
-	  best_score = curr;
-	  best_move->rot = r;
-	  best_move->col = c;
-	}
-	grid_block_remove(g, b);
+	continue;
       }
+      assert(grid_block_valid(g, b));
+      int amt = grid_block_drop(g, b);
+      grid_block_add(g, b);
+      int new_relief_mx = MAX(relief_max, top_elevated-amt);
+      double curr;
+      if (g->full_rows_count)	{
+	g_rec = g_prime;
+	// memcpy(g_rec, g, sizeof(grid));
+	grid_cpy(g_rec, g);
+	assert(grid_equal(g_rec, g));
+	grid_clear_lines(g_rec);
+      }else 	{
+	g_rec = g;
+      }
+      if (depth_left)	{
+	ai_best_move_rec(g_rec, stream, w, depth_left-1, &curr, new_relief_mx);
+      }else 	{
+	curr = grid_eval(g_rec, w);
+      }
+      if (curr>best_score)	{
+	best_score = curr;
+	best_move->rot = r;
+	best_move->col = c;
+      }
+      grid_block_remove(g, b);
+    }
   }
   *value = best_score;
   return best_move;
@@ -201,8 +194,6 @@ void test_feature (  )	{
   assert(raws[FEATIDX_GAPS] == 2);
   assert(raws[FEATIDX_OBS] == 0);
   grid_set_color(g, 4, 0, 1);
-  assert(raws[FEATIDX_GAPS] == 3);
-  assert(raws[FEATIDX_OBS] == 1);
 }
 
 void ai_init (  )	{
