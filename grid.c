@@ -10,6 +10,7 @@ grid* grid_new ( int height, int width )	{
   g->width = width;
   g->rows = malloc(height*sizeof(*g->rows));
   g->relief = malloc(width*sizeof(*g->relief));
+  g->gaps = malloc(width*sizeof(*g->gaps));
   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
@@ -28,6 +29,7 @@ void grid_reset ( grid* g )	{
   int c;
   for ( c = 0; c < g->width; c++ )	{
     g->relief[c] = -1;
+    g->gaps[c] = 0;
   }
   memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
   g->total_cleared_count = 0;
@@ -52,6 +54,8 @@ void grid_cpy ( grid* dest, grid* src )	{
 	 src->height*sizeof(*src->row_fill_count));
   memcpy(dest->relief, src->relief,
 	   src->width*sizeof(*src->relief));
+  memcpy(dest->gaps, src->gaps,
+	   src->width*sizeof(*src->gaps));
 }
 
 
@@ -97,6 +101,9 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     int top = g->relief[c];
     if (top<r)	{
       g->relief[c] = r;
+      g->gaps[c] += r-1-top;
+    }else 	{
+      g->gaps[c] --;
     }
   }
 }
@@ -115,6 +122,7 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
     if (top == r)	{
       int new_top = grid_height_at_start_at(g, c, r-1);
       g->relief[c] = new_top;
+      g->gaps[c] -= (top-1-new_top);
     }
   }
 }
@@ -124,8 +132,11 @@ inline void grid_set_color ( grid* g, int r, int c, int color )	{
   g->rows[r][c] = color;
   if (color == 0)	{
     g->row_fill_count[r] -= 1;
-    if (g->relief[c] == r)	{
-      g->relief[c] = grid_height_at_start_at(g, c, r-1);
+    int top = g->relief[c];
+    if (top == r)	{
+      int new_top = grid_height_at_start_at(g, c, r-1);
+      g->relief[c] = new_top;
+      g->gaps[c] -= (top-1-new_top);
     }
     if (g->row_fill_count[r] == g->width-1)	{
       // need to maintain g->full_rows and g->full_rows_count invariants
@@ -137,8 +148,10 @@ inline void grid_set_color ( grid* g, int r, int c, int color )	{
       g->full_rows[g->full_rows_count++] = r;
     }
     assert(g->relief[c] != r);
-    if (g->relief[c]<r)	{
+    int top = g->relief[c];
+    if (top<r)	{
       g->relief[c] = r;
+      g->gaps[c] += r-1-top;
     }
   }
 }
@@ -307,8 +320,17 @@ int grid_clear_lines ( grid* g )	{
   // now we need to update relief
   int i;
   for ( i = 0; i < g->width; i++ )	{
-    g->relief[i] = grid_height_at_start_at(g, i, g->relief[i]);
-
+    int new_top = grid_height_at_start_at(g, i, g->relief[i]);
+    g->relief[i] = new_top;
+    int gaps = 0;
+    int ii;
+    for ( ii = new_top-1; ii >=0; ii--){
+      // gaps += !g->rows[i][ii];
+      if (!(g->rows[ii][i]))	{
+	gaps++;
+      }
+    }
+    g->gaps[i] = gaps;
   }
   // we should be done.
   // should assert consistency
@@ -319,6 +341,14 @@ int grid_assert_consistency ( grid* g )	{
   int i;
   for ( i = 0; i < g->width; i++ )	{
     assert(g->relief[i] == grid_height_at(g, i));
+    int gaps = 0;
+    int ii;
+    for ( ii = g->relief[i]-1; ii >= 0; ii-- )	{
+      if (!g->rows[ii][i])	{
+	gaps++;
+      }
+    }
+    assert(gaps == g->gaps[i]);
   }
   int r;
   for ( r = 0; r < g->height; r++ )	{

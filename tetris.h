@@ -59,6 +59,7 @@ typedef struct {
 
   int total_cleared_count;
   int last_cleared_count;
+  int* gaps;
 } grid;
 grid* grid_new(int height, int width);
 void grid_reset ( grid* g );
