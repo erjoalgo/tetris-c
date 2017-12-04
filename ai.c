@@ -177,40 +177,9 @@ void feature_variance ( grid* g, double* ordered_raws )	{
   ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
 }
 
-void feature_gaps ( grid* g, double* ordered_raws )	{
-  int gaps = 0, obs = 0;
-  int c;
-  for ( c = 0; c < g->width; c++ )	{
-    int r;
-    // this is not row-major
-    int top = g->relief[c];
-    if (top<=0) continue;
-    int rgaps = 0;
-    for ( r = top-1; r >= 0; r-- )	{
-      if (!g->rows[r][c])	{
-	rgaps++;
-	// penalize higher gaps more heavily
-	// this encourages to fix gaps near the top first
-      }
-    }
-    gaps+= rgaps;
-    obs += (top-rgaps);
-  }
-  ordered_raws[FEATIDX_GAPS] = gaps;
-  // ordered_raws[FEATIDX_GAPS_EXP] = gaps_exp;
-  // ordered_raws[FEATIDX_GAPS_EXP] = 0;
-  ordered_raws[FEATIDX_OBS] = obs;
-  // ordered_raws[FEATIDX_OBS_EXP] = obs_exp;
-  // ordered_raws[FEATIDX_OBS_EXP] = 0;
-  ordered_raws[FEATIDX_ROWS_FULL_CTR] = g->full_rows_count;
-  // ordered_raws[FEATIDX_CLEARED_COUNT] = ;
-}
-
 void test_feature (  )	{
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   grid_set_color(g, 2, 0, 1);
-  double raws[FEAT_COUNT];
-  feature_gaps(g, raws);
   assert(raws[FEATIDX_GAPS] == 2);
   assert(raws[FEATIDX_OBS] == 0);
   grid_set_color(g, 4, 0, 1);
