@@ -511,10 +511,10 @@ int drop_amount ( grid* g, block* b )	{
 
 int grid_block_drop ( grid* g, block* b )	{
   //this assertion not valid when painting shadow from the UI
-  assert(grid_block_valid(g, b));
+  // assert(grid_block_valid(g, b));
   int amount = drop_amount(g, b);
   block_move(b, BOT, amount);
-  assert(grid_block_valid(g, b));
+  // assert(grid_block_valid(g, b));
   return amount;
 }
 
