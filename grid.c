@@ -170,41 +170,75 @@ void grid_block_set_color ( grid* g, block* b, int color )	{
 }
 
 void grid_block_add ( grid* g, block* b )	{
-  int i = 0;
-  // int len = b->shape->len;
-  const int len = 4;
-  assert(len<=4);
-  for ( i = 0; i < len; i++ )	{
-    int* rot = b->shape->rot[b->rot][i];
-    int c = rot[0] + b->offset[0];
-    int r = rot[1] + b->offset[1];
-    grid_cell_add(g, r, c);
-  }
-}
-
-void grid_block_remove ( grid* g, block* b )	{
-  int len = b->shape->len;
-  (void)len;
-  assert(len<=4);
-  assert(len==4);
+  assert(b->shape->len==4);
 
   int dc = b->offset[0];
   int dr = b->offset[1];
 
-  int** rots = b->shape->rot[b->rot];
-  int* rot;
+  int* rot = (int*)(b->shape->rot_flat[b->rot]);
 
-  rot = rots[0];
-  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+  /*int i;
+    gcc doesn't unroll this
+    for ( i = 0; i < 2*4; i+=2 )	{
+    int c = rot[i] +dc;
+    int r = rot[i+1] +dr;
+    grid_cell_add(g, r, c);
+  }*/
+  int r, c;
+  c = *rot++; r = *rot++;
+  grid_cell_add(g, r+dr, c+dc);
 
-  rot = rots[1];
-  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+  c = *rot++; r = *rot++;
+  grid_cell_add(g, r+dr, c+dc);
 
-  rot = rots[2];
-  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+  c = *rot++; r = *rot++;
+  grid_cell_add(g, r+dr, c+dc);
 
-  rot = rots[3];
-  grid_cell_remove(g, rot[1] + dr, rot[0] + dc);
+  c = *rot++; r = *rot++;
+  grid_cell_add(g, r+dr, c+dc);
+}
+
+void grid_block_remove ( grid* g, block* b )	{
+  assert(b->shape->len==4);
+
+  int dc = b->offset[0];
+  int dr = b->offset[1];
+  /*
+    int i;
+  for ( i = 0; i < 4; i++ )	{
+    int r = b->shape->rot_flat[rot][i][1] + dr;
+    int c = b->shape->rot_flat[rot][i][0] + dc;
+    grid_cell_remove(g, r, c);
+  }*/
+
+  // int rot = ;
+  // int** rots = b->shape->rot_flat[rot];
+  // int i = 0;
+  // rots[0][1]
+
+  int* rot = (int*)(b->shape->rot_flat[b->rot]);
+  int r, c;
+  /*
+  int i;
+  for ( i = 0; i < 4; i++ )	{
+    // c = *roti++; r = *roti++;
+    c = roti[0]; r = roti[1];
+    grid_cell_remove(g,  r + dr, c + dc);
+    // roti++;
+    // roti++;
+    roti+=2;
+  }*/
+  c = *rot++; r = *rot++;
+  grid_cell_remove(g, r+dr, c+dc);
+
+  c = *rot++; r = *rot++;
+  grid_cell_remove(g, r+dr, c+dc);
+
+  c = *rot++; r = *rot++;
+  grid_cell_remove(g, r+dr, c+dc);
+
+  c = *rot++; r = *rot++;
+  grid_cell_remove(g, r+dr, c+dc);
 }
 
 int cmp_rev (const void* a, const void* b  )	{
