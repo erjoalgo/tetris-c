@@ -145,6 +145,22 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
       }
     }
   }
+  {
+    int r, i, dim, dir;
+    // initialize the flat, more efficient versions
+    for ( r = 0; r < s->rot_count; r++ )	{
+      for ( dim = 0; dim < 2; dim++ )	{
+	for ( i = 0; i < s->len; i++ )	{
+	  s->rot_flat[r][i][dim] = s->rot[r][i][dim];
+	}
+	for ( dir = 0; dir < 4; dir++ )	{
+	  for ( i = 0; i < s->crust_len[r][dir]; i++ )	{
+	    s->crust_flat[dir][r][i][dim] = s->crust[dir][r][i][dim];
+	  }
+	}
+      }
+    }
+  }
   return s;
 }
 

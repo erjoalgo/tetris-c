@@ -2,15 +2,21 @@ typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 
 typedef int coord[2];//TODO do away with this?
 
+// below is the max len of any blocks read at runtime
+// TODO err if a shape has too many blocks
+#define MAX_BLOCK_LEN 4
 typedef struct {
   int rot_count;
   int rot_wh[4][2];
   int** crust[4][4];
   int crust_len[4][4];
+  int crust_flat[4][4][MAX_BLOCK_LEN][2];//direction, rotation, blocki, rc
   int len;
   int max_dim_len;
   int** rot[4];
+  int rot_flat[4][MAX_BLOCK_LEN][2];//rotation, blocki, rc
 } shape;
+
 void shape_print(shape* s, int quiet);
 shape** shapes_read(char* file, int* shape_count);
 void shape_test();
