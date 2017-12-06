@@ -195,7 +195,8 @@ void test_feature (  )	{
 }
 
 void ai_init (  )	{
-  double w[FEAT_COUNT] = { -0.21, -1.42, -0.20, -0.83, -0.19, 0.00 };
+  double w[FEAT_COUNT] =    { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
+
   default_weights = malloc(sizeof(w));
   memcpy(default_weights, w, sizeof(w));
   init_feat_names();
