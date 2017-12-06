@@ -55,7 +55,7 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
   // first rotation: normalize to (0, 0)
   for ( i = 0; i < shape_len; i++ )	{
     s->rot[0][i] = malloc(2*sizeof(*s->rot[0][i]));
-    s->rot[0][i][0] = shape_rot[i][0] - extreme_left;;
+    s->rot[0][i][0] = shape_rot[i][0] - extreme_left;
     s->rot[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
   s->max_dim_len = max_ab(max_dim(s->rot[0], shape_len, 0),
