@@ -146,6 +146,11 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
     }
   }
   {
+    if (s->len>MAX_BLOCK_LEN)	{
+      printf( "shape len %d is greater than than MAX_BLOCK_LEN of %d\n",
+	      s->len, MAX_BLOCK_LEN );
+      return NULL;
+    }
     int r, i, dim, dir;
     // initialize the flat, more efficient versions
     for ( r = 0; r < s->rot_count; r++ )	{

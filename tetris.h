@@ -3,7 +3,7 @@ typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 typedef int coord[2];//TODO do away with this?
 
 // below is the max len of any blocks read at runtime
-// TODO err if a shape has too many blocks
+// shape should err when shape len is larger
 #define MAX_BLOCK_LEN 4
 typedef struct {
   int rot_count;
