@@ -470,16 +470,19 @@ int drop_amount ( grid* g, block* b )	{
   int dr=b->offset[1];
   int rot = b->rot;
   int crust_len = b->shape->crust_len[rot][BOT];
-  int** crust  = b->shape->crust[rot][BOT];
+  int* crust = (int*)(b->shape->crust_flat[rot][BOT]);
   int i;
-  // coord cr;
   for ( i = 0; i < crust_len; i++ )	{
-    // block_crust_get(b, BOT, i, &cr);
-    // int c = cr[0];
-    // int r = cr[1];
-    int* crust_i = crust[i];
-    int c = crust_i[0] + dc;
-    int r = crust_i[1] + dr;
+    // int c =  b->shape->crust_flat[rot][BOT][i][0] + dc;
+    // int r =  b->shape->crust_flat[rot][BOT][i][1] + dr;
+    int c =  *crust++ + dc;
+    int r =  *crust++ + dr;
+
+    assert(b->shape->crust_flat[rot][BOT][i][1] ==
+	   b->shape->crust[rot][BOT][i][1]);
+
+    assert(b->shape->crust_flat[rot][BOT][i][0] ==
+	   b->shape->crust[rot][BOT][i][0]);
     int amnt = r-(g->relief[c]+1);
     if (amnt<min_amnt)	{
       min_amnt = amnt;
