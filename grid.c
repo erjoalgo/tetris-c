@@ -8,6 +8,7 @@
 #define GRID_WIDTH 10 // fix grid width at compile time
 // #define G_WIDTH(g) ((g)->width)
 #define G_WIDTH(g) GRID_WIDTH
+int grid_assert_consistency ( grid* g );
 
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
@@ -130,12 +131,14 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
       g->stacks[c][idx] = r;
       g->stack_cnt[c]++;
     }
+    assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
   }
 }
 
 inline void grid_cell_remove ( grid* g, int r, int c )	{
   const int color = 0;
   assert(!g->rows[r][c] ^ !color);
+  assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
   g->rows[r][c] = color;
   {
     if (g->row_fill_count[r] == G_WIDTH(g))	{
@@ -410,6 +413,7 @@ int grid_clear_lines ( grid* g )	{
   }
   // we should be done.
   // should assert consistency
+  assert(grid_assert_consistency(g));
   return g->last_cleared_count;
 }
 
