@@ -7,10 +7,8 @@
 #include "tetris_ai.h"
 
 
-void fatal(char* msg){
-  printf("FATAL: %s", msg);
-  exit(1);
-}
+
+#define FATAL(fmt, ...) { fprintf(stderr, fmt, ##__VA_ARGS__); exit(1); }
 
 int main(int argc, char** argv)
 {
@@ -19,7 +17,7 @@ int main(int argc, char** argv)
   printf( "seed %d \n", seed );
   srand(seed);
   if (argc<2)	{
-    fatal("must provide subcommand");
+    FATAL("must provide subcommand");
   }else 	{
     char* opt = argv[1];
     if (!strcmp(argv[1], "play"))	{
