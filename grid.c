@@ -259,16 +259,16 @@ void grid_block_remove ( grid* g, block* b )	{
     // roti++;
     roti+=2;
   }*/
-  c = *rot++; r = *rot++;
+  c = rot[6]; r = rot[7];
   grid_cell_remove(g, r+dr, c+dc);
 
-  c = *rot++; r = *rot++;
+  c = rot[4]; r = rot[5];
   grid_cell_remove(g, r+dr, c+dc);
 
-  c = *rot++; r = *rot++;
+  c = rot[2]; r = rot[3];
   grid_cell_remove(g, r+dr, c+dc);
 
-  c = *rot++; r = *rot++;
+  c = rot[0]; r = rot[1];
   grid_cell_remove(g, r+dr, c+dc);
 }
 

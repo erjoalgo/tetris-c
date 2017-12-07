@@ -7,7 +7,7 @@ int cmp_coord (const void* a, const void* b  )	{
   int* A = *((int**)a);
   int* B = *((int**)b);
   if (A[1] != B[1])	{
-    return (B[1]-A[1]);
+    return -(B[1]-A[1]);
   }else	{
     return A[0]-B[0];
   }
