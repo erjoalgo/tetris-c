@@ -5,10 +5,15 @@
 #include "tetris.h"
 #include "limits.h"
 
+#define GRID_WIDTH 10 // fix grid width at compile time
+// #define G_WIDTH(g) ((g)->width)
+#define G_WIDTH(g) GRID_WIDTH
+
 grid* grid_new ( int height, int width )	{
   grid* g = malloc(sizeof(grid));
   g->height = height;
   g->width = width;
+  assert(width == GRID_WIDTH);
   g->rows = malloc(height*sizeof(*g->rows));
   g->relief = malloc(width*sizeof(*g->relief));
   g->gaps = malloc(width*sizeof(*g->gaps));
@@ -16,7 +21,7 @@ grid* grid_new ( int height, int width )	{
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
   for ( r = 0; r < g->height; r++ )	{
-    g->rows[r] = malloc(g->width*sizeof(*g->rows));
+    g->rows[r] = malloc(G_WIDTH(g)*sizeof(*g->rows));
   }
   grid_reset(g);
   return g;
@@ -25,10 +30,10 @@ grid* grid_new ( int height, int width )	{
 void grid_reset ( grid* g )	{
   int r;
   for ( r = 0; r < g->height; r++ )	{
-    memset(g->rows[r], 0, g->width*sizeof(*g->rows[r]));
+    memset(g->rows[r], 0, G_WIDTH(g)*sizeof(*g->rows[r]));
   }
   int c;
-  for ( c = 0; c < g->width; c++ )	{
+  for ( c = 0; c < G_WIDTH(g); c++ )	{
     g->relief[c] = -1;
     g->gaps[c] = 0;
   }
@@ -91,7 +96,7 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
   g->rows[r][c] = color;
   {
     g->row_fill_count[r] += 1;
-    if (g->row_fill_count[r] == g->width)	{
+    if (g->row_fill_count[r] == G_WIDTH(g))	{
       g->full_rows[g->full_rows_count++] = r;
     }
     assert(g->relief[c] != r);
@@ -110,7 +115,7 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
   assert(!g->rows[r][c] ^ !color);
   g->rows[r][c] = color;
   {
-    if (g->row_fill_count[r] == g->width)	{
+    if (g->row_fill_count[r] == G_WIDTH(g))	{
       // need to maintain g->full_rows and g->full_rows_count invariants
       grid_remove_full_row(g, r);
     }
@@ -139,13 +144,13 @@ inline void grid_set_color ( grid* g, int r, int c, int color )	{
       g->relief[c] = new_top;
       g->gaps[c] -= (top-1-new_top);
     }
-    if (g->row_fill_count[r] == g->width-1)	{
+    if (g->row_fill_count[r] == G_WIDTH(g)-1)	{
       // need to maintain g->full_rows and g->full_rows_count invariants
       grid_remove_full_row(g, r);
     }
   }else 	{
     g->row_fill_count[r] += 1;
-    if (g->row_fill_count[r] == g->width)	{
+    if (g->row_fill_count[r] == G_WIDTH(g))	{
       g->full_rows[g->full_rows_count++] = r;
     }
     assert(g->relief[c] != r);
@@ -299,10 +304,10 @@ int grid_clear_lines ( grid* g )	{
   // smallest full row
   int y = g->full_rows[g->full_rows_count-1];
   // largest occupied (full or non-full) row.
-  int ymax = max (g->relief, g->width);
+  int ymax = max (g->relief, G_WIDTH(g));
   assert(ymax<g->height);
   assert(grid_assert_consistency(g));
-  assert(g->row_fill_count[y] == g->width);
+  assert(g->row_fill_count[y] == G_WIDTH(g));
   assert(g->full_rows[g->full_rows_count-1] == y);
 
   int next_non_full = y+1;
@@ -313,7 +318,7 @@ int grid_clear_lines ( grid* g )	{
 
     // find the next non-full
     assert(next_non_full<g->height);
-    while (g->row_fill_count[next_non_full] == g->width)	{
+    while (g->row_fill_count[next_non_full] == G_WIDTH(g))	{
       next_non_full++;
       // it should be (almost) impossible for the highest row to get full
       // however, it is still possible,eg if new shape exactly fits into top row
@@ -328,9 +333,9 @@ int grid_clear_lines ( grid* g )	{
       break;
     }
     // invariant: next_non_full should be not full
-    assert(g->row_fill_count[next_non_full] != g->width);
+    assert(g->row_fill_count[next_non_full] != G_WIDTH(g));
 
-    if (g->row_fill_count[y]==g->width) {
+    if (g->row_fill_count[y]==G_WIDTH(g)) {
       // in this case, save row y for the end
       assert(g->full_rows[g->full_rows_count-1] == y);
       g->full_rows_count--;
@@ -362,13 +367,13 @@ int grid_clear_lines ( grid* g )	{
       g->rows[g->full_rows[--g->full_rows_count]]:
       cleared[--cleared_count];
     g->row_fill_count[y] = 0;
-    memset(g->rows[y], 0, g->width*sizeof(*g->rows[y]));
+    memset(g->rows[y], 0, G_WIDTH(g)*sizeof(*g->rows[y]));
     y++;
   }
   assert(g->full_rows_count == 0);
   // now we need to update relief
   int i;
-  for ( i = 0; i < g->width; i++ )	{
+  for ( i = 0; i < G_WIDTH(g); i++ )	{
     int new_top = grid_height_at_start_at(g, i, g->relief[i]);
     g->relief[i] = new_top;
     int gaps = 0;
@@ -388,7 +393,7 @@ int grid_clear_lines ( grid* g )	{
 
 int grid_assert_consistency ( grid* g )	{
   int i;
-  for ( i = 0; i < g->width; i++ )	{
+  for ( i = 0; i < G_WIDTH(g); i++ )	{
     assert(g->relief[i] == grid_height_at(g, i));
     int gaps = 0;
     int ii;
@@ -403,7 +408,7 @@ int grid_assert_consistency ( grid* g )	{
   for ( r = 0; r < g->height; r++ )	{
     int count = 0;
     int c;
-    for ( c = 0; c < g->width; c++ )	{
+    for ( c = 0; c < G_WIDTH(g); c++ )	{
       count += g->rows[r][c]?1:0;
     }
     assert(g->row_fill_count[r] == count);
@@ -411,7 +416,7 @@ int grid_assert_consistency ( grid* g )	{
   for ( i = 0; i < g->full_rows_count; i++ )	{
     int y = g->full_rows[i];
     (void)y;
-    assert(g->row_fill_count[y] == g->width);
+    assert(g->row_fill_count[y] == G_WIDTH(g));
   }
 
   int* sorted_rows[g->height];
@@ -425,14 +430,14 @@ int grid_assert_consistency ( grid* g )	{
   memset(checked, 0, sizeof(checked));
   for ( i = 0; i < g->full_rows_count; i++ )	{
     r = g->full_rows[i];
-    assert(g->row_fill_count[r] == g->width);
+    assert(g->row_fill_count[r] == G_WIDTH(g));
     assert(checked[r] == 0);
     checked[r] = 1;
   }
 
   for ( i = 0; i < g->height; i++ )	{
     if (!checked[i])	{
-      assert(g->row_fill_count[i] != g->width);
+      assert(g->row_fill_count[i] != G_WIDTH(g));
     }
   }
   return 1;
@@ -455,7 +460,7 @@ int grid_equal(grid* a, grid* b){
 
 int grid_block_in_bounds ( grid* g, block* b )	{
   return block_extreme(b, LEFT)>=0 &&
-    block_extreme(b, RIGHT)<g->width &&
+    block_extreme(b, RIGHT)<G_WIDTH(g) &&
     block_extreme(b, BOT)>=0 &&
     block_extreme(b, TOP)<g->height;
 }
@@ -497,7 +502,7 @@ inline int grid_block_elevate ( grid* g, block* b )	{
 
 inline int grid_block_center_elevate (grid* g, block* b)	{
   // return whether block was successfully centered
-  b->offset[0] = (g->width - b->shape->rot_wh[b->rot][0])/2;
+  b->offset[0] = (G_WIDTH(g) - b->shape->rot_wh[b->rot][0])/2;
   return grid_block_elevate(g, b);
 }
 
@@ -558,17 +563,17 @@ int grid_block_drop ( grid* g, block* b )	{
 void grid_print ( grid* g )	{
   printf( "\n" );
   int row, col;
-  char row_s[g->width+2];
-  row_s[g->width] = '|';
-  row_s[g->width+1] = 0;
+  char row_s[G_WIDTH(g)+2];
+  row_s[G_WIDTH(g)] = '|';
+  row_s[G_WIDTH(g)+1] = 0;
   for ( row = g->height-1; row >= 0; row-- )	{
-    for ( col = 0; col < g->width; col++ )	{
+    for ( col = 0; col < G_WIDTH(g); col++ )	{
       row_s[col] = g->rows[row][col]? '*' : ' ';
     }
     printf("%s\n", row_s);
   }
-  memset(row_s, 'T', g->width*sizeof(char));
-  row_s[g->width] = ' ';
+  memset(row_s, 'T', G_WIDTH(g)*sizeof(char));
+  row_s[G_WIDTH(g)] = ' ';
   printf("%s\n", row_s);
 }
 
@@ -616,9 +621,9 @@ void print_arr ( int* arr, int len )	{
 void print_relief ( grid* g )	{
   int i;
   printf( "relief:   " );
-  print_arr(g->relief, g->width);
+  print_arr(g->relief, G_WIDTH(g));
   printf( "heigh at: " );
-  for ( i = 0; i < g->width; i++ )	{
+  for ( i = 0; i < G_WIDTH(g); i++ )	{
     printf( "%d ", grid_height_at(g, i) );
   }
   printf( "\n" );
@@ -632,12 +637,13 @@ void grid_block_move_safe ( grid* g, block* b, int direction, int amount )	{
 }
 
 void grid_block_move_safe_to ( grid* g, block* b, int c )	{
+  (void)g;
   b->offset[0] = c;
   assert(c>=0);
   if (c<0)	{
     b->offset[0] = 0;
   }else 	{
-    int over = block_extreme(b, RIGHT)-(g->width-1);
+    int over = block_extreme(b, RIGHT)-(G_WIDTH(g)-1);
     if (over>0)	{
       b->offset[0] -= over;
     }
