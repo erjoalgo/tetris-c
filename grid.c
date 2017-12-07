@@ -122,6 +122,7 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
       g->stacks[c][g->stack_cnt[c]++] = r;
     }else 	{
       g->gaps[c] --;
+      printf( "warning: adding under the relief!\n" );
       assert(r != top);
       assert(g->stacks[c][g->stack_cnt[c]-1] == top);
       int idx = g->stack_cnt[c]-1;//insert idx
@@ -163,6 +164,7 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       assert(r<top);
       g->gaps[c]++;
 
+      printf( "warning: removing under the relief!\n" );
       int idx = g->stack_cnt[c]-1; //insert idx
       for ( ; g->stacks[c][idx]!=r; idx-- );
       assert(g->stacks[c][idx]);
