@@ -21,7 +21,7 @@ libtetris.so: $(OBJ) evolution.o
 
 
 perf.data: FORCE tetris-prof
-	perf record --call-graph dwarf -g ./tetris-prof ai
+	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
 
 call.svg: perf.data
 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
