@@ -121,6 +121,9 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
       g->relief[c] = new_top;
       g->gaps[c] -= (top-1-new_top);
+    }else 	{
+      assert(r<top);
+      g->gaps[c]++;
     }
   }
 }
