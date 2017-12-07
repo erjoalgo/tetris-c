@@ -6,6 +6,7 @@
 #include "tetris.h"
 #include "tetris_ai.h"
 
+#include <unistd.h>
 
 
 #define FATAL(fmt, ...) { fprintf(stderr, fmt, ##__VA_ARGS__); exit(1); }
@@ -14,30 +15,54 @@ int main(int argc, char** argv)
 {
   SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
   int seed = time(NULL);
+
+  int depth = 3;
+  int max_moves = 5000;
+  int show_grid = 0;
+
+  int c;
+  while ((c = getopt (argc, argv, "d:m:hvs:")) != -1)
+    switch (c)
+      {
+      case 'd':
+	depth = atoi(optarg);
+        break;
+      case 'm':
+	max_moves = atoi(optarg);
+        break;
+      case 'v':
+	show_grid = 1;
+        break;
+      case 'h':
+	printf ("usage: tetris play|ai|evolve|test\n");
+	exit(0);
+        break;
+      case '?':
+	FATAL("unknown flag %c", optopt);
+      default:
+	assert(0);
+      }
+
+  if (optind>=argc)	{
+    FATAL("must provide command");
+  }
+  char* cmd = argv[optind];
+
   printf( "seed %d \n", seed );
   srand(seed);
-  if (argc<2)	{
-    FATAL("must provide subcommand");
+
+  if (!strcmp(cmd, "play"))	{
+    ui_play();
+  }else if (!strcmp(cmd, "ai"))	{
+    ai_run(max_moves, depth, show_grid);
+  }else if (!strcmp(cmd, "evolve"))	{
+    evolution_test();
+  }else if (!strcmp(cmd, "test"))	{
+    shape_test();
+    grid_test();
+    shape_stream_test();
   }else 	{
-    char* opt = argv[1];
-    if (!strcmp(argv[1], "play"))	{
-      ui_play();
-      // ai_play(3, 1);
-    }else if (!strcmp(argv[1], "ai"))	{
-      int max_moves = 5000;
-      int depth = 3;
-      int show_grid = 0;
-      ai_run(max_moves, depth, show_grid);
-    }else if (!strcmp(opt, "evolve"))	{
-      evolution_test();
-    }else if (!strcmp(opt, "test"))	{
-      shape_test();
-      grid_test();
-      shape_stream_test();
-    }else 	{
-      printf( "unknown option: %s\n", opt );
-      return 1;
-    }
+    FATAL("unknown command: %s\n", cmd );
   }
   return 0;
 }
