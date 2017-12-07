@@ -19,9 +19,7 @@ void init_feat_names (  )	{
   feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
   feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
   feat_names[FEATIDX_GAPS] = "GAPS     ";
-  // feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
   feat_names[FEATIDX_OBS] = "OBS     ";
-  // feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
   feat_names[FEATIDX_DISCONT] = "DISCONT";
 }
 
