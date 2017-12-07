@@ -13,7 +13,7 @@
 
 int main(int argc, char** argv)
 {
-  SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
+  char* shapes_file = "shapes.in";
   int seed = time(NULL);
 
   int depth = 3;
@@ -29,6 +29,9 @@ int main(int argc, char** argv)
         break;
       case 'm':
 	max_moves = atoi(optarg);
+        break;
+      case 's':
+	shapes_file = optarg;
         break;
       case 'v':
 	show_grid = 1;
@@ -47,6 +50,10 @@ int main(int argc, char** argv)
     FATAL("must provide command");
   }
   char* cmd = argv[optind];
+
+  if (!(SHAPES = shapes_read(shapes_file, &SHAPE_COUNT)))	{
+    FATAL("unable to open %s", shapes_file);
+  }
 
   printf( "seed %d \n", seed );
   srand(seed);
