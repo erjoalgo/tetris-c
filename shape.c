@@ -6,12 +6,10 @@
 int cmp_coord (const void* a, const void* b  )	{
   int* A = *((int**)a);
   int* B = *((int**)b);
-  int suma = A[0]+A[1];
-  int sumb = B[0]+B[1];
-  if ( suma != sumb)	{
-    return sumb-suma;
+  if (A[1] != B[1])	{
+    return (B[1]-A[1]);
   }else	{
-    return B[0]-A[0];
+    return A[0]-B[0];
   }
 }
 
@@ -143,6 +141,7 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
 	  ii++;
 	}
       }
+      qsort(s->crust[roti][d], crust_len, sizeof(int)*2, cmp_coord);
     }
   }
   {
