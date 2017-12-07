@@ -21,7 +21,7 @@ int main(int argc, char** argv)
   int show_grid = 0;
 
   int c;
-  while ((c = getopt (argc, argv, "d:m:hvs:")) != -1)
+  while ((c = getopt (argc, argv, "d:m:hvs:S:")) != -1)
     switch (c)
       {
       case 'd':
@@ -31,6 +31,9 @@ int main(int argc, char** argv)
 	max_moves = atoi(optarg);
         break;
       case 's':
+	seed = atoi(optarg);
+        break;
+      case 'S':
 	shapes_file = optarg;
         break;
       case 'v':
