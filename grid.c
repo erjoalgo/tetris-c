@@ -118,8 +118,17 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     if (top<r)	{
       g->relief[c] = r;
       g->gaps[c] += r-1-top;
+      g->stacks[c][g->stack_cnt[c]++] = r;
     }else 	{
       g->gaps[c] --;
+      assert(r != top);
+      assert(g->stacks[c][g->stack_cnt[c]-1] == top);
+      int idx = g->stack_cnt[c]-1;//insert idx
+      for ( ; idx > 0 && g->stacks[c][idx-1]>r; idx-- );
+      memmove(g->stacks[c]+idx+1, g->stacks[c]+idx,
+	      (g->stack_cnt[c]-idx)*sizeof(*g->stacks[c]));
+      g->stacks[c][idx] = r;
+      g->stack_cnt[c]++;
     }
   }
 }
@@ -164,7 +173,6 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
 
 inline void grid_set_color ( grid* g, int r, int c, int color )	{
   assert(!g->rows[r][c] ^ !color);
-  g->rows[r][c] = color;
   if (color == 0)	{
     grid_cell_add(g, r, c);
   }else 	{
