@@ -15,13 +15,20 @@ grid* grid_new ( int height, int width )	{
   g->width = width;
   assert(width == GRID_WIDTH);
   g->rows = malloc(height*sizeof(*g->rows));
+  g->stacks = malloc(width*sizeof(*g->stacks));
   g->relief = malloc(width*sizeof(*g->relief));
   g->gaps = malloc(width*sizeof(*g->gaps));
+  g->stack_cnt = malloc(width*sizeof(*g->stack_cnt));
   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
   for ( r = 0; r < g->height; r++ )	{
     g->rows[r] = malloc(G_WIDTH(g)*sizeof(*g->rows));
+  }
+  int c;
+  for ( c = 0; c < G_WIDTH(g); c++ )	{
+    //alloc a single chunk?
+    g->stacks[c] = malloc(g->height*sizeof(*g->stacks));
   }
   grid_reset(g);
   return g;
@@ -36,6 +43,7 @@ void grid_reset ( grid* g )	{
   for ( c = 0; c < G_WIDTH(g); c++ )	{
     g->relief[c] = -1;
     g->gaps[c] = 0;
+    g->stack_cnt[c] = 0;
   }
   memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
   g->total_cleared_count = 0;
@@ -54,12 +62,18 @@ void grid_cpy ( grid* dest, grid* src )	{
     memcpy(dest->rows[i], src->rows[i],
 	   src->width*sizeof(*src->rows[i]));
   }
+  for ( i = 0; i < src->width; i++ )	{
+    memcpy(dest->stacks[i], src->stacks[i],
+	   src->width*sizeof(*src->stacks[i]));
+  }
   memcpy(dest->full_rows, src->full_rows,
 	 src->height*sizeof(*src->full_rows));
   memcpy(dest->row_fill_count, src->row_fill_count,
 	 src->height*sizeof(*src->row_fill_count));
   memcpy(dest->relief, src->relief,
 	   src->width*sizeof(*src->relief));
+  memcpy(dest->stack_cnt, src->stack_cnt,
+	   src->width*sizeof(*src->stack_cnt));
   memcpy(dest->gaps, src->gaps,
 	   src->width*sizeof(*src->gaps));
 }
@@ -104,8 +118,17 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     if (top<r)	{
       g->relief[c] = r;
       g->gaps[c] += r-1-top;
+      g->stacks[c][g->stack_cnt[c]++] = r;
     }else 	{
       g->gaps[c] --;
+      assert(r != top);
+      assert(g->stacks[c][g->stack_cnt[c]-1] == top);
+      int idx = g->stack_cnt[c]-1;//insert idx
+      for ( ; idx > 0 && g->stacks[c][idx-1]>r; idx-- );
+      memmove(g->stacks[c]+idx+1, g->stacks[c]+idx,
+	      (g->stack_cnt[c]-idx)*sizeof(*g->stacks[c]));
+      g->stacks[c][idx] = r;
+      g->stack_cnt[c]++;
     }
   }
 }
@@ -121,44 +144,39 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
     }
     g->row_fill_count[r] -= 1;
     int top = g->relief[c];
+    assert(top>=0);
     if (top == r)	{
-      int new_top = r-1;
-      for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
+      assert(g->stack_cnt[c]>0);
+      assert(top == g->stacks[c][g->stack_cnt[c]-1]);
+      g->stack_cnt[c]--;
+      int new_top = g->stack_cnt[c]?
+	g->stacks[c][g->stack_cnt[c]-1]  : -1;
+      assert(new_top<top);
+      // int new_top = top-1
+      // for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
       g->relief[c] = new_top;
       g->gaps[c] -= (top-1-new_top);
     }else 	{
       assert(r<top);
       g->gaps[c]++;
+
+      int idx = g->stack_cnt[c]-1; //insert idx
+      for ( ; g->stacks[c][idx]!=r; idx-- );
+      assert(g->stacks[c][idx]);
+      assert(idx >= 0);
+      memmove(g->stacks[c]+idx, g->stacks[c]+idx+1,
+	      (g->stack_cnt[c]-idx)*sizeof(*g->stacks[c]));
+      g->stack_cnt[c]--;
     }
   }
 }
 
 inline void grid_set_color ( grid* g, int r, int c, int color )	{
   assert(!g->rows[r][c] ^ !color);
-  g->rows[r][c] = color;
   if (color == 0)	{
-    g->row_fill_count[r] -= 1;
-    int top = g->relief[c];
-    if (top == r)	{
-      int new_top = grid_height_at_start_at(g, c, r-1);
-      g->relief[c] = new_top;
-      g->gaps[c] -= (top-1-new_top);
-    }
-    if (g->row_fill_count[r] == G_WIDTH(g)-1)	{
-      // need to maintain g->full_rows and g->full_rows_count invariants
-      grid_remove_full_row(g, r);
-    }
+    grid_cell_add(g, r, c);
   }else 	{
-    g->row_fill_count[r] += 1;
-    if (g->row_fill_count[r] == G_WIDTH(g))	{
-      g->full_rows[g->full_rows_count++] = r;
-    }
-    assert(g->relief[c] != r);
-    int top = g->relief[c];
-    if (top<r)	{
-      g->relief[c] = r;
-      g->gaps[c] += r-1-top;
-    }
+    grid_cell_remove(g, r, c);
   }
 }
 
@@ -372,16 +390,20 @@ int grid_clear_lines ( grid* g )	{
   }
   assert(g->full_rows_count == 0);
   // now we need to update relief
+  // and stacks
   int i;
   for ( i = 0; i < G_WIDTH(g); i++ )	{
     int new_top = grid_height_at_start_at(g, i, g->relief[i]);
     g->relief[i] = new_top;
     int gaps = 0;
     int ii;
-    for ( ii = new_top-1; ii >=0; ii--){
+    g->stack_cnt[i] = 0;
+    for ( ii = 0; ii <= new_top; ii++){
       // gaps += !g->rows[i][ii];
       if (!(g->rows[ii][i]))	{
 	gaps++;
+      }else 	{
+	g->stacks[i][g->stack_cnt[i]++] = ii;
       }
     }
     g->gaps[i] = gaps;
@@ -403,6 +425,22 @@ int grid_assert_consistency ( grid* g )	{
       }
     }
     assert(gaps == g->gaps[i]);
+
+    if (!((g->stack_cnt[i] ==  g->relief[i]+1-gaps)))	{
+      grid_print(g);
+      printf( "%d %d %d %d\n",
+	      g->stack_cnt[i], g->relief[i]+1-gaps,
+	      g->relief[i], gaps);
+    }
+
+    assert(g->stack_cnt[i] ==  g->relief[i]+1-gaps);
+    assert(g->relief[i] == -1 ||
+	   g->relief[i] == g->stacks[i][g->stack_cnt[i]-1] );
+
+    for ( ii = 0; ii < g->stack_cnt[i]; ii++ )	{
+      assert(g->rows[g->stacks[i][ii]][i]);
+      assert(g->stacks[i][ii]>=ii);
+    }
   }
   int r;
   for ( r = 0; r < g->height; r++ )	{
