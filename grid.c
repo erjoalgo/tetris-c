@@ -20,8 +20,6 @@ grid* grid_new ( int height, int width )	{
   assert(width == GRID_WIDTH);
   g->rows = malloc(height*sizeof(*g->rows));
   g->stacks = malloc(width*sizeof(*g->stacks));
-  g->relief = malloc(width*sizeof(*g->relief));
-  g->gaps = malloc(width*sizeof(*g->gaps));
   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
@@ -46,8 +44,6 @@ void grid_reset ( grid* g )	{
   }
   int c;
   for ( c = 0; c < G_WIDTH(g); c++ )	{
-    g->relief[c] = -1;
-    g->gaps[c] = 0;
     g->stacks[c][-1] = -1;// always -1
     g->stacks[c][-2] = 0;// counts
   }
@@ -76,12 +72,6 @@ void grid_cpy ( grid* dest, grid* src )	{
 	 src->height*sizeof(*src->full_rows));
   memcpy(dest->row_fill_count, src->row_fill_count,
 	 src->height*sizeof(*src->row_fill_count));
-  memcpy(dest->relief, src->relief,
-	   src->width*sizeof(*src->relief));
-  // memcpy(dest->stack_cnt, src->stack_cnt,
-  // 	   src->width*sizeof(*src->stack_cnt));
-  memcpy(dest->gaps, src->gaps,
-	   src->width*sizeof(*src->gaps));
 }
 
 
@@ -119,14 +109,10 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     if (g->row_fill_count[r] == G_WIDTH(g))	{
       g->full_rows[g->full_rows_count++] = r;
     }
-    assert(g->relief[c] != r);
-    int top = g->relief[c];
+    int top = g->stacks[c][g->stacks[c][-2]-1];
     if (top<r)	{
-      g->relief[c] = r;
-      g->gaps[c] += r-1-top;
       g->stacks[c][g->stacks[c][-2]++] = r;
     }else 	{
-      g->gaps[c] --;
       printf( "warning: adding under the relief!\n" );
       assert(r != top);
       assert(g->stacks[c][g->stacks[c][-2]-1] == top);
@@ -152,23 +138,16 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       grid_remove_full_row(g, r);
     }
     g->row_fill_count[r] -= 1;
-    assert(g->relief[c] == g->stacks[c][g->stacks[c][-2]-1]);
     int top = g->stacks[c][g->stacks[c][-2]-1];
     assert(top>=0);
     if (top == r)	{
       assert(g->stacks[c][-2]>0);
       assert(top == g->stacks[c][g->stacks[c][-2]-1]);
       g->stacks[c][-2]--;
-      int new_top = g->stacks[c][g->stacks[c][-2]-1];
-      assert(new_top<top);
       // int new_top = top-1
       // for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
-      g->relief[c] = new_top;
-      g->gaps[c] -= (top-1-new_top);
     }else 	{
       assert(r<top);
-      g->gaps[c]++;
-
       printf( "warning: removing under the relief!\n" );
       int idx = g->stacks[c][-2]-1; //insert idx
       for ( ; g->stacks[c][idx]!=r; idx-- );
@@ -332,7 +311,12 @@ int grid_clear_lines ( grid* g )	{
   // smallest full row
   int y = g->full_rows[g->full_rows_count-1];
   // largest occupied (full or non-full) row.
-  int ymax = max (g->relief, G_WIDTH(g));
+  int ymax = G_RELIEF(g, 0);
+  {
+    int i;
+    for ( i = 1; i < G_WIDTH(g); i++ )
+      ymax = G_RELIEF(g, i)>ymax? G_RELIEF(g, i): ymax;
+  }
   assert(ymax<g->height);
   assert(grid_assert_consistency(g));
   assert(g->row_fill_count[y] == G_WIDTH(g));
@@ -403,20 +387,16 @@ int grid_clear_lines ( grid* g )	{
   // and stacks
   int i;
   for ( i = 0; i < G_WIDTH(g); i++ )	{
-    int new_top = grid_height_at_start_at(g, i, g->relief[i]);
-    g->relief[i] = new_top;
-    int gaps = 0;
+    int old_top = G_RELIEF(g, i);
     int ii;
     g->stacks[i][-2] = 0;
-    for ( ii = 0; ii <= new_top; ii++){
+    for ( ii = 0; ii <= old_top; ii++){
       // gaps += !g->rows[i][ii];
       if (!(g->rows[ii][i]))	{
-	gaps++;
       }else 	{
 	g->stacks[i][g->stacks[i][-2]++] = ii;
       }
     }
-    g->gaps[i] = gaps;
   }
   // we should be done.
   // should assert consistency
@@ -427,25 +407,17 @@ int grid_clear_lines ( grid* g )	{
 int grid_assert_consistency ( grid* g )	{
   int i;
   for ( i = 0; i < G_WIDTH(g); i++ )	{
-    assert(g->relief[i] == grid_height_at(g, i));
+    assert(G_RELIEF(g, i) == grid_height_at(g, i));
     int gaps = 0;
     int ii;
-    for ( ii = g->relief[i]-1; ii >= 0; ii-- )	{
+    for ( ii = G_RELIEF(g, i)-1; ii >= 0; ii-- )	{
       if (!g->rows[ii][i])	{
 	gaps++;
       }
     }
-    assert(gaps == g->gaps[i]);
-    assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
 
-    assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
-    assert((g->relief[i]==-1)  == (g->stacks[i][-2]==0));
 
-    assert(g->relief[i] == -1 ||
-	   g->relief[i] == g->stacks[i][g->stacks[i][-2]-1] );
 
-    assert(!g->stacks[i][-2] ||
-	   g->stacks[i][g->stacks[i][-2]-1]+1 - g->stacks[i][-2] == gaps);
 
     for ( ii = 0; ii < g->stacks[i][-2]; ii++ )	{
       assert(g->rows[g->stacks[i][ii]][i]);
@@ -573,7 +545,7 @@ int drop_amount ( grid* g, block* b )	{
 
     assert(b->shape->crust_flat[rot][BOT][i][0] ==
 	   b->shape->crust[rot][BOT][i][0]);
-    int amnt = r-(g->relief[c]+1);
+    int amnt = r-(G_RELIEF(g, c)+1);
     if (amnt<min_amnt)	{
       min_amnt = amnt;
     }
@@ -669,7 +641,6 @@ void print_arr ( int* arr, int len )	{
 void print_relief ( grid* g )	{
   int i;
   printf( "relief:   " );
-  print_arr(g->relief, G_WIDTH(g));
   printf( "heigh at: " );
   for ( i = 0; i < G_WIDTH(g); i++ )	{
     printf( "%d ", grid_height_at(g, i) );

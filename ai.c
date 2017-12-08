@@ -10,6 +10,8 @@
 #define MOST_NEG_DBL (-DBL_MAX)
 
 #define MAX(a, b) ((a)>(b)? (a):(b))
+#define G_STACK_CNT(g, c) ((g)->stacks[c][-2])
+#define G_RELIEF(g, c) ((g)->stacks[c][G_STACK_CNT(g, c)-1])
 
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
@@ -133,7 +135,7 @@ game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
   int relief_mx = -1;
   int i;
   for ( i = 0; i < g->width; i++ ){
-    relief_mx = MAX(relief_mx, g->relief[i]);
+    relief_mx = MAX(relief_mx, G_RELIEF(g, i));
   }
 
   game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value,
@@ -163,8 +165,7 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     discont += last_height != height;
     last_height = height;
 
-    int cgaps = !stack_cnt? 0:
-      g->stacks[i][stack_cnt-1]+1-stack_cnt;
+    int cgaps = g->stacks[i][stack_cnt-1]+1-stack_cnt;
 
     gaps+=cgaps;
     if (stack_cnt>=2)	{

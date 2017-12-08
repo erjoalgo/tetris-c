@@ -42,7 +42,7 @@ void ncurses_grid_print_fill_count ( grid* g )	{
 
   int col;
   for ( col = 0; col < g->width; col++ )	{
-    int tall = g->relief[col];
+    int tall = 0;
     continue;
     mvwaddch(win, EDGE+g->height+1, col+EDGE,
 	    tall == -1? '-' :
@@ -51,7 +51,7 @@ void ncurses_grid_print_fill_count ( grid* g )	{
   }
 
   for ( col = 0; col < g->width; col++ )	{
-    int gaps = g->gaps[col];
+    int gaps = 0;
     mvwaddch(win, EDGE+g->height, col+EDGE,
 	     !gaps ? '-' :
 	     gaps<10?'0'+gaps:

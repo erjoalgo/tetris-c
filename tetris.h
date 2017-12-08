@@ -57,8 +57,6 @@ void game_move_print(game_move* g);
 typedef struct {
   int** rows;
   int** stacks;
-  int* stack_cnt;
-  int* relief;
   int* row_fill_count;
   int* full_rows;
   int full_rows_count;
@@ -67,7 +65,6 @@ typedef struct {
 
   int total_cleared_count;
   int last_cleared_count;
-  int* gaps;
 } grid;
 grid* grid_new(int height, int width);
 void grid_reset ( grid* g );
