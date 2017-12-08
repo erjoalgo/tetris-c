@@ -431,13 +431,7 @@ int grid_assert_consistency ( grid* g )	{
       }
     }
     assert(gaps == g->gaps[i]);
-
-    if (!((g->stack_cnt[i] ==  g->relief[i]+1-gaps)))	{
-      grid_print(g);
-      printf( "%d %d %d %d\n",
-	      g->stack_cnt[i], g->relief[i]+1-gaps,
-	      g->relief[i], gaps);
-    }
+    assert(g->stack_cnt[i] ==  g->relief[i]+1-gaps);
 
     assert(g->stack_cnt[i] ==  g->relief[i]+1-gaps);
     assert(g->relief[i] == -1 ||
