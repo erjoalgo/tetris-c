@@ -19,9 +19,15 @@ libtetris.so: $(OBJ) evolution.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 
-
+PROF_PARAMS=ai -d 4 -m 1000
 perf.data: FORCE tetris-prof
-	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
+	perf record --call-graph dwarf -g ./tetris-prof $(PROF_PARAMS)
+
+stat: FORCE tetris-prof
+	perf stat ./tetris $(PROF_PARAMS)
+
+time: FORCE tetris-prof
+	time ./tetris $(PROF_PARAMS)
 
 call.svg: perf.data
 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
