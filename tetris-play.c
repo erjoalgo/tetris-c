@@ -74,6 +74,8 @@ ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
       return inc<3? ROTCW: ROTCCW;
     }else if (b->offset[0] != gm->col)	{
       return gm->col > b->offset[0]? MVRIGHT: MVLEFT;
+    }else if (drop_amount(g, b))	{
+      return MVDOWN;
     }else 	{
       gm = NULL;
       return DROP;
