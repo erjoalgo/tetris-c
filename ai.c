@@ -154,7 +154,8 @@ void feature_variance ( grid* g, double* ordered_raws )	{
   int discont = -1, last_height = -1;
   int gaps = 0, obs = 0;
   for ( i = 0; i < width; i++ )	{
-    int height = g->relief[i];
+    int stack_cnt = g->stacks[i][-2];
+    int height = g->stacks[i][stack_cnt-1];
     if (height>max)	{
       max = height;
     }
@@ -162,14 +163,19 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     discont += last_height != height;
     last_height = height;
 
-    int cgaps = g->gaps[i];
+    int cgaps = !stack_cnt? 0:
+      g->stacks[i][stack_cnt-1]+1-stack_cnt;
+
     gaps+=cgaps;
-    obs += height-cgaps;
+    if (stack_cnt>=2)	{
+      obs += height-g->stacks[i][stack_cnt-2];
+    }
   }
   avg/=width;
 
   for ( i = 0; i < g->width; i++ )	{
-    int height = g->relief[i];
+    int stack_cnt = g->stacks[i][-2];
+    int height = g->stacks[i][stack_cnt-1];
     double diff = avg-height;
     var += diff*diff;
   }

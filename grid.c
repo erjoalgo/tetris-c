@@ -8,6 +8,9 @@
 #define GRID_WIDTH 10 // fix grid width at compile time
 // #define G_WIDTH(g) ((g)->width)
 #define G_WIDTH(g) GRID_WIDTH
+#define G_STACK_CNT(g, c) ((g)->stacks[c][-2])
+#define G_RELIEF(g, c) ((g)->stacks[c][G_STACK_CNT(g, c)-1])
+
 int grid_assert_consistency ( grid* g );
 
 grid* grid_new ( int height, int width )	{
@@ -19,7 +22,6 @@ grid* grid_new ( int height, int width )	{
   g->stacks = malloc(width*sizeof(*g->stacks));
   g->relief = malloc(width*sizeof(*g->relief));
   g->gaps = malloc(width*sizeof(*g->gaps));
-  g->stack_cnt = malloc(width*sizeof(*g->stack_cnt));
   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
@@ -29,7 +31,9 @@ grid* grid_new ( int height, int width )	{
   int c;
   for ( c = 0; c < G_WIDTH(g); c++ )	{
     //alloc a single chunk?
-    g->stacks[c] = malloc(g->height*sizeof(*g->stacks));
+    // g->stacks[i][-1] == -1, consistent with g->relief[i] value
+    // g->stacks[i][-1] == size of the stack
+    g->stacks[c] = malloc((2+g->height)*sizeof(*g->stacks));
   }
   grid_reset(g);
   return g;
@@ -44,7 +48,8 @@ void grid_reset ( grid* g )	{
   for ( c = 0; c < G_WIDTH(g); c++ )	{
     g->relief[c] = -1;
     g->gaps[c] = 0;
-    g->stack_cnt[c] = 0;
+    g->stacks[c][-1] = -1;// always -1
+    g->stacks[c][-2] = 0;// counts
   }
   memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
   g->total_cleared_count = 0;
@@ -64,8 +69,8 @@ void grid_cpy ( grid* dest, grid* src )	{
 	   src->width*sizeof(*src->rows[i]));
   }
   for ( i = 0; i < src->width; i++ )	{
-    memcpy(dest->stacks[i], src->stacks[i],
-	   src->width*sizeof(*src->stacks[i]));
+    memcpy(dest->stacks[i]-2, src->stacks[i]-2,
+	   (src->height+2)*sizeof(*src->stacks[i]));
   }
   memcpy(dest->full_rows, src->full_rows,
 	 src->height*sizeof(*src->full_rows));
@@ -73,8 +78,8 @@ void grid_cpy ( grid* dest, grid* src )	{
 	 src->height*sizeof(*src->row_fill_count));
   memcpy(dest->relief, src->relief,
 	   src->width*sizeof(*src->relief));
-  memcpy(dest->stack_cnt, src->stack_cnt,
-	   src->width*sizeof(*src->stack_cnt));
+  // memcpy(dest->stack_cnt, src->stack_cnt,
+  // 	   src->width*sizeof(*src->stack_cnt));
   memcpy(dest->gaps, src->gaps,
 	   src->width*sizeof(*src->gaps));
 }
@@ -119,18 +124,18 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     if (top<r)	{
       g->relief[c] = r;
       g->gaps[c] += r-1-top;
-      g->stacks[c][g->stack_cnt[c]++] = r;
+      g->stacks[c][g->stacks[c][-2]++] = r;
     }else 	{
       g->gaps[c] --;
       printf( "warning: adding under the relief!\n" );
       assert(r != top);
-      assert(g->stacks[c][g->stack_cnt[c]-1] == top);
-      int idx = g->stack_cnt[c]-1;//insert idx
+      assert(g->stacks[c][g->stacks[c][-2]-1] == top);
+      int idx = g->stacks[c][-2]-1;//insert idx
       for ( ; idx > 0 && g->stacks[c][idx-1]>r; idx-- );
       memmove(g->stacks[c]+idx+1, g->stacks[c]+idx,
-	      (g->stack_cnt[c]-idx)*sizeof(*g->stacks[c]));
+	      (g->stacks[c][-2]-idx)*sizeof(*g->stacks[c]));
       g->stacks[c][idx] = r;
-      g->stack_cnt[c]++;
+      g->stacks[c][-2]++;
     }
     assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
   }
@@ -147,14 +152,14 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       grid_remove_full_row(g, r);
     }
     g->row_fill_count[r] -= 1;
-    int top = g->relief[c];
+    assert(g->relief[c] == g->stacks[c][g->stacks[c][-2]-1]);
+    int top = g->stacks[c][g->stacks[c][-2]-1];
     assert(top>=0);
     if (top == r)	{
-      assert(g->stack_cnt[c]>0);
-      assert(top == g->stacks[c][g->stack_cnt[c]-1]);
-      g->stack_cnt[c]--;
-      int new_top = g->stack_cnt[c]?
-	g->stacks[c][g->stack_cnt[c]-1]  : -1;
+      assert(g->stacks[c][-2]>0);
+      assert(top == g->stacks[c][g->stacks[c][-2]-1]);
+      g->stacks[c][-2]--;
+      int new_top = g->stacks[c][g->stacks[c][-2]-1];
       assert(new_top<top);
       // int new_top = top-1
       // for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
@@ -165,13 +170,13 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       g->gaps[c]++;
 
       printf( "warning: removing under the relief!\n" );
-      int idx = g->stack_cnt[c]-1; //insert idx
+      int idx = g->stacks[c][-2]-1; //insert idx
       for ( ; g->stacks[c][idx]!=r; idx-- );
       assert(g->stacks[c][idx]);
       assert(idx >= 0);
       memmove(g->stacks[c]+idx, g->stacks[c]+idx+1,
-	      (g->stack_cnt[c]-idx)*sizeof(*g->stacks[c]));
-      g->stack_cnt[c]--;
+	      (g->stacks[c][-2]-idx)*sizeof(*g->stacks[c]));
+      g->stacks[c][-2]--;
     }
   }
 }
@@ -402,13 +407,13 @@ int grid_clear_lines ( grid* g )	{
     g->relief[i] = new_top;
     int gaps = 0;
     int ii;
-    g->stack_cnt[i] = 0;
+    g->stacks[i][-2] = 0;
     for ( ii = 0; ii <= new_top; ii++){
       // gaps += !g->rows[i][ii];
       if (!(g->rows[ii][i]))	{
 	gaps++;
       }else 	{
-	g->stacks[i][g->stack_cnt[i]++] = ii;
+	g->stacks[i][g->stacks[i][-2]++] = ii;
       }
     }
     g->gaps[i] = gaps;
@@ -431,13 +436,18 @@ int grid_assert_consistency ( grid* g )	{
       }
     }
     assert(gaps == g->gaps[i]);
-    assert(g->stack_cnt[i] ==  g->relief[i]+1-gaps);
+    assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
 
-    assert(g->stack_cnt[i] ==  g->relief[i]+1-gaps);
+    assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
+    assert((g->relief[i]==-1)  == (g->stacks[i][-2]==0));
+
     assert(g->relief[i] == -1 ||
-	   g->relief[i] == g->stacks[i][g->stack_cnt[i]-1] );
+	   g->relief[i] == g->stacks[i][g->stacks[i][-2]-1] );
 
-    for ( ii = 0; ii < g->stack_cnt[i]; ii++ )	{
+    assert(!g->stacks[i][-2] ||
+	   g->stacks[i][g->stacks[i][-2]-1]+1 - g->stacks[i][-2] == gaps);
+
+    for ( ii = 0; ii < g->stacks[i][-2]; ii++ )	{
       assert(g->rows[g->stacks[i][ii]][i]);
       assert(g->stacks[i][ii]>=ii);
     }
