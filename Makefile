@@ -29,6 +29,19 @@ stat: FORCE tetris-prof
 time: FORCE tetris-prof
 	time ./tetris $(PROF_PARAMS)
 
+pprof.data: FORCE tetris-prof
+	CPUPROFILE=$@ ./tetris $(PROF_PARAMS)
+
+pprof.pg: tetris-prof pprof.data
+	pprof $^ > $@
+
+pprof.gv: tetris-prof pprof.data
+	pprof --web $^
+
+pprof.asm: tetris-prof pprof.data
+	pprof --disasm='block_(add|remove)|drop|ai' $^ > $@
+	less $@
+
 call.svg: perf.data
 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
 	firefox --new-tab $@
