@@ -20,6 +20,7 @@ grid* grid_new ( int height, int width )	{
   assert(width == GRID_WIDTH);
   g->rows = malloc(height*sizeof(*g->rows));
   g->stacks = malloc(width*sizeof(*g->stacks));
+  g->gaps = malloc(width*sizeof(*g->gaps));
   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
   g->full_rows = malloc(height*sizeof(*g->full_rows));
   int r;
@@ -44,6 +45,7 @@ void grid_reset ( grid* g )	{
   }
   int c;
   for ( c = 0; c < G_WIDTH(g); c++ )	{
+    g->gaps[c] = 0;
     g->stacks[c][-1] = -1;// always -1
     g->stacks[c][-2] = 0;// counts
   }
@@ -72,6 +74,8 @@ void grid_cpy ( grid* dest, grid* src )	{
 	 src->height*sizeof(*src->full_rows));
   memcpy(dest->row_fill_count, src->row_fill_count,
 	 src->height*sizeof(*src->row_fill_count));
+  memcpy(dest->gaps, src->gaps,
+	   src->width*sizeof(*src->gaps));
 }
 
 
@@ -111,8 +115,10 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
     }
     int top = g->stacks[c][g->stacks[c][-2]-1];
     if (top<r)	{
+      g->gaps[c] += r-1-top;
       g->stacks[c][g->stacks[c][-2]++] = r;
     }else 	{
+      g->gaps[c] --;
       printf( "warning: adding under the relief!\n" );
       assert(r != top);
       assert(g->stacks[c][g->stacks[c][-2]-1] == top);
@@ -146,8 +152,11 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
       g->stacks[c][-2]--;
       // int new_top = top-1
       // for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
+      g->gaps[c] -= (top-1-g->stacks[c][g->stacks[c][-2]-1]);
     }else 	{
       assert(r<top);
+      g->gaps[c]++;
+
       printf( "warning: removing under the relief!\n" );
       int idx = g->stacks[c][-2]-1; //insert idx
       for ( ; g->stacks[c][idx]!=r; idx-- );
@@ -387,16 +396,20 @@ int grid_clear_lines ( grid* g )	{
   // and stacks
   int i;
   for ( i = 0; i < G_WIDTH(g); i++ )	{
-    int old_top = G_RELIEF(g, i);
+    int new_top = G_RELIEF(g, i);
+    for ( ; new_top >= 0 && !g->rows[new_top][i]; new_top-- );
+    int gaps = 0;
     int ii;
     g->stacks[i][-2] = 0;
-    for ( ii = 0; ii <= old_top; ii++){
+    for ( ii = 0; ii <= new_top; ii++){
       // gaps += !g->rows[i][ii];
       if (!(g->rows[ii][i]))	{
+	gaps++;
       }else 	{
 	g->stacks[i][g->stacks[i][-2]++] = ii;
       }
     }
+    g->gaps[i] = gaps;
   }
   // we should be done.
   // should assert consistency
@@ -415,9 +428,8 @@ int grid_assert_consistency ( grid* g )	{
 	gaps++;
       }
     }
-
-
-
+    assert(gaps == g->gaps[i]);
+    assert(g->stacks[i][-2] == G_RELIEF(g, i)+1-gaps);
 
     for ( ii = 0; ii < g->stacks[i][-2]; ii++ )	{
       assert(g->rows[g->stacks[i][ii]][i]);

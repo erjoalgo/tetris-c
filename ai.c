@@ -165,7 +165,7 @@ void feature_variance ( grid* g, double* ordered_raws )	{
     discont += last_height != height;
     last_height = height;
 
-    int cgaps = g->stacks[i][stack_cnt-1]+1-stack_cnt;
+    int cgaps = g->gaps[i];
 
     gaps+=cgaps;
     if (stack_cnt>=2)	{
