@@ -80,7 +80,7 @@ void grid_cpy ( grid* dest, grid* src )	{
 
 
 
-inline int grid_height_at_start_at ( grid* g, int x, int start_at )	{
+int grid_height_at_start_at ( grid* g, int x, int start_at )	{
   // return the largest y s.t. g.grid[x][y]==1,
   // or -1 if no such y exists
   int y;
@@ -92,7 +92,7 @@ int grid_height_at ( grid* g, int x ){
   return grid_height_at_start_at(g, x, g->height-1);
 }
 
-inline void grid_remove_full_row ( grid* g, int r )	{
+void grid_remove_full_row ( grid* g, int r )	{
   assert(g->full_rows_count>0);
   int last_full_idx = g->full_rows_count-1;
   if (g->full_rows[last_full_idx] != r)	{
@@ -104,7 +104,7 @@ inline void grid_remove_full_row ( grid* g, int r )	{
   g->full_rows_count--;
 }
 
-inline void grid_cell_add ( grid* g, int r, int c )	{
+void grid_cell_add ( grid* g, int r, int c )	{
   const int color = 1;
   assert(!g->rows[r][c] ^ !color);
   g->rows[r][c] = color;
@@ -133,7 +133,7 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
   }
 }
 
-inline void grid_cell_remove ( grid* g, int r, int c )	{
+void grid_cell_remove ( grid* g, int r, int c )	{
   const int color = 0;
   assert(!g->rows[r][c] ^ !color);
   assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
@@ -169,7 +169,7 @@ inline void grid_cell_remove ( grid* g, int r, int c )	{
   }
 }
 
-inline void grid_set_color ( grid* g, int r, int c, int color )	{
+void grid_set_color ( grid* g, int r, int c, int color )	{
   assert(!g->rows[r][c] ^ !color);
   if (color == 0)	{
     grid_cell_add(g, r, c);
@@ -519,7 +519,7 @@ int grid_block_valid ( grid* g, block* b )	{
   return grid_block_in_bounds(g, b) && !grid_block_intersects(g, b);
 }
 
-inline int grid_block_elevate ( grid* g, block* b )	{
+int grid_block_elevate ( grid* g, block* b )	{
   // note: offset[1] needs to be in-bounds for all rotations
   // so extreme(b, TOP) == 0 won't always be the case
   b->offset[1] = g->height - b->shape->max_dim_len;
@@ -532,7 +532,7 @@ inline int grid_block_elevate ( grid* g, block* b )	{
 }
 
 
-inline int grid_block_center_elevate (grid* g, block* b)	{
+int grid_block_center_elevate (grid* g, block* b)	{
   // return whether block was successfully centered
   b->offset[0] = (G_WIDTH(g) - b->shape->rot_wh[b->rot][0])/2;
   return grid_block_elevate(g, b);
