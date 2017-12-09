@@ -39,7 +39,7 @@ pprof.gv: tetris-prof pprof.data
 	pprof --web $^
 
 pprof.asm: tetris-prof pprof.data
-	pprof --disasm='block_(add|remove)|drop|ai' $^ > $@
+	pprof --disasm='(block|cell)_(add|remove)|drop|ai' $^ > $@
 	less $@
 
 call.svg: perf.data
