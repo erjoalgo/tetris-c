@@ -3,11 +3,12 @@ CFLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops  --param max-unroll-t
 # CFLAGS=-Wall -W -Werror -Wextra -fno-inline -g -fno-inline-functions # -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
 DEPS=tetris.h tetri_ai.h
 OBJ=ai.o game.o grid.o block.o shape.o
+OBJ_EXTRA=evolution.o tetris-ncurses.o tetris-play.o
 
 all: tetris
 
-tetris: tetris.o $(OBJ) evolution.o tetris-ncurses.o tetris-play.o
-	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
+tetris: tetris.o $(OBJ) $(OBJ_EXTRA)
+	$(CC) -o $@ $< $(OBJ) $(OBJ_EXTRA) $(CFLAGS) -lncurses
 
 tetris-prof: tetris.o $(OBJ)
 	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
