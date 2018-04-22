@@ -13,8 +13,8 @@ tetris: tetris.o $(OBJ) $(OBJ_EXTRA)
 tetris-prof: tetris.o $(OBJ)
 	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
 
-libtetris.so: tetris.o $(OBJ) evolution.o
-	$(CC) -shared -Wl,-soname,$@.1 -o $@ $< $(OBJ) evolution.o $(CFLAGS) -lc
+libtetris.so: $(OBJ) evolution.o
+	$(CC) -shared -Wl,-soname,$@.1 -o $@ $(OBJ) evolution.o $(CFLAGS) -lc
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
