@@ -15,7 +15,8 @@
   (t (:default "libcurl")))
 
 (define-foreign-library libtetris
-  (:unix (:or "libtetris.so")))
+  (:unix (:or "libtetris.so.1" "libtetris.so"))
+  (t (:default "libtetris.so")))
 
 (use-foreign-library libtetris)
 
