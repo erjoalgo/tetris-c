@@ -19,8 +19,6 @@ libtetris.so: $(OBJ) evolution.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-
-
 perf.data: FORCE tetris-prof
 	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
 
