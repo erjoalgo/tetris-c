@@ -113,12 +113,10 @@
              for r downfrom (1- (game-height game)) to 0
              as row = (cffi:mem-aref rows :pointer r)
              collect
-               (format nil "~{~d~}"
-                       (loop for c below (game-width game)
+               (loop for c below (game-width game)
                           as val = (cffi:mem-aref row :int c)
-                          do (format t "val ~D~%" val)
                           do (setf dbg val)
-                          collect val)))))
+                          collect (if (= 0 val) " " "*")))))
 
 (defparameter HEIGHT 19)
 (defparameter WIDTH 10)
