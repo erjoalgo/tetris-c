@@ -6,10 +6,10 @@
    )
   )
 
-(defvar server nil)
+(defvar acceptor nil)
 
-(unless server
-  (setf server (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
+(unless acceptor
+  (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
 
 (defvar dbg)
 
