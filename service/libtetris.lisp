@@ -30,7 +30,8 @@
                               :pointer))
   (format t "loaded ~D shapes ~%" SHAPE-COUNT)
   (cffi:foreign-funcall "srand" :int seed)
-  (assert (> SHAPE-COUNT 0)))
+  (assert (> SHAPE-COUNT 0))
+  (cffi:foreign-funcall "ai_init" :void))
 
 (init-tetris seed shapes-file)
 
@@ -46,9 +47,10 @@
   ss ;; shape-stream
   height
   width
+  ai-weights
   )
 
-(defun game-init (height width)
+(defun game-init (height width &optional ai-weights)
   (cffi:with-foreign-objects
       ((g :pointer)
        (b :pointer)
@@ -63,7 +65,7 @@
 
     (format t "initializing ss...~%" )
     (setf ss (cffi:foreign-funcall "shape_stream_new" :int 3 :pointer))
-    (make-game :g g :b b :ss ss :height height :width width)
+    (make-game :g g :b b :ss ss :height height :width width :ai-weights ai-weights)
     ))
 
 (defun game-next-shape (game)
@@ -121,8 +123,9 @@
 (defparameter HEIGHT 19)
 (defparameter WIDTH 10)
 
+(cffi:defcvar ("default_weights" ai-default-weights) :pointer)
 (defun test-game ()
-  (let ((game (game-init HEIGHT WIDTH))
+  (let ((game (game-init HEIGHT WIDTH ai-default-weights))
         next-shape)
     (setf next-shape (game-next-shape game))
     (game-exec-move game nil)
