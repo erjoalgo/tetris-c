@@ -97,23 +97,6 @@
 
 
 
-(defcstruct game-move
-  "game move"
-  (shape :pointer)
-  (rot :int)
-  (col :int))
-
-(defcstruct tetris-block
-  "block"
-  (offset :int)
-  (rot :int)
-  (shape :pointer))
-
-'(defun make-null-game-move (b)
-  (with-foreign-slots ((offset rot shape)
-                       (translate-from-foreign b 'tetris-block)
-                       tetris-block)
-    ))
 
 (defun game-apply-move (game move &optional no-add)
   (cffi:foreign-funcall "grid_block_apply_move"
