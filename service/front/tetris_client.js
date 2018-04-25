@@ -118,7 +118,6 @@ var server_timeout = 20000;
 // var timer_delay = 200;
 var timer_delay = 90;
 var server_moves_ahead = [];
-var global_request_args = [null, null];
 
 
 
@@ -149,13 +148,7 @@ function min (a, b) {
 function server_request ( requestcode, response_hanlder )
 {
 
-    if (requestcode==null)
-	{
-
-	    assert(response_hanlder==null,  " assertion failed at 110 ");
-	    requestcode = global_request_args[0];
-	    response_hanlder = global_request_args[1];
-	}
+    assert(requestcode!=null && response_hanlder != null);
 
     var xhr = new XMLHttpRequest();
     // xhr.open('get', 'http://root.erjoalgo.com/tetris_updater/send_ajax_data.php');
@@ -175,7 +168,6 @@ function server_request ( requestcode, response_hanlder )
 		// var array = new JSONArray(xhr.responseText);
 		try{
 		    response = eval(xhr.responseText+";");
-		    // global_response_handler(response);
 		}
 		catch (err)
 		{
@@ -186,9 +178,6 @@ function server_request ( requestcode, response_hanlder )
 			}
 		    console.log("failed to parse request: "+xhr.responseText);
 		    // alert("error parsing response from server");
-		    global_request_args[0] = requestcode;
-		    global_request_args[1] = response_hanlder;
-
 		    consec_failed_mills+=retry_timeout;
 
 		    if (consec_failed_mills>server_timeout)
@@ -197,7 +186,7 @@ function server_request ( requestcode, response_hanlder )
 		    }
 		    else
 		    {
-			setTimeout(server_request,retry_timeout);
+			setTimeout(function(){server_request(requestcode, response_handler)},retry_timeout);
 		    }
 		    return ;
 		}
@@ -651,7 +640,6 @@ function init ( response )
 {
     if (response==null)
 	{
-	    // global_response_handler = init;
 	    server_request(-1, init);
 	    return;
 	}
