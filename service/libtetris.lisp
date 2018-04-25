@@ -123,7 +123,6 @@
                              :initial-element #\Space))
         (i -1))
     (game-grid-iter game (lambda (r c v)
-                           (declare (ignore r))
                            (when r
                              (setf (aref string (incf i)) (cond
                                                           ((null c) #\Newline)
