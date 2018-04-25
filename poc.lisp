@@ -18,8 +18,6 @@
 
 (use-foreign-library libtetris)
 
-(define-foreign-library libtetris
-  (:unix (:or "libtetrissss.so")))
 
 
 
