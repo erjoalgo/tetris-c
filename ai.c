@@ -228,10 +228,7 @@ void ai_run ( int max_moves, int depth, int show_grid )	{
     succ = grid_block_apply_move(g, &b, gm, 1);
     assert(succ);
     applied++;
-    shape* shape = shape_stream_pop(ss);
-    (void*)shape;
-    printf( "code: %ld\n", (void*)shape-(void*)SHAPES );
-
+    shape_stream_pop(ss);
   }
   (void)succ;
   printf( "%d moves applied, %d lines cleared\n",
