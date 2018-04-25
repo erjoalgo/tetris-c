@@ -245,6 +245,10 @@ shape** shapes_read ( char* file, int* shape_count)	{
   return shapes;
 }
 
+int shapes_init ( char* shapes_file )    {
+  return !!(SHAPES = shapes_read(shapes_file, &SHAPE_COUNT));
+}
+
 void shape_test (  )	{
   int i;
   for ( i = 0; i < SHAPE_COUNT; i++ )	{

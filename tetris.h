@@ -20,6 +20,7 @@ typedef struct {
 void shape_print(shape* s, int quiet);
 shape** shapes_read(char* file, int* shape_count);
 void shape_test();
+int shapes_init (char* shapes_file);
 //global shapes and count
 shape** SHAPES;
 int SHAPE_COUNT;
