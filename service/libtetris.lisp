@@ -141,6 +141,21 @@
                         :pointer weights
                         :pointer))
 
+(defcstruct (%game-move :class game-move)
+  "game move"
+  (shape :pointer)
+  (rot :int)
+  (col :int))
+
+;; (defmethod translate-from-foreign (pointer (type game-move))
+(defun my-translate-from-foreign (pointer &optional game-move)
+  (declare (ignore game-move))
+  (format t "translating...~%" )
+  (with-foreign-slots ((shape rot col) pointer (:struct %game-move))
+    ;; You can change this and get return value in other format
+    ;; for example: (values width height)
+    (list shape rot col)))
+
 
 (defun game-apply-next-move (game &optional game-move)
   (unless game-move
