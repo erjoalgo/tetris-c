@@ -1,0 +1,7 @@
+#+OPTIONS: ^:nil
+#+OPTIONS: html-postamble:nil
+#+TITLE: REST-ful service original spec
+
+| *request*                               | *description*            | *notes*                                                                                                                                       | *response*                                                               |
+| ~GET /tetris.uwsgi?-1~                  | init request from client | the first n-4 values (must be even) are the flattened row, column pairs of those grid cells that are 'on' at the current ~(game_no, move_no)~ | ~[c1, r1, c2, r2, c3, r3..., grid_height, grid_width, move_no, game_no]~ |
+| ~GET /tetris.uwsgi?<move-no>%<game_no>~ | AI move(s) request         | a flattened list of moves [shape_code, rotation, column] starting at ~move_no~ (must be multiple of 3)                                          | ~[s1, r1, c1, s2, r2, c2, s3, r3...]~                                    |
