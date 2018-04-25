@@ -15,9 +15,6 @@
 
 (use-foreign-library libtetris)
 
-(cffi:defcvar ("stdout" stdout) :pointer)
-(cffi:foreign-funcall "fflush" :pointer stdout :int)
-
 (defparameter seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
 (defparameter shapes-file "shapes.in")
 
