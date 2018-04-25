@@ -95,18 +95,14 @@
 
 
 
-(defun game-exec-move (game move)
-  (declare (ignore move))
-  ;; TODO set block to move
-  (cffi:foreign-funcall "grid_block_drop"
-                        :pointer (game-g game)
-                        :pointer (game-b game)
-                        :int)
 
-  (cffi:foreign-funcall "grid_block_add"
+(defun game-apply-move (game move &optional no-add)
+  (cffi:foreign-funcall "grid_block_apply_move"
                         :pointer (game-g game)
                         :pointer (game-b game)
-                        :int))
+                        :pointer move
+                        :int (if no-add 0 1)
+                        :boolean))
 
 (defun game-print (game)
   (format t "~{~a~%~}"
