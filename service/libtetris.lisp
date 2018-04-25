@@ -106,17 +106,30 @@
                         :int (if no-add 0 1)
                         :boolean))
 
+(defun game-grid-iter (game fun)
+  (loop
+     with rows = (cffi:mem-ref (game-g game) :pointer 0)
+     for r downfrom (1- (game-height game)) to 0
+     as row = (cffi:mem-aref rows :pointer r)
+     do (funcall fun r nil nil)
+     do
+       (loop for c below (game-width game)
+          as val = (cffi:mem-aref row :int c)
+          do (funcall fun r c val)))
+  (funcall fun nil nil nil))
+
 (defun game-print (game)
-  (format t "~{~a~%~}"
-          (loop
-             with rows = (cffi:mem-ref (game-g game) :pointer 0)
-             for r downfrom (1- (game-height game)) to 0
-             as row = (cffi:mem-aref rows :pointer r)
-             collect
-               (loop for c below (game-width game)
-                          as val = (cffi:mem-aref row :int c)
-                          do (setf dbg val)
-                          collect (if (= 0 val) " " "*")))))
+  (let ((string (make-string (* (game-height game) (1+ (game-width game)))
+                             :initial-element #\Space))
+        (i -1))
+    (game-grid-iter game (lambda (r c v)
+                           (declare (ignore r))
+                           (when r
+                             (setf (aref string (incf i)) (cond
+                                                          ((null c) #\Newline)
+                                                          ((zerop v) #\Space)
+                                                          (t #\*))))))
+    (format t "~A~%" string)))
 
 (defparameter HEIGHT 19)
 (defparameter WIDTH 10)
