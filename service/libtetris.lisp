@@ -154,7 +154,8 @@
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move))
     ;; You can change this and get return value in other format
     ;; for example: (values width height)
-    (list shape rot col)))
+    (let ((shape-id (mem-ref shape :int)))
+      (list shape-id rot col))))
 
 
 (defun game-apply-next-move (game &optional game-move)
