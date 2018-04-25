@@ -124,12 +124,6 @@
 (defparameter WIDTH 10)
 
 (cffi:defcvar ("default_weights" ai-default-weights) :pointer)
-(defun test-game ()
-  (let ((game (game-init HEIGHT WIDTH ai-default-weights))
-        next-shape)
-    (setf next-shape (game-next-shape game))
-    (game-exec-move game nil)
-    (game-print game)))
 
 (defun ai-best-move (game weights)
   (cffi:foreign-funcall "ai_best_move"
@@ -147,5 +141,13 @@
     (game-next-shape game)
     (game-apply-move game next-move)))
 
+(defun test-game ()
+  (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
+    (loop for i below 100 do
+         (progn
+           (game-apply-next-move game)
+           (game-print game)
+           (sleep .5))
+    )))
 
 (test-game)
