@@ -1,3 +1,6 @@
+(proclaim '(optimize (speed 0) (space 0) (debug 3)))
+;; (proclaim '(optimize (debug 3)))
+
 (ql:quickload "cffi")
 
 (asdf:load-system :cffi)
