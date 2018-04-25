@@ -7,12 +7,7 @@
 
 (defvar dbg)
 
-(hunchentoot:define-easy-handler (say-yo :uri "/yo") (name)
-  (setf (hunchentoot:content-type*) "text/plain")
-  (format nil "Hey~@[ ~A~]!" name))
-
 (hunchentoot:define-easy-handler (tetris :uri "/tetris.uwsgi") ()
-  (setf (hunchentoot:content-type*) "text/plain")
   (setf dbg (list hunchentoot:*request* hunchentoot:*acceptor*))
   ;; (format t "holahola~%" )
   (let* ((qstring (hunchentoot:query-string*)))
