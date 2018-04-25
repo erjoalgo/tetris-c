@@ -1,4 +1,10 @@
-(ql:quickload "hunchentoot")
+(defpackage #:server
+  (:use :cl)
+  ;; (:use :cl :hunchentoot)
+  (:export
+   ;; #:file-string #:list-directory-recursive #:list-directory #:list-to-hash-table
+   )
+  )
 
 (defvar server nil)
 
