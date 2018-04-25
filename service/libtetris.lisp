@@ -131,5 +131,21 @@
     (game-exec-move game nil)
     (game-print game)))
 
+(defun ai-best-move (game weights)
+  (cffi:foreign-funcall "ai_best_move"
+                        :pointer (game-g game)
+                        :pointer (game-ss game)
+                        :pointer weights
+                        :pointer))
+
+
+(defun game-apply-next-move (game &optional game-move)
+  (unless game-move
+    ;; TODO allow specifying move
+    )
+  (let* ((next-move (ai-best-move game (game-ai-weights game))))
+    (game-next-shape game)
+    (game-apply-move game next-move)))
+
 
 (test-game)
