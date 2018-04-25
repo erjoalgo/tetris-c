@@ -1,5 +1,5 @@
- /*    
-        @licstart  The following is the entire license notice for the 
+ /*
+        @licstart  The following is the entire license notice for the
         JavaScript code in this page.
 
         Copyright (C) 2014  Ernesto Alfonso
@@ -16,7 +16,7 @@
         may distribute non-source (e.g., minimized or compacted) forms of
         that code without the copy of the GNU GPL normally required by
         section 4, provided you include this license notice and a URL
-        through which recipients can access the Corresponding Source.   
+        through which recipients can access the Corresponding Source.
 
 
         @licend  The above is the entire license notice
@@ -57,14 +57,14 @@ function table_create (width, height) {
     //body reference
     // debugger;
     var body = document.getElementsByTagName("body")[0];
-    
+
     loading = document.createElement("img");
     // loading.src = "http://root.erjoalgo.com/loading.gif";
     loading.src = SERVER+"loading.gif";
 
     hide_show_loading(false);
     body.appendChild(loading);
-    
+
 
     // create elements <table> and a <tbody>
     var tbl     = document.createElement("table");
@@ -83,19 +83,19 @@ function table_create (width, height) {
 	cell_grid.push(cell_row);
         var row = document.createElement("tr");
         for (var i = 0; i < width; i++) {
-            // create element <td> and text node 
+            // create element <td> and text node
             //Make text node the contents of <td> element
             // put <td> at end of the table row
             var cell = document.createElement("td");
 	    cell_row.push(cell);
-	    
+
 	    cell.width = square;
 	    cell.height = square;
 	    cell.bgColor = blank;
 	    cell.style.border = "1px solid #000"
 
-            // var cellText = document.createTextNode("cell is row "+j+", column "+i); 
-            var cellText = document.createTextNode(""); 
+            // var cellText = document.createTextNode("cell is row "+j+", column "+i);
+            var cellText = document.createTextNode("");
             cell.appendChild(cellText);
             row.appendChild(cell);
         }
@@ -108,7 +108,7 @@ function table_create (width, height) {
     tbl.appendChild(tblBody);
     // put <table> in the <body>
     body.appendChild(tbl);
-    // tbl border attribute to 
+    // tbl border attribute to
     tbl.setAttribute("border", "2");
     completed = true;
 
@@ -151,12 +151,12 @@ function server_request ( requestcode, response_hanlder )
 
     if (requestcode==null)
 	{
-	    
+
 	    assert(response_hanlder==null,  " assertion failed at 110 ");
 	    requestcode = global_request_args[0];
 	    response_hanlder = global_request_args[1];
 	}
-    
+
     var xhr = new XMLHttpRequest();
     // xhr.open('get', 'http://root.erjoalgo.com/tetris_updater/send_ajax_data.php');
     // xhr.open('get', "http://root.erjoalgo.com/tetris_updater/send_ajax_data.php?tcode="+requestcode);
@@ -188,9 +188,9 @@ function server_request ( requestcode, response_hanlder )
 		    // alert("error parsing response from server");
 		    global_request_args[0] = requestcode;
 		    global_request_args[1] = response_hanlder;
-		    
+
 		    consec_failed_mills+=retry_timeout;
-		    
+
 		    if (consec_failed_mills>server_timeout)
 		    {
 			alert("server seems unresponsive. try again later")
@@ -210,7 +210,7 @@ function server_request ( requestcode, response_hanlder )
 /*	    else{
 		alert('Error: '+xhr.status); // An error occurred during the request
             }*/
-	    
+
 	}
     }
     // Send the request to send-ajax-data.php
@@ -259,12 +259,12 @@ var move_no = null;
 var game_no = null;
 
 var grid = {
-    relief:null, 
+    relief:null,
     width:null,
     height:null,
     need_clear:[],
     needs_clear:false,
-    rowcounts:null, 
+    rowcounts:null,
     grid:null
 };
 
@@ -322,14 +322,14 @@ function paint_to (color, no_overwrite)
 	    {
 		//debugger;
 		game_over = true;
-		
+
 		return false;
 	    }
-	    
+
 	}
     }
 
-    
+
     for (var i = 0;i< coords.length; i++)
     {
 	xy = coords[i];
@@ -339,7 +339,7 @@ function paint_to (color, no_overwrite)
 
     return true;
 }
-    
+
 function move_tetro ( move_fun )
 {
 
@@ -352,7 +352,7 @@ function move_tetro ( move_fun )
 	move_fun(true);//undo
 	paint_to(colors.BLUE);
     }
-    
+
 }
 function add_tetro (  )
 {
@@ -361,7 +361,7 @@ function add_tetro (  )
     paint_to(colors.BLUE);
 }
 
-    
+
 function left ( undo ) {
 
 
@@ -388,7 +388,7 @@ function down ( undo ) {
 
     !undo?mrxy[3]++:mrxy[3]--;
 }
-    
+
 
 function get_drop_distance (  )
 {
@@ -413,7 +413,7 @@ function get_drop_distance (  )
 	    new_y = relief_y;
 	}
     }
-    
+
     var drop_dist = min_dist-1-y;
     if (drop_dist<0)
     {
@@ -429,7 +429,7 @@ function drop (  )
 
 
     //assert(answer_rx[0]==mrxy[1] && answer_rx[1]==mrxy[2], " assertion failed at 380 ");
-    
+
 
     var drop_distance  = get_drop_distance();
     if (drop_distance<0)
@@ -438,20 +438,20 @@ function drop (  )
 	    game_over = true;
 	    return ;
 	}
-    
+
     mrxy[3] += drop_distance;
     var y = mrxy[3];
     var x = mrxy[2];
-    
+
     var top_crust = top_crusts[mrxy[0]][mrxy[1]];
     for (var i = 0, xy = null; i<top_crust.length; i++)
     {
 	xy = top_crust[i];
 	grid.relief[xy[0] + x] = xy[1]+y;
-	    
-		
+
+
     }
-    
+
     var coords = virtual_iterate();
     for (var i = 0;i< coords.length; i++)
 	{
@@ -473,12 +473,12 @@ function maybe_clear (  )
     {
 	// //debugger;
     }
-    
+
     if (grid.needs_clear)
     {
 	clear_lines();
     }
-}    
+}
 
 function sum ( list )
 {
@@ -505,7 +505,7 @@ function list_min ( list )
     return min;
 }
 
-    
+
 
 var cmpNum = function(a,b){return a-b}
 
@@ -549,9 +549,9 @@ function clear_lines (  )
 
     while (grid.need_clear.length>0)
         cleared.push(grid.grid[grid.need_clear.pop ()]);
-    
+
     // //debugger;
-    
+
     while (y>=YMAX)
     {
         //assert((cleared.length>0  && sum (cleared[0])==grid.width )  || sum (grid.grid[y])==grid.width,  " assertion failed at 510 ");
@@ -566,7 +566,7 @@ function clear_lines (  )
 
     assert(grid.need_clear.length==0,  " assertion failed at 536 ");
     assert(cleared.length==0,  " assertion failed at 537. game_no: "+game_no);//this is failing
-    
+
     for (var i = 0; i<grid.width; i++)
     {
         var relief = grid.relief[i];
@@ -574,7 +574,7 @@ function clear_lines (  )
 	    relief+=1;
         grid.relief[i] = relief;
     }
-    
+
     // assert(grid.consistency (), "failed assertion at line 419 ");
     grid.needs_clear = false;
     // repaint_rows(ymin, YMAX);
@@ -605,16 +605,16 @@ function fetch ( response )
 	{
 	    assert(server_moves_ahead.i==server_moves_ahead.max_i,  " assertion failed at 566 ");
 	    assert(!(response.length%3),  " assertion failed at 567 ");
-	    
+
 	    var to = min(server_moves_ahead.q.length, response.length);
 	    for (var i = 0; i<to; i++)
 	    {server_moves_ahead.q[i] = response[i];}
 	    for (var i = server_moves_ahead.q.length; i<response.length; i++)
 	    {server_moves_ahead.q.push(response[i]);}
-	    
+
 	    server_moves_ahead.max_i = response.length;
 	    server_moves_ahead.i = 0;
-	    
+
 	    assert(server_moves_ahead.i + 2 <server_moves_ahead.max_i,  " assertion failed at 578 ");
 
 	}
@@ -627,7 +627,7 @@ function fetch ( response )
 	    return;
 	}
     }
-    
+
     assert(server_moves_ahead.i + 2 <server_moves_ahead.max_i, " assertion failed at 590 ");
 
     // assert(first_move, "failed assertion at line 459 ");
@@ -637,13 +637,13 @@ function fetch ( response )
     first_move[1] = server_moves_ahead.q[server_moves_ahead.i++];
     first_move[2] = server_moves_ahead.q[server_moves_ahead.i++];
     ////debugger;
-    
+
 
     mrxy[0] = first_move[0], mrxy[1] = 0, mrxy[2] = grid.width/2-1, mrxy[3] = 0;
     answer_rx[0] = first_move[1], answer_rx[1] = first_move[2];
     move_no++;
 
-    
+
     timer();
 }
 
@@ -655,14 +655,14 @@ function init ( response )
 	    server_request(-1, init);
 	    return;
 	}
-    
+
     // response = [[0, 18], [0, 17], [1, 18], [1,17], [1,16], 10, 19, 0];
     // response = [];
     var miny = grid.height;
-    
+
     game_no = response.pop()
     console.log("game_no is: " +game_no);
-    
+
     move_no = response.pop();
     grid.width = response.pop();
     grid.height = response.pop();
@@ -670,9 +670,9 @@ function init ( response )
     grid.grid = [];
     grid.relief = [];
     answer_rx = [null, null];
-		 
+
     table_create(grid.width, grid.height);//delete previous table
-    
+
     for (var i = 0; i<grid.height;i++)
     {
 	grid.rowcounts.push(0);
@@ -685,13 +685,13 @@ function init ( response )
     {
 	grid.relief.push(grid.height);
     }
-	    
+
     // for (var xy in response)
     for (var i = 0;i<response.length;i+=2)
     {
 	x = response[i];
 	y = grid.height-1-response[i+1];
-	
+
 	grid.grid[y][x] = colors.BLUE;
 	cell_grid[y][x].bgColor = colors.BLUE;
 	if (y<miny)
@@ -727,7 +727,7 @@ function plan (  )
     move_queue.push(add_tetro);
     move_queue.push(plan);
 }
-    
+
 function pause_toggle (  )
 {
 console.log("calling pause_toggle");//autogen function logger
@@ -748,18 +748,18 @@ function game_over_fun (  )
 function timer (  )
 {
     ////debugger;
-    
+
     if (paused_p)
     {
 	//unpause must bring timer back to life
 	return ;
     }
-    // alert("timer executing");   
+    // alert("timer executing");
     if (move_queue.length>0)
     {
 	var move = move_queue.shift();
 	//debugger;
-	
+
 	if (move.name in paint_moves)
 	{
 	    move_tetro(move);
@@ -767,7 +767,7 @@ function timer (  )
 	    {
 		;//con
 	    }
-	    
+
 	}
 	else
 	{
@@ -776,7 +776,7 @@ function timer (  )
 	if (game_over)
 	{
 	    //debugger;
-	    
+
 	    game_over_fun();
 	}
 	else if (!(move.name in two_step_moves))
@@ -785,15 +785,15 @@ function timer (  )
 		{
 		    timer();
 		}
-		
+
 	    else
 	    {
 		setTimeout(timer,timer_delay);
 	    }
-	    
+
 	}
 	//otherwise two-step-move must bring timer back to life
-	
+
     }
     else
     {
@@ -804,9 +804,9 @@ function timer (  )
 /*moves = function() {return {
     'INIT' : init,
     'FETCH' : fetch,
-    'ROTCW'	: rotcw, 
-    'ROTCCW'	: rotccw, 
-    'LEFT'	: left, 
+    'ROTCW'	: rotcw,
+    'ROTCCW'	: rotccw,
+    'LEFT'	: left,
     'RIGHT'	: right,
     'DROP'	: drop,
     'DOWN'	: down,
@@ -819,9 +819,9 @@ function timer (  )
 
 
 /*paint_moves = function() {return {
-    'ROTCW'	: rotcw, 
-    'ROTCCW'	: rotccw, 
-    'LEFT'	: left, 
+    'ROTCW'	: rotcw,
+    'ROTCCW'	: rotccw,
+    'LEFT'	: left,
     'RIGHT'	: right,
     'DROP'	: drop,
     'DOWN'	: down,
@@ -848,8 +848,8 @@ pause_toggle.name = "pause_toggle";
 plan.name = "plan";
 add_tetro.name = "add_tetro";
 
-  
- 
+
+
 
 // server_request(-1);
 move_queue.push(init);
