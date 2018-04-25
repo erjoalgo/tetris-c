@@ -6,6 +6,7 @@ typedef int coord[2];//TODO do away with this?
 // shape should err when shape len is larger
 #define MAX_BLOCK_LEN 4
 typedef struct {
+  int id;
   int rot_count;
   int rot_wh[4][2];
   int** crust[4][4];

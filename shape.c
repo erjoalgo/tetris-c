@@ -38,10 +38,11 @@ int max_ab ( int a, int b )	{
   return a>b?a:b;
 }
 
-shape* shape_new ( int** shape_rot, int shape_len )	{
+shape* shape_new ( int** shape_rot, int shape_len, int shape_id )	{
   // shape_rot is one rotation of the shape
   shape* s = malloc(sizeof(shape));
   s->len = shape_len;
+  s->id = shape_id;
 
   // normalize to (0, 0)
   int extreme_left = min_dim(shape_rot, shape_len, 0);
@@ -228,6 +229,7 @@ shape** shapes_read ( char* file, int* shape_count)	{
   if (!fh) return NULL;
   *shape_count = 0;
   shape** shapes = malloc(1*sizeof(shape*));
+  int id = 0;
   while (!feof (fh))	{
     int len;
     fscanf(fh, "%d", &len);
@@ -240,7 +242,7 @@ shape** shapes_read ( char* file, int* shape_count)	{
       fscanf(fh, "%d", &rot[i][1]);
     }
     shapes = realloc(shapes, (*shape_count+1)*sizeof(shape*));
-    shapes[(*shape_count)++] = shape_new(rot, len);
+    shapes[(*shape_count)++] = shape_new(rot, len, id++);
   }
   return shapes;
 }
