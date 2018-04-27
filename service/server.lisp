@@ -10,7 +10,8 @@
 
 (defvar acceptor nil)
 
-(unless acceptor
+(defun server-start ()
+  (when acceptor (hunchentoot:stop acceptor))
   (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
 
 (defvar dbg)
