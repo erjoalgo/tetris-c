@@ -30,7 +30,7 @@
      (push (hunchentoot:create-regex-dispatcher ,url-regexp ',name)
            hunchentoot:*dispatch-table*)))
 
-(hunchentoot:define-easy-handler (game-status :uri "/game-status") ()
+(define-regexp-route current-game-state-handler ("^/game$")
   (let* ((game-no *curr-gameno*)
          (move-no 0)
          (game (car (gethash game-no games)))
@@ -46,9 +46,15 @@
                                                             (push r resp))))
           (format nil "[~{~D~^, ~}]" resp)))))
 
-(hunchentoot:define-easy-handler (move :uri "/moves") (game-no move-no)
+
+
+(define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
+                                        game-no-string move-no-string)
+  "Display the contents of the ENTRY."
   ;; (setf (hunchentoot:content-type*) "text/plain")
-  (let ((moves (cdr (gethash game-no games))))
+  (let* ((game-no (parse-integer game-no-string))
+         (move-no (parse-integer move-no-string))
+         (moves (cdr (gethash game-no games))))
     (if (null moves) "no such game" ;; TODO non-200
         (loop while (>= move-no (length moves))
            do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
