@@ -259,6 +259,21 @@ void shape_test (  )	{
   }
 }
 
+void shape_new_test (  )	{
+  int shape_rot_spec[] = {1, 0 ,0, 1 ,1, 1 ,0, 2};
+  int len = sizeof(shape_rot_spec)/sizeof(*shape_rot_spec)/2;
+  int* shape_rot[len];
+  int i;
+  for ( i = 0; i < len; i++ )    {
+    shape_rot[i] = malloc(2*sizeof(*shape_rot[i]));
+    shape_rot[i][0] = shape_rot_spec[i*2];
+    shape_rot[i][1] = shape_rot_spec[i*2+1];
+  }
+  shape* s = shape_new(shape_rot, len, 0);
+  shape_print(s, 0);
+  printf( "%s\n", shape_serialize(s) );
+}
+
 char* shape_serialize ( shape* s )    {
   char* buf = malloc(10000);
   char* CRUST_NAMES[4];

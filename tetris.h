@@ -22,6 +22,7 @@ void shape_print(shape* s, int quiet);
 char* shape_serialize(shape* s);
 shape** shapes_read(char* file, int* shape_count);
 void shape_test();
+void shape_new_test();
 int shapes_init (char* shapes_file);
 //global shapes and count
 shape** SHAPES;
