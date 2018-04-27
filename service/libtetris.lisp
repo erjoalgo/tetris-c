@@ -11,6 +11,7 @@
    #:my-translate-from-foreign
    #:game-print
    #:serialize-shapes
+   #:init-tetris
    )
   )
 
@@ -28,7 +29,7 @@
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
-(defun init-tetris (seed shapes-file)
+(defun init-tetris (&key (seed seed) (shapes-file shapes-file))
   (format t "reading shapes...~%" )
   (setf shapes
         (cffi:foreign-funcall "shapes_read"
@@ -40,13 +41,9 @@
   (assert (> SHAPE-COUNT 0))
   (cffi:foreign-funcall "ai_init" :void))
 
-(init-tetris seed shapes-file)
-
 (defun grid-test ()
   (format t "starting test...~%" )
   (cffi:foreign-funcall "grid_test"))
-
-(defvar dbg)
 
 (defstruct game
   g ;; grid
