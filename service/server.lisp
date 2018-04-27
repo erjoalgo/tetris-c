@@ -17,6 +17,19 @@
 
 (defparameter *curr-gameno* 3)
 
+(defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
+  `(progn
+     (defun ,name ()
+       ;; ,@(when documentation (list documentation))
+       ;; ,@declarations
+       ;; (when *debug*
+       ;;   (format *trace-output* "=== Calling ~A Handler ===" ',name))
+       (ppcre:register-groups-bind ,capture-names
+           (,url-regexp (hunchentoot:script-name*))
+         ,@body))
+     (push (hunchentoot:create-regex-dispatcher ,url-regexp ',name)
+           hunchentoot:*dispatch-table*)))
+
 (hunchentoot:define-easy-handler (game-status :uri "/game-status") ()
   (let* ((game-no *curr-gameno*)
          (move-no 0)
