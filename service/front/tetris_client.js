@@ -698,12 +698,34 @@ function init_shapes ( response )
     }else     {
         for (var i = 0; i<response.length; i++)    {
             var shape = response[i];
+            var rots = shape.rotation_configurations;
+            for (var r = 0; r<rots.length; r++)    {
+                var rot_h = shape.rot_wh[r][1];
+                var zero_seen = false;
+                var rot = rots[r];
+                for (var b = 0; b<rot.length; b++)    {
+                    rot[b][1] *= -1;
+                    rot[b][1] += rot_h-1;
+                    assert(rot[b][1]>=0);
+                    zero_seen = zero_seen || rot[b][1] == 0;
+                }
+                assert(zero_seen);
+
+                CRUST_NAMES = ["top", "bot", "left", "right"];
+                for (var c = 0; c<CRUST_NAMES.length; c++)    {
+                    var crust = shape.crust_configurations[CRUST_NAMES[c]][r];
+                    for (var b = 0; b<crust.length; b++)    {
+                        var cr = crust[b];
+                        cr[1]*=-1;
+                        cr[1]+=rot_h-1;
+                        assert(cr[1]>=0);
+                    }
+                }
+            }
             shapes.push(shape.rotation_configurations);
             assert(shape.id == i);
-            // top_crusts.push(shape.crust_configurations.top);
-            // bot_crusts.push(shape.crust_configurations.bot);
-            top_crusts.push(shape.crust_configurations.bot);
-            bot_crusts.push(shape.crust_configurations.top);
+            top_crusts.push(shape.crust_configurations.top);
+            bot_crusts.push(shape.crust_configurations.bot);
         }
         timer();
     }
