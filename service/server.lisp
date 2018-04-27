@@ -10,6 +10,14 @@
 
 (defvar acceptor nil)
 
+(defun main (argv)
+  (declare (ignore argv))
+  (libtetris:init-tetris)
+  (server-start)
+  (loop
+     do (game-create-run *curr-gameno*)
+     do (incf *curr-gameno*)))
+
 (defun server-start ()
   (when acceptor (hunchentoot:stop acceptor))
   (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
@@ -114,5 +122,3 @@
 
 (defun game-create-run-thread (game-no)
   (sb-thread:make-thread 'game-create-run :arguments (list game-no)))
-
-;; (progn (incf *curr-gameno*) (game-create-run-thread *curr-gameno*))
