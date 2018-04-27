@@ -7,7 +7,7 @@
 	       #:getopt
 	       )
   :components (
-               (:file "server")
 	       (:file "libtetris")
+               (:file "server")
                )
   )
