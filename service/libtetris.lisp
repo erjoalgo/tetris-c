@@ -167,7 +167,6 @@
     (let ((shape-id (mem-ref shape :int)))
       (make-game-move-native :shape-code shape-id :rot rot :col col))))
 
-
 (defun game-apply-next-move (game &optional game-move)
   (unless game-move
     ;; TODO allow specifying move
@@ -194,7 +193,5 @@
   (format nil "[~%~{~a~^,~%~}~%]~%"
           (loop for id below SHAPE-COUNT collect
                (serialize-shape (mem-aref SHAPES :pointer id)))))
-
-
 
 ;; (test-game)
