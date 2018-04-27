@@ -312,6 +312,13 @@ char* shape_serialize ( shape* s )    {
     i+=sprintf(buf+i, "\n\t\t]");
   }
   i+=sprintf(buf+i, "\n\t}");
+
+  i+=sprintf(buf+i, ",\n\t\"rot_wh\": [");
+  for ( r = 0; r < 4; r++ )    {
+    i+=sprintf(buf+i, "%s[%d, %d]", r?", ":"", s->rot_wh[r][0], s->rot_wh[r][1]);
+  }
+  i+=sprintf(buf+i, "]");
+
   i+=sprintf(buf+i, "\n}");
   return buf;
 }
