@@ -155,7 +155,7 @@ function server_request ( requestcode, response_hanlder )
     // xhr.open('get', "http://root.erjoalgo.com/tetris_updater/send_ajax_data.php?tcode="+requestcode);
     // xhr.open('get', "http://root.erjoalgo.com/tetris.uwsgi?"+requestcode);
     //console.log( "making server request" );
-    xhr.open('get', SERVER+"tetris.uwsgi?"+requestcode);
+    xhr.open('get', SERVER+requestcode);
     // Track the state changes of the request
     xhr.onreadystatechange = function(){
 	// Ready state 4 means the request is done
@@ -612,7 +612,8 @@ function fetch ( response )
 	    assert(server_moves_ahead.i==server_moves_ahead.max_i,  " assertion failed at 583 ");
 	    //debugger;
 	    //console.log( "requesting moves from server" );
-	    server_request(move_no+"%"+game_no, fetch);//model, rotation, x
+            var uri = "/moves?" +"move-no="+move_no +"&game-no="+game_no;
+            server_request(uri, fetch); //model, rotation, x
 	    return;
 	}
     }
@@ -640,7 +641,7 @@ function init ( response )
 {
     if (response==null)
 	{
-	    server_request(-1, init);
+	    server_request("/game-status", init);
 	    return;
 	}
 
