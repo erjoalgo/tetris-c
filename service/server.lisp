@@ -14,6 +14,7 @@
   (when acceptor (hunchentoot:stop acceptor))
   (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
 
+(defvar games (make-hash-table))
 
 (defparameter *curr-gameno* 3)
 
@@ -82,8 +83,6 @@
 
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
-
-(defvar games (make-hash-table))
 
 (defun game-run (game moves)
   (loop
