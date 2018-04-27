@@ -258,3 +258,46 @@ void shape_test (  )	{
     shape_print(SHAPES[i], 0);
   }
 }
+
+char* shape_serialize ( shape* s )    {
+  char* buf = malloc(10000);
+  char* CRUST_NAMES[4];
+  CRUST_NAMES[TOP] = "top";
+  CRUST_NAMES[RIGHT] = "right";
+  CRUST_NAMES[LEFT] = "left";
+  CRUST_NAMES[BOT] = "bot";
+
+  int i = 0;
+  int r, b, d;
+  i = sprintf(buf, "{\n\t\"id\": %d,\n\t\"length\": %d,\n\t\"rot-count\": %d",
+              s->id, s->len, s->rot_count);
+
+  i+=sprintf(buf+i, ",\n\t\"rotation_configurations\": [");
+  for ( r = 0; r < s->rot_count; r++ )    {
+    i+=sprintf(buf+i, "%s\n\t\t[", r? ",": "");
+    for ( b = 0; b < s->len; b++ )    {
+      i+=sprintf(buf+i, "%s[%d, %d]", b? " ,": "", s->rot_flat[r][b][0], s->rot_flat[r][b][1]);
+    }
+    i+=sprintf(buf+i, "]");
+  }
+  i+=sprintf(buf+i, "\n\t]");
+
+  i+=sprintf(buf+i, ",\n\t\"crust_configurations\": {");
+  for ( d = 0; d < 4; d++ )    {
+    char* crust_name = CRUST_NAMES[d];
+    i+=sprintf(buf+i, "%s\n\t\t\"%s\": [", d? ",": "", crust_name);
+    for ( r = 0; r < s->rot_count; r++ )    {
+      i+=sprintf(buf+i, "%s\n\t\t\t[", r? ",": "");
+      for ( b = 0; b < s->crust_len[r][d]; b++ )    {
+        i+=sprintf(buf+i, "%s[%d, %d]", b? " ,":"",
+                   s->crust[r][d][b][0], s->crust[r][d][b][1]);
+      }
+      i+=sprintf(buf+i, "]");
+    }
+    i+=sprintf(buf+i, "\n\t\t]");
+  }
+  i+=sprintf(buf+i, "\n\t}");
+  i+=sprintf(buf+i, "\n}");
+  return buf;
+}
+

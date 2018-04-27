@@ -19,6 +19,7 @@ typedef struct {
 } shape;
 
 void shape_print(shape* s, int quiet);
+char* shape_serialize(shape* s);
 shape** shapes_read(char* file, int* shape_count);
 void shape_test();
 int shapes_init (char* shapes_file);
