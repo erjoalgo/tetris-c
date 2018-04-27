@@ -14,7 +14,6 @@
   (when acceptor (hunchentoot:stop acceptor))
   (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
 
-(defvar dbg)
 
 (defparameter *curr-gameno* 3)
 
