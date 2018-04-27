@@ -185,4 +185,16 @@
            (sleep .5))
          )))
 
+(defun serialize-shape (shape-ptr)
+  (cffi:foreign-funcall "shape_serialize"
+                        :pointer shape-ptr
+                        :string))
+
+(defun serialize-shapes ()
+  (format nil "[~%~{~a~^,~%~}~%]~%"
+          (loop for id below SHAPE-COUNT collect
+               (serialize-shape (mem-aref SHAPES :pointer id)))))
+
+
+
 ;; (test-game)

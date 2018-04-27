@@ -61,6 +61,9 @@
        "/loading.gif" "loading.gif")
       hunchentoot:*dispatch-table*)
 
+(hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
+  (libtetris:serialize-shapes))
+
 (defvar games (make-hash-table))
 
 (defun test-curl ()
@@ -70,6 +73,7 @@
                         (list "-s" "localhost:4242/game-status")
                         ;; (list "-s" (format nil "localhost:4242/moves?move-no=0&game-no=~D"
                         ;;                    *curr-gameno*))
+                        ;; (list "-s" "localhost:4242/shapes")
                         ;; (list "localhost:4242/yo")
                         :search t
                         :wait t
