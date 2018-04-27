@@ -178,11 +178,11 @@
 
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
-    (loop for i below 100 do
+    (loop for i below 10 do
          (progn
            (game-apply-next-move game)
            (game-print game)
            (sleep .5))
-    )))
+         )))
 
 (test-game)
