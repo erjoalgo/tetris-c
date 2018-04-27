@@ -206,13 +206,6 @@ function server_request ( requestcode, response_hanlder )
 }
 
 
-var shapes = [[[[0, 3], [0, 2], [0, 1], [0, 0]], [[0, 0], [1, 0], [2, 0], [3, 0]]], [[[0, 2], [0, 1], [0, 0], [1, 2]], [[0, 0], [1, 0], [2, 0], [0, 1]], [[1, 0], [1, 1], [1, 2], [0, 0]], [[2, 1], [1, 1], [0, 1], [2, 0]]], [[[0, 1], [0, 0], [1, 1], [2, 1]], [[0, 0], [1, 0], [0, 1], [0, 2]], [[2, 0], [2, 1], [1, 0], [0, 0]], [[1, 2], [0, 2], [1, 1], [1, 0]]], [[[0, 2], [0, 1], [1, 1], [1, 0]], [[0, 0], [1, 0], [1, 1], [2, 1]]], [[[0, 0], [0, 1], [1, 1], [1, 2]], [[2, 0], [1, 0], [1, 1], [0, 1]]], [[[0, 1], [0, 0], [1, 0], [1, 1]]], [[[0, 1], [1, 1], [1, 0], [2, 1]], [[0, 0], [0, 1], [1, 1], [0, 2]], [[2, 0], [1, 0], [1, 1], [0, 0]], [[1, 2], [1, 1], [0, 1], [1, 0]]]];
-
-var top_crusts = [[[[0, 0]], [[0, 0], [1, 0], [2, 0], [3, 0]]], [[[0, 0], [1, 2]], [[0, 0], [1, 0], [2, 0]], [[1, 0], [0, 0]], [[1, 1], [0, 1], [2, 0]]], [[[0, 0], [1, 1], [2, 1]], [[0, 0], [1, 0]], [[2, 0], [1, 0], [0, 0]], [[0, 2], [1, 0]]], [[[0, 1], [1, 0]], [[0, 0], [1, 0], [2, 1]]], [[[0, 0], [1, 1]], [[2, 0], [1, 0], [0, 1]]], [[[0, 0], [1, 0]]], [[[0, 1], [1, 0], [2, 1]], [[0, 0], [1, 1]], [[2, 0], [1, 0], [0, 0]], [[0, 1], [1, 0]]]];
-
-
-
-var bot_crusts = [[[[0, 3]], [[0, 0], [1, 0], [2, 0], [3, 0]]], [[[0, 2], [1, 2]], [[1, 0], [2, 0], [0, 1]], [[1, 2], [0, 0]], [[2, 1], [1, 1], [0, 1]]], [[[0, 1], [1, 1], [2, 1]], [[1, 0], [0, 2]], [[2, 1], [1, 0], [0, 0]], [[1, 2], [0, 2]]], [[[0, 2], [1, 1]], [[0, 0], [1, 1], [2, 1]]], [[[0, 1], [1, 2]], [[2, 0], [1, 1], [0, 1]]], [[[0, 1], [1, 1]]], [[[0, 1], [1, 1], [2, 1]], [[1, 1], [0, 2]], [[2, 0], [1, 1], [0, 0]], [[1, 2], [0, 1]]]];
 //y inverted
 
 
@@ -694,7 +687,27 @@ function init ( response )
     timer();
 }
 
+var top_crusts = [];
+var bot_crusts = [];
+var shapes = [];
 
+function init_shapes ( response )
+{
+    if (response == null)    {
+        server_request("shapes", init_shapes)
+    }else     {
+        for (var i = 0; i<response.length; i++)    {
+            var shape = response[i];
+            shapes.push(shape.rotation_configurations);
+            assert(shape.id == i);
+            // top_crusts.push(shape.crust_configurations.top);
+            // bot_crusts.push(shape.crust_configurations.bot);
+            top_crusts.push(shape.crust_configurations.bot);
+            bot_crusts.push(shape.crust_configurations.top);
+        }
+        timer();
+    }
+}
 
 
 function plan (  )
@@ -830,6 +843,7 @@ left.name = "left";
 right.name = "right";
 drop.name = "drop";
 down.name = "down";
+init_shapes.name = "init_shapes";
 clear_lines.name = "clear_lines";
 maybe_clear.name = "maybe_clear";
 pause_toggle.name = "pause_toggle";
@@ -841,6 +855,7 @@ add_tetro.name = "add_tetro";
 
 // server_request(-1);
 move_queue.push(init);
+move_queue.push(init_shapes);
 move_queue.push(fetch);
 move_queue.push(add_tetro);
 move_queue.push(plan);
