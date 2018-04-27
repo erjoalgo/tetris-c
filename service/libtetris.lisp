@@ -167,7 +167,7 @@
     )
   (let* ((next-move (ai-best-move game (game-ai-weights game))))
     (game-next-shape game)
-    (game-apply-move game next-move)))
+    (when (game-apply-move game next-move) next-move)))
 
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
