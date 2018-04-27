@@ -108,3 +108,5 @@
   (sb-thread:make-thread 'game-create-run :arguments (list game-no)))
 
 (format t "test curl: ~A~%" (test-curl))
+
+;; (progn (incf *curr-gameno*) (game-create-run-thread *curr-gameno*))
