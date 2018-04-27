@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   }
   char* cmd = argv[optind];
 
-  if (!(SHAPES = shapes_read(shapes_file, &SHAPE_COUNT)))	{
+  if (!shapes_init(shapes_file))	{
     FATAL("unable to open %s", shapes_file);
   }
 
