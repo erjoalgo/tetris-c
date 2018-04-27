@@ -3,7 +3,14 @@
   ;; (:use :common-lisp :cffi)
   (:use :cl :cffi)
   (:export
-   ;; #:file-string #:list-directory-recursive #:list-directory #:list-to-hash-table
+   #:make-game-move-native #:game-move-native
+   #:game-grid-iter
+   #:game-init #:game-width #:game-height
+   #:HEIGHT #:WIDTH #:ai-default-weights
+   #:game-apply-next-move
+   #:my-translate-from-foreign
+   #:game-print
+   #:serialize-shapes
    )
   )
 
