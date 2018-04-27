@@ -185,4 +185,4 @@
            (sleep .5))
          )))
 
-(test-game)
+;; (test-game)
