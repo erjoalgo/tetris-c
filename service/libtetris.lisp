@@ -141,6 +141,8 @@
                         :pointer weights
                         :pointer))
 
+(defstruct game-move-native shape-code rot col)
+
 (defcstruct (%game-move :class game-move)
   "game move"
   (shape :pointer)
@@ -148,6 +150,7 @@
   (col :int))
 
 ;; (defmethod translate-from-foreign (pointer (type game-move))
+;; TODO use proper defmethod
 (defun my-translate-from-foreign (pointer &optional game-move)
   (declare (ignore game-move))
   (format t "translating...~%" )
@@ -155,7 +158,7 @@
     ;; You can change this and get return value in other format
     ;; for example: (values width height)
     (let ((shape-id (mem-ref shape :int)))
-      (list shape-id rot col))))
+      (make-game-move-native :shape-code shape-id :rot rot :col col))))
 
 
 (defun game-apply-next-move (game &optional game-move)
