@@ -867,6 +867,3 @@ console.log("hola");
 
 timer();
 // init([19, 10, 0]);
-
-
-
