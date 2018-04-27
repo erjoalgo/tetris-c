@@ -85,20 +85,6 @@
 
 (defvar games (make-hash-table))
 
-(defun test-curl ()
-  (with-output-to-string
-      (output-fh)
-    (SB-EXT:RUN-PROGRAM "curl"
-                        (list "-s" "localhost:4242/game-status")
-                        ;; (list "-s" (format nil "localhost:4242/moves?move-no=0&game-no=~D"
-                        ;;                    *curr-gameno*))
-                        ;; (list "-s" "localhost:4242/shapes")
-                        ;; (list "localhost:4242/yo")
-                        :search t
-                        :wait t
-                        :output output-fh
-                        :error output-fh)))
-
 (defun game-run (game moves)
   (loop
      for i from 0
@@ -129,7 +115,5 @@
 
 (defun game-create-run-thread (game-no)
   (sb-thread:make-thread 'game-create-run :arguments (list game-no)))
-
-(format t "test curl: ~A~%" (test-curl))
 
 ;; (progn (incf *curr-gameno*) (game-create-run-thread *curr-gameno*))
