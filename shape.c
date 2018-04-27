@@ -291,7 +291,7 @@ char* shape_serialize ( shape* s )    {
   for ( r = 0; r < s->rot_count; r++ )    {
     i+=sprintf(buf+i, "%s\n\t\t[", r? ",": "");
     for ( b = 0; b < s->len; b++ )    {
-      i+=sprintf(buf+i, "%s[%d, %d]", b? " ,": "", s->rot_flat[r][b][0], s->rot_flat[r][b][1]);
+      i+=sprintf(buf+i, "%s[%d, %d]", b? ", ": "", s->rot_flat[r][b][0], s->rot_flat[r][b][1]);
     }
     i+=sprintf(buf+i, "]");
   }
@@ -304,7 +304,7 @@ char* shape_serialize ( shape* s )    {
     for ( r = 0; r < s->rot_count; r++ )    {
       i+=sprintf(buf+i, "%s\n\t\t\t[", r? ",": "");
       for ( b = 0; b < s->crust_len[r][d]; b++ )    {
-        i+=sprintf(buf+i, "%s[%d, %d]", b? " ,":"",
+        i+=sprintf(buf+i, "%s[%d, %d]", b? ", ":"",
                    s->crust[r][d][b][0], s->crust[r][d][b][1]);
       }
       i+=sprintf(buf+i, "]");
