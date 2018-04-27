@@ -6,6 +6,8 @@
    )
   )
 
+(in-package #:server)
+
 (defvar acceptor nil)
 
 (unless acceptor
