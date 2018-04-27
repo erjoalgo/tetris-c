@@ -604,7 +604,7 @@ function fetch ( response )
 	    assert(server_moves_ahead.i==server_moves_ahead.max_i,  " assertion failed at 583 ");
 	    //debugger;
 	    //console.log( "requesting moves from server" );
-            var uri = "/moves?" +"move-no="+move_no +"&game-no="+game_no;
+            var uri = "/games/"+game_no+"/moves/"+move_no;
             server_request(uri, fetch); //model, rotation, x
 	    return;
 	}
@@ -633,7 +633,7 @@ function init ( response )
 {
     if (response==null)
 	{
-	    server_request("/game-status", init);
+	    server_request("/game", init);
 	    return;
 	}
 
