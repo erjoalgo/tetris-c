@@ -67,8 +67,9 @@
   (with-output-to-string
       (output-fh)
     (SB-EXT:RUN-PROGRAM "curl"
-                        (list "localhost:4242/tetris.uwsgi?-1")
-                        ;; (list "localhost:4242/tetris.uwsgi?124%123")
+                        (list "-s" "localhost:4242/game-status")
+                        ;; (list "-s" (format nil "localhost:4242/moves?move-no=0&game-no=~D"
+                        ;;                    *curr-gameno*))
                         ;; (list "localhost:4242/yo")
                         :search t
                         :wait t
