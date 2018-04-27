@@ -49,6 +49,18 @@
                                (list libtetris::shape-code libtetris::rot
                                      libtetris::col))))))))
 
+(push (hunchentoot:create-static-file-dispatcher-and-handler
+       "/index.html" "index.html")
+      hunchentoot:*dispatch-table*)
+
+(push (hunchentoot:create-static-file-dispatcher-and-handler
+       "/tetris_client.js" "tetris_client.js")
+      hunchentoot:*dispatch-table*)
+
+(push (hunchentoot:create-static-file-dispatcher-and-handler
+       "/loading.gif" "loading.gif")
+      hunchentoot:*dispatch-table*)
+
 (defvar games (make-hash-table))
 
 (defun test-curl ()
