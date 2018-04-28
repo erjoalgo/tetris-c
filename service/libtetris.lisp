@@ -12,6 +12,7 @@
    #:game-print
    #:serialize-shapes
    #:init-tetris
+   #:game-over-p
    )
   )
 
@@ -52,6 +53,7 @@
   height
   width
   ai-weights
+  over-p
   )
 
 (defun game-init (height width &optional ai-weights)
