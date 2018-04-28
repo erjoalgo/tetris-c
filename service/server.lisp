@@ -8,7 +8,7 @@
 
 (in-package #:server)
 
-(defvar acceptor nil)
+(defvar *acceptor* nil)
 
 (defun main (argv)
   (declare (ignore argv))
@@ -21,7 +21,7 @@
 
 (defun server-start (port)
   (when acceptor (hunchentoot:stop acceptor))
-  (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
+  (setf *acceptor* (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
 
 (defvar games (make-hash-table))
 
