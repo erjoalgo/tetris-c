@@ -2,6 +2,10 @@
   (:use :cl)
   ;; (:use :cl :hunchentoot)
   (:export
+   #:service-start
+   #:service-stop
+   #:game-create-run
+   #:make-config
    ;; #:file-string #:list-directory-recursive #:list-directory #:list-to-hash-table
    )
   )
