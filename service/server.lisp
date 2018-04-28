@@ -13,14 +13,15 @@
 (defun main (argv)
   (declare (ignore argv))
   (libtetris:init-tetris)
-  (server-start)
+  ;; TODO parse args
+  (server-start 4242)
   (loop
      do (game-create-run *curr-gameno*)
      do (incf *curr-gameno*)))
 
-(defun server-start ()
+(defun server-start (port)
   (when acceptor (hunchentoot:stop acceptor))
-  (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port 4242))))
+  (setf acceptor (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
 
 (defvar games (make-hash-table))
 
