@@ -20,7 +20,8 @@
      do (incf *curr-gameno*)))
 
 (defun server-start (port)
-  (when acceptor (hunchentoot:stop acceptor))
+  (when *acceptor* (and (hunchentoot:started-p *acceptor*)
+                      (hunchentoot:stop *acceptor*)))
   (setf *acceptor* (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
 
 (defvar games (make-hash-table))
