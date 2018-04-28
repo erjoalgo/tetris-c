@@ -8,25 +8,58 @@
 
 (in-package #:server)
 
-(defvar *acceptor* nil)
+(defstruct config
+  port
+  shapes-file
+  seed
+  grid-dimensions
+  max-move-catchup-wait-secs
+  )
+
+(defvar config-default
+  (make-config :port 4242
+               :shapes-file nil ; use libtetris default
+               :grid-dimensions nil ; use libtetris default
+               :max-move-catchup-wait-secs 10))
+
+(defstruct service
+  config
+  acceptor
+  games-moves
+  curr-game-no
+  )
 
 (defun main (argv)
   (declare (ignore argv))
-  (libtetris:init-tetris)
   ;; TODO parse args
-  (server-start 4242)
-  (loop
-     do (game-create-run *curr-gameno*)
-     do (incf *curr-gameno*)))
+  (let ((config config-default))
+    (service-start config))
+  (loop do (game-create-run)))
 
-(defun server-start (port)
-  (when *acceptor* (and (hunchentoot:started-p *acceptor*)
-                        (hunchentoot:stop *acceptor*)))
-  (setf *acceptor* (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
+(defvar *service* nil)
 
-(defvar *games* (make-hash-table))
+(defun service-start (config)
+  (apply 'libtetris:init-tetris
+         (append (when (config-shapes-file config)
+                   (list :shapes-file (config-shapes-file config)))
+                 (when (config-seed config)
+                   (list :seed (config-seed config)))))
 
-(defparameter *curr-gameno* 3)
+  (let ((acceptor (make-instance 'hunchentoot:easy-acceptor :port (config-port config))))
+    (hunchentoot:start acceptor)
+    (setf *service*
+          (make-service :config (or config config-default)
+                        :acceptor acceptor
+                        :games-moves (make-hash-table)
+                        :curr-game-no 0))))
+
+(defun service-stop (service)
+  (let ((acceptor (service-acceptor service)))
+    (when (and acceptor (hunchentoot:started-p acceptor))
+      (hunchentoot:stop acceptor)))
+  ;; TODO kill running game threads
+  )
+
 
 (defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
   `(progn
@@ -44,9 +77,9 @@
   (jonathan:to-json body))
 
 (define-regexp-route current-game-state-handler ("^/game$")
-  (let* ((game-no *curr-gameno*)
+  (let* ((game-no (service-curr-game-no *service*))
          (move-no 0)
-         (game (car (gethash game-no *games*))))
+         (game (car (gethash game-no (service-games-moves *service*)))))
 
     (if (null game)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
@@ -58,12 +91,10 @@
                                                       (push r resp))))))
 
 
-(defvar *max-move-catchup-wait-secs* 10)
-
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
   ;; (setf (hunchentoot:content-type*) "text/plain")
-  (let ((game-moves (gethash game-no *games*)))
+  (let ((game-moves (gethash game-no (service-games-moves *service*))))
     (if (null game-moves)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
         (destructuring-bind (game . moves) game-moves
@@ -71,7 +102,10 @@
             ((and (libtetris:game-over-p game) (>= move-no (length moves)))
              (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
                         '(:error "requested move outside of range of completed game")))
-            (t (loop for i below *max-move-catchup-wait-secs*
+            (t (loop with
+                  max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                                (service-config *service*))
+                  for i below max-move-catchup-wait-secs
                   as behind = (>= move-no (length moves))
                   while behind
                   do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
@@ -90,7 +124,8 @@
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
-             (loop for game-no being the hash-keys of *games* collect game-no)))
+             (loop for game-no being the hash-keys of (service-games-moves *service*)
+                collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
@@ -128,11 +163,14 @@
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
-    (setf (gethash game-no *games*) (cons game moves))))
+    (setf (gethash game-no (service-games-moves *service*)) (cons game moves))))
 
-(defun game-create-run (game-no &optional max-moves)
-  (destructuring-bind (game . moves) (game-create game-no)
-    (game-run game moves max-moves)))
+(defun game-create-run (&optional game-no max-moves)
+  (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
+    (when (gethash game-no (service-games-moves *service*))
+      (error "game ~D exists" game-no))
+    (destructuring-bind (game . moves) (game-create game-no)
+      (game-run game moves max-moves))))
 
 (defun game-create-run-thread (game-no &optional max-moves)
   (sb-thread:make-thread 'game-create-run :arguments (list game-no max-moves)))
