@@ -92,12 +92,11 @@
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
 
-(defun game-run (game moves)
+(defun game-run (game moves &optional max-moves)
   (loop
      for i from 0
-     upto 100
      as next-move = (libtetris:game-apply-next-move game)
-     while next-move
+     while (and next-move (or (null max-moves) (< i max-moves)))
      do (libtetris:game-print game)
      do
        (let ((native (libtetris:my-translate-from-foreign next-move)))
@@ -116,9 +115,9 @@
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
     (setf (gethash game-no games) (cons game moves))))
 
-(defun game-create-run (game-no)
+(defun game-create-run (game-no &optional max-moves)
   (destructuring-bind (game . moves) (game-create game-no)
-      (game-run game moves)))
+      (game-run game moves max-moves)))
 
-(defun game-create-run-thread (game-no)
-  (sb-thread:make-thread 'game-create-run :arguments (list game-no)))
+(defun game-create-run-thread (game-no &optional max-moves)
+  (sb-thread:make-thread 'game-create-run :arguments (list game-no max-moves)))
