@@ -39,6 +39,12 @@
      (push (hunchentoot:create-regex-dispatcher ,url-regexp ',name)
            hunchentoot:*dispatch-table*)))
 
+(defun json-resp (return-code body)
+  (when return-code
+    (setf (hunchentoot:return-code*) return-code))
+  (setf (hunchentoot:content-type*) "application/json")
+  (jonathan:to-json body))
+
 (define-regexp-route current-game-state-handler ("^/game$")
   (let* ((game-no *curr-gameno*)
          (move-no 0)
@@ -46,8 +52,8 @@
          resp)
 
     (if (null game)
-        ;; TODO non-200
-        "no current games"
+        (json-resp hunchentoot:+HTTP-NOT-FOUND+
+                   '(:error "no current games"))
         (progn
           (setf resp (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no))
           '(libtetris:game-grid-iter game (lambda (r c v) (when (not (zerop v))
@@ -67,13 +73,12 @@
          (game-moves (gethash game-no games)))
     (if (null game-moves)
         (progn
-          (setf (hunchentoot:return-code*) hunchentoot:+HTTP-NOT-FOUND+)
-          "no such game")
+          (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game")))
     (destructuring-bind (game . moves) game-moves
       (cond
         ((and (libtetris:game-over-p game) (>= move-no (length moves)))
-         (setf (hunchentoot:return-code*) hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+)
-         "requested move outside of range")
+         (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+         '(:error "requested move outside of range of completed game")))
         (t (loop for i below *max-move-catchup-wait-secs*
            as behind = (>= move-no (length moves))
            while behind
@@ -82,9 +87,10 @@
                      (sleep 1))
            finally
              (if behind
-                 (progn (setf (hunchentoot:return-code*) hunchentoot:+HTTP-SERVICE-UNAVAILABLE+)
-                        (format nil "reached timeout catching up to requested move~%" ))
-             (return (format nil "[~{~D~^, ~}]"
+                 (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                                   '(:error "reached timeout catching up to requested move~%" ))
+                 (return
+                   (json-resp nil
                              ;; TODO export
                              (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
                                  (aref moves move-no)
@@ -93,7 +99,8 @@
 
 (define-regexp-route game-list-handler ("^/games/?$")
   "Display the contents of the ENTRY."
-  (jonathan:to-json (loop for game-no being the hash-keys of games collect game-no)))
+  (json-resp nil
+   (loop for game-no being the hash-keys of games collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
