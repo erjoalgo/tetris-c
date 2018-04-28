@@ -91,6 +91,10 @@
                                (list libtetris::shape-code libtetris::rot
                                      libtetris::col))))))))))))
 
+(define-regexp-route game-list-handler ("^/games/?$")
+  "Display the contents of the ENTRY."
+  (jonathan:to-json (loop for game-no being the hash-keys of games collect game-no)))
+
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
       hunchentoot:*dispatch-table*)
