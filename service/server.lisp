@@ -67,12 +67,10 @@
 (defvar *max-move-catchup-wait-secs* 10)
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
-                                        game-no-string move-no-string)
+                                        (#'parse-integer game-no) (#'parse-integer move-no))
   "Display the contents of the ENTRY."
   ;; (setf (hunchentoot:content-type*) "text/plain")
-  (let* ((game-no (parse-integer game-no-string))
-         (move-no (parse-integer move-no-string))
-         (game-moves (gethash game-no games)))
+  (let ((game-moves (gethash game-no games)))
     (if (null game-moves)
         (progn
           (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game")))
