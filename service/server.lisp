@@ -24,7 +24,7 @@
                         (hunchentoot:stop *acceptor*)))
   (setf *acceptor* (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
 
-(defvar games (make-hash-table))
+(defvar *games* (make-hash-table))
 
 (defparameter *curr-gameno* 3)
 
@@ -46,7 +46,7 @@
 (define-regexp-route current-game-state-handler ("^/game$")
   (let* ((game-no *curr-gameno*)
          (move-no 0)
-         (game (car (gethash game-no games))))
+         (game (car (gethash game-no *games*))))
 
     (if (null game)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
@@ -63,7 +63,7 @@
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
   ;; (setf (hunchentoot:content-type*) "text/plain")
-  (let ((game-moves (gethash game-no games)))
+  (let ((game-moves (gethash game-no *games*)))
     (if (null game-moves)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
         (destructuring-bind (game . moves) game-moves
@@ -90,7 +90,7 @@
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
-             (loop for game-no being the hash-keys of games collect game-no)))
+             (loop for game-no being the hash-keys of *games* collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
@@ -128,7 +128,7 @@
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
-    (setf (gethash game-no games) (cons game moves))))
+    (setf (gethash game-no *games*) (cons game moves))))
 
 (defun game-create-run (game-no &optional max-moves)
   (destructuring-bind (game . moves) (game-create game-no)
