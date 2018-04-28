@@ -64,7 +64,10 @@
   (let* ((game-no (parse-integer game-no-string))
          (move-no (parse-integer move-no-string))
          (moves (cdr (gethash game-no games))))
-    (if (null moves) "no such game" ;; TODO non-200
+    (if (null moves)
+        (progn
+          (setf (hunchentoot:return-code*) hunchentoot:+HTTP-NOT-FOUND+)
+          "no such game")
         (loop while (>= move-no (length moves))
            do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
                              (length moves) move-no game-no)
