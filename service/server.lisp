@@ -46,18 +46,16 @@
 (define-regexp-route current-game-state-handler ("^/game$")
   (let* ((game-no *curr-gameno*)
          (move-no 0)
-         (game (car (gethash game-no games)))
-         resp)
+         (game (car (gethash game-no games))))
 
     (if (null game)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
                    '(:error "no current games"))
-        (progn
-          (setf resp (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no))
-          '(libtetris:game-grid-iter game (lambda (r c v) (when (not (zerop v))
-                                                            (push c resp)
-                                                            (push r resp))))
-          (format nil "[~{~D~^, ~}]" resp)))))
+        (json-resp nil
+                   (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)))
+    '(libtetris:game-grid-iter game (lambda (r c v) (when (not (zerop v))
+                                                      (push c resp)
+                                                      (push r resp))))))
 
 
 (defvar *max-move-catchup-wait-secs* 10)
@@ -67,8 +65,7 @@
   ;; (setf (hunchentoot:content-type*) "text/plain")
   (let ((game-moves (gethash game-no games)))
     (if (null game-moves)
-        (progn
-          (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game")))
+        (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
         (destructuring-bind (game . moves) game-moves
           (cond
             ((and (libtetris:game-over-p game) (>= move-no (length moves)))
