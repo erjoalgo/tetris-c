@@ -64,12 +64,17 @@
   ;; (setf (hunchentoot:content-type*) "text/plain")
   (let* ((game-no (parse-integer game-no-string))
          (move-no (parse-integer move-no-string))
-         (moves (cdr (gethash game-no games))))
-    (if (null moves)
+         (game-moves (gethash game-no games)))
+    (if (null game-moves)
         (progn
           (setf (hunchentoot:return-code*) hunchentoot:+HTTP-NOT-FOUND+)
           "no such game")
-        (loop for i below *max-move-catchup-wait-secs*
+    (destructuring-bind (game . moves) game-moves
+      (cond
+        ((and (libtetris:game-over-p game) (>= move-no (length moves)))
+         (setf (hunchentoot:return-code*) hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+)
+         "requested move outside of range")
+        (t (loop for i below *max-move-catchup-wait-secs*
            as behind = (>= move-no (length moves))
            while behind
            do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
@@ -84,7 +89,7 @@
                              (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
                                  (aref moves move-no)
                                (list libtetris::shape-code libtetris::rot
-                                     libtetris::col)))))))))
+                                     libtetris::col))))))))))))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
