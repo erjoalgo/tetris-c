@@ -21,7 +21,7 @@
 
 (defun server-start (port)
   (when *acceptor* (and (hunchentoot:started-p *acceptor*)
-                      (hunchentoot:stop *acceptor*)))
+                        (hunchentoot:stop *acceptor*)))
   (setf *acceptor* (hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port port))))
 
 (defvar games (make-hash-table))
@@ -31,10 +31,6 @@
 (defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
   `(progn
      (defun ,name ()
-       ;; ,@(when documentation (list documentation))
-       ;; ,@declarations
-       ;; (when *debug*
-       ;;   (format *trace-output* "=== Calling ~A Handler ===" ',name))
        (ppcre:register-groups-bind ,capture-names
            (,url-regexp (hunchentoot:script-name*))
          ,@body))
@@ -68,39 +64,36 @@
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
-  "Display the contents of the ENTRY."
   ;; (setf (hunchentoot:content-type*) "text/plain")
   (let ((game-moves (gethash game-no games)))
     (if (null game-moves)
         (progn
           (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game")))
-    (destructuring-bind (game . moves) game-moves
-      (cond
-        ((and (libtetris:game-over-p game) (>= move-no (length moves)))
-         (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
-         '(:error "requested move outside of range of completed game")))
-        (t (loop for i below *max-move-catchup-wait-secs*
-           as behind = (>= move-no (length moves))
-           while behind
-           do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
-                             (length moves) move-no game-no)
-                     (sleep 1))
-           finally
-             (if behind
-                 (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+        (destructuring-bind (game . moves) game-moves
+          (cond
+            ((and (libtetris:game-over-p game) (>= move-no (length moves)))
+             (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+                        '(:error "requested move outside of range of completed game")))
+            (t (loop for i below *max-move-catchup-wait-secs*
+                  as behind = (>= move-no (length moves))
+                  while behind
+                  do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
+                                    (length moves) move-no game-no)
+                            (sleep 1))
+                  finally
+                    (if behind
+                        (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
                                    '(:error "reached timeout catching up to requested move~%" ))
-                 (return
-                   (json-resp nil
-                             ;; TODO export
-                             (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
-                                 (aref moves move-no)
-                               (list libtetris::shape-code libtetris::rot
-                                     libtetris::col))))))))))))
+                        (return
+                          (json-resp nil
+                                     (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
+                                         (aref moves move-no)
+                                       (list libtetris::shape-code libtetris::rot
+                                             libtetris::col))))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
-  "Display the contents of the ENTRY."
   (json-resp nil
-   (loop for game-no being the hash-keys of games collect game-no)))
+             (loop for game-no being the hash-keys of games collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
@@ -142,7 +135,7 @@
 
 (defun game-create-run (game-no &optional max-moves)
   (destructuring-bind (game . moves) (game-create game-no)
-      (game-run game moves max-moves)))
+    (game-run game moves max-moves)))
 
 (defun game-create-run-thread (game-no &optional max-moves)
   (sb-thread:make-thread 'game-create-run :arguments (list game-no max-moves)))
