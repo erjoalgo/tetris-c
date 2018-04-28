@@ -56,6 +56,7 @@
           (format nil "[~{~D~^, ~}]" resp)))))
 
 
+(defvar *max-move-catchup-wait-secs* 10)
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         game-no-string move-no-string)
@@ -68,17 +69,22 @@
         (progn
           (setf (hunchentoot:return-code*) hunchentoot:+HTTP-NOT-FOUND+)
           "no such game")
-        (loop while (>= move-no (length moves))
+        (loop for i below *max-move-catchup-wait-secs*
+           as behind = (>= move-no (length moves))
+           while behind
            do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
                              (length moves) move-no game-no)
                      (sleep 1))
            finally
+             (if behind
+                 (progn (setf (hunchentoot:return-code*) hunchentoot:+HTTP-SERVICE-UNAVAILABLE+)
+                        (format nil "reached timeout catching up to requested move~%" ))
              (return (format nil "[~{~D~^, ~}]"
                              ;; TODO export
                              (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
                                  (aref moves move-no)
                                (list libtetris::shape-code libtetris::rot
-                                     libtetris::col))))))))
+                                     libtetris::col)))))))))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/index.html" "index.html")
