@@ -853,7 +853,7 @@ function timer (  )
 two_step_moves = {"fetch":true, "init":true};*/
 
 paint_moves = {rotcw:true, rotccw:true, drop:true, left:true, right:true, down:true};
-two_step_moves = {fetch:true, init:true};
+two_step_moves = {fetch:true, init:true, init_shapes:true};
 no_delay_moves = {fetch:true, init:true, plan:true};
 
 /*unfortunate hack for IE, in which function.name doesn't work:*/
