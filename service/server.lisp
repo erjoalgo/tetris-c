@@ -98,18 +98,36 @@
   (setf (hunchentoot:content-type*) "application/json")
   (jonathan:to-json body))
 
+(defun game-execution-last-recorded-state-blocking (game-exc)
+  (if (not (game-execution-running-p game-exc))
+      (game-execution-final-state game-exc)
+      (let ((mutex (game-execution-mutex game-exc))
+            last-state)
+        (sb-thread:with-mutex (mutex)
+          (setf (game-execution-last-recorded-state game-exc) nil))
+        (loop until (setf last-state (game-execution-last-recorded-state game-exc))
+           for i below 5
+           do (format t "waiting for last state~%")
+           do (sleep .5))
+        (or last-state (game-execution-final-state game-exc)))))
+
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
                                                  (#'parse-integer game-no))
-  (let* (
-         (move-no 0)
-         (game-exc (gethash game-no (service-game-executions *service*)))
-         (game (and game-exc (game-execution-game game-exc))))
+  (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
-                   '(:error "no current games"))
-        (json-resp nil
-                   (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)))))
-
+                   '(:error "no such game"))
+        (let ((game (game-execution-game game-exc))
+              (last-recorded-state (game-execution-last-recorded-state-blocking game-exc))
+              (move-no 0)
+              (on-cells nil))
+          (when last-recorded-state
+            (setf move-no (last-recorded-state-move-no last-recorded-state)
+                  on-cells (last-recorded-state-on-cells last-recorded-state)))
+          (json-resp nil (append on-cells
+                                 (list (libtetris:game-height game)
+                                       (libtetris:game-width game)
+                                       move-no game-no)))))))
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
