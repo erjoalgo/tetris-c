@@ -36,6 +36,7 @@
 (defstruct game-execution
   game
   moves
+  thread
   max-moves
   )
 
@@ -187,6 +188,7 @@
 
 (defun game-create-run-thread (game-no &optional max-moves)
   (let* ((game-exc (game-create game-no max-moves)))
+    (setf (game-execution-thread game-exc)
           (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                                 )))
+                                 :name (format nil "game ~D" game-no)))))
 
