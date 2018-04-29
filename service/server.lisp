@@ -156,8 +156,9 @@
                   for i below max-move-catchup-wait-secs
                   as behind = (>= move-no (length moves))
                   while behind
-                  do (progn (format t "waiting for game to catch up to from ~D to ~D on game ~D~%"
-                                    (length moves) move-no game-no)
+                  do (progn
+                       (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
+                               (length moves) move-no game-no (- max-move-catchup-wait-secs i))
                             (sleep 1))
                   finally
                     (if behind
