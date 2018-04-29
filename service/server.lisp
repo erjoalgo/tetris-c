@@ -86,9 +86,9 @@
   (setf (hunchentoot:content-type*) "application/json")
   (jonathan:to-json body))
 
-(define-regexp-route current-game-state-handler ("^/game$")
-
-  (let* ((game-no (service-curr-game-no *service*))
+(define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
+                                                 (#'parse-integer game-no))
+  (let* (
          (move-no 0)
          (game-exc (gethash game-no (service-game-executions *service*)))
          (game (and game-exc (game-execution-game game-exc))))
