@@ -4,7 +4,6 @@
   (:use :cl :cffi)
   (:export
    #:make-game-move-native #:game-move-native
-   #:game-grid-iter
    #:game-init #:game-width #:game-height
    #:HEIGHT #:WIDTH #:ai-default-weights
    #:game-apply-next-move
@@ -13,6 +12,11 @@
    #:serialize-shapes
    #:init-tetris
    #:game-over-p
+   #:cell-pack
+   #:cell-unpack
+   #:game-on-cells-packed
+   #:game-grid-loop
+   #:game-printable-string
    )
   )
 
@@ -112,28 +116,53 @@
                         :int (if no-add 0 1)
                         :boolean))
 
-(defun game-grid-iter (game fun)
-  (loop
-     with rows = (cffi:mem-ref (game-g game) :pointer 0)
-     for r downfrom (1- (game-height game)) to 0
-     as row = (cffi:mem-aref rows :pointer r)
-     do
-       (loop for c below (game-width game)
-          as val = (cffi:mem-aref row :int c)
-          do (funcall fun r c val))))
+(defmacro game-grid-loop (game r-sym c-sym val-sym
+                          &key
+                            (outer-action :do)
+                            (inner-action :do)
+                            (condition nil)
+                            body
+                            )
+  (let ((if-cond (when condition `(if ,condition)))
+        (rows (gensym "rows"))
+        (row (gensym "row")))
+    `(loop
+        with ,rows = (cffi:mem-ref (game-g game) :pointer 0)
+        for ,r-sym downfrom (1- (game-height game)) to 0
+        as ,row = (cffi:mem-aref ,rows :pointer r)
+          ,outer-action
+          (loop for ,c-sym below (game-width ,game)
+             as ,val-sym = (cffi:mem-aref ,row :int c)
+               ,@if-cond
+               ,inner-action
+               ,body))))
 
-(defun game-print (game)
-  (let ((string (make-string (* (game-height game) (1+ (game-width game)))
-                             :initial-element #\Newline))
-        (i -1))
-    (game-grid-iter game (lambda (r c v)
-                           (declare (ignore r))
-                           (when (and (> i -1) (zerop c)) (incf i));; skip newline
-                           (setf (aref string (incf i)) (cond
-                                                          ((null c) #\Newline)
-                                                          ((zerop v) #\Space)
-                                                          (t #\*)))))
-    (format t "~A~%" string)))
+
+(defun cell-pack (r c width)
+  (+ (* r width) c))
+
+(defun cell-unpack (rc width)
+  (values (floor rc width)
+          (mod rc width)))
+
+(defun game-on-cells-packed (game &aux width)
+  (setf width (game-width game))
+  (game-grid-loop game r c val
+                  :outer-action nconc
+                  :inner-action collect
+                  :condition (not (zerop val))
+                  :body (cell-pack r c width)))
+
+(defun game-printable-string (game &optional string)
+  (let* ((swidth (1+ (game-width game)))
+         (height (game-height game)))
+    (unless nil
+      (setf string (make-string (* (game-height game) swidth)
+                                :initial-element #\Newline)))
+    (game-grid-loop game r c val
+                    :body (setf (aref string (cell-pack (- height 1 r) c swidth))
+                                (if (zerop val) #\Space #\*)))
+    string))
 
 (defparameter HEIGHT 19)
 (defparameter WIDTH 10)
@@ -176,12 +205,14 @@
 
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
-    (loop for i below 10 do
+    (loop
+       for i below 10
+       as string = (game-printable-string game string)
+         do
          (progn
            (game-apply-next-move game)
-           (game-print game)
-           (sleep .5))
-         )))
+           (format t string)
+           (sleep .5)))))
 
 (defun serialize-shape (shape-ptr)
   (cffi:foreign-funcall "shape_serialize"
