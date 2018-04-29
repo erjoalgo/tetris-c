@@ -36,6 +36,7 @@
 (defstruct game-execution
   game
   moves
+  max-moves
   )
 
 (defun main (argv)
@@ -149,10 +150,11 @@
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
 
-(defun game-run (game moves &optional max-moves)
+(defun game-run (game-exc)
   (loop
      with game = (game-execution-game game-exc)
      with moves = (game-execution-moves game-exc)
+     with max-moves = (game-execution-max-moves game-exc)
      for i from 0
      as next-move = (libtetris:game-apply-next-move game)
      while (and next-move (or (null max-moves) (< i max-moves)))
@@ -167,22 +169,23 @@
            (sleep .5)
            (vector-push-extend native moves)))))
 
-(defun game-create (game-no)
+(defun game-create (game-no &optional max-moves)
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
-          (make-game-execution :game game :moves moves))))
+          (make-game-execution :game game :moves moves :max-moves max-moves
+                               ))))
 
 (defun game-create-run (&optional game-no max-moves)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
     (when (gethash game-no (service-game-executions *service*))
       (error "game ~D exists" game-no))
-    (game-run (game-create game-no) max-moves)))
+    (game-run (game-create game-no max-moves))))
 
 (defun game-create-run-thread (game-no &optional max-moves)
-  (let* ((game-exc (game-create game-no)))
-          (sb-thread:make-thread 'game-run :arguments (list game-exc max-moves)
+  (let* ((game-exc (game-create game-no max-moves)))
+          (sb-thread:make-thread 'game-run :arguments (list game-exc)
                                  )))
 
