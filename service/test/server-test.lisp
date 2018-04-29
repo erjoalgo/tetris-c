@@ -34,7 +34,7 @@
     (server:service-stop *test-service*))
   (setf *test-service*
         (server:service-start test-service-config))
-  (server:game-create-run test-game-no max-no-moves)
+  (server:game-create-run test-game-no :max-moves max-no-moves)
   (setf (server::service-curr-game-no *test-service*) test-game-no);;TODO
   )
 
