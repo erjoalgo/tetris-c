@@ -10,12 +10,15 @@
 
 (defvar test-game-no 5)
 (defvar max-no-moves 3)
+(defvar game-width 10)
+(defvar game-height 19)
+
 (defparameter test-service-config
   (server:make-config
    :port 4243
    ;; shapes-file
    ;; seed
-   ;; grid-dimensions
+   :grid-dimensions (cons game-height game-width)
    :max-move-catchup-wait-secs 3))
 
 (defparameter base-url (format nil "http://localhost:~D"
@@ -92,7 +95,7 @@
     (stefil:is (loop for v in game-move always (>= v 0)))
     (stefil:is (< (nth 0 game-move) *shape-count*))
     (stefil:is (< (nth 1 game-move) 4))
-    (stefil:is (< (nth 2 game-move) libtetris:WIDTH))
+    (stefil:is (< (nth 2 game-move) game-width))
     ))
 
 (stefil:deftest test-game-move-timeout nil
