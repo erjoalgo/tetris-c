@@ -29,8 +29,13 @@
 (defstruct service
   config
   acceptor
-  games-moves
   curr-game-no
+  game-executions
+  )
+
+(defstruct game-execution
+  game
+  moves
   )
 
 (defun main (argv)
@@ -54,7 +59,7 @@
     (setf *service*
           (make-service :config (or config config-default)
                         :acceptor acceptor
-                        :games-moves (make-hash-table)
+                        :game-executions (make-hash-table)
                         :curr-game-no 0))))
 
 (defun service-stop (service)
@@ -81,11 +86,12 @@
   (jonathan:to-json body))
 
 (define-regexp-route current-game-state-handler ("^/game$")
+
   (let* ((game-no (service-curr-game-no *service*))
          (move-no 0)
-         (game (car (gethash game-no (service-games-moves *service*)))))
-
-    (if (null game)
+         (game-exc (gethash game-no (service-game-executions *service*)))
+         (game (and game-exc (game-execution-game game-exc))))
+    (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
                    '(:error "no current games"))
         (json-resp nil
@@ -95,12 +101,12 @@
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
   ;; (setf (hunchentoot:content-type*) "text/plain")
-  (let ((game-moves (gethash game-no (service-games-moves *service*))))
-    (if (null game-moves)
+  (let* ((game-exc (gethash game-no (service-game-executions *service*)))
+        (moves (and game-exc (game-execution-moves game-exc))))
+    (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
-        (destructuring-bind (game . moves) game-moves
           (cond
-            ((and (libtetris:game-over-p game) (>= move-no (length moves)))
+            ((and t (>= move-no (length moves)))
              (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
                         '(:error "requested move outside of range of completed game")))
             (t (loop with
@@ -121,11 +127,11 @@
                                      (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
                                          (aref moves move-no)
                                        (list libtetris::shape-code libtetris::rot
-                                             libtetris::col))))))))))))
+                                             libtetris::col)))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
-             (loop for game-no being the hash-keys of (service-games-moves *service*)
+             (loop for game-no being the hash-keys of (service-game-executions *service*)
                 collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
@@ -145,6 +151,8 @@
 
 (defun game-run (game moves &optional max-moves)
   (loop
+     with game = (game-execution-game game-exc)
+     with moves = (game-execution-moves game-exc)
      for i from 0
      as next-move = (libtetris:game-apply-next-move game)
      while (and next-move (or (null max-moves) (< i max-moves)))
@@ -164,14 +172,17 @@
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
-    (setf (gethash game-no (service-games-moves *service*)) (cons game moves))))
+    (setf (gethash game-no (service-game-executions *service*))
+          (make-game-execution :game game :moves moves))))
 
 (defun game-create-run (&optional game-no max-moves)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
-    (when (gethash game-no (service-games-moves *service*))
+    (when (gethash game-no (service-game-executions *service*))
       (error "game ~D exists" game-no))
-    (destructuring-bind (game . moves) (game-create game-no)
-      (game-run game moves max-moves))))
+    (game-run (game-create game-no) max-moves)))
 
 (defun game-create-run-thread (game-no &optional max-moves)
-  (sb-thread:make-thread 'game-create-run :arguments (list game-no max-moves)))
+  (let* ((game-exc (game-create game-no)))
+          (sb-thread:make-thread 'game-run :arguments (list game-exc max-moves)
+                                 )))
+
