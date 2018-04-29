@@ -98,17 +98,22 @@
   (setf (hunchentoot:content-type*) "application/json")
   (jonathan:to-json body))
 
-(defun game-execution-last-recorded-state-blocking (game-exc)
+(defun game-execution-last-recorded-state-blocking (game-exc &key (timeout-secs 10))
   (if (not (game-execution-running-p game-exc))
       (game-execution-final-state game-exc)
       (let ((mutex (game-execution-mutex game-exc))
             last-state)
         (sb-thread:with-mutex (mutex)
           (setf (game-execution-last-recorded-state game-exc) nil))
-        (loop until (setf last-state (game-execution-last-recorded-state game-exc))
-           for i below 5
+        (loop
+           with checks-per-sec = 2
+           with check-delay = (/ 1 checks-per-sec)
+           with max-i = (max (* checks-per-sec timeout-secs) 1)
+
+           until (setf last-state (game-execution-last-recorded-state game-exc))
+           for i below max-i
            do (format t "waiting for last state~%")
-           do (sleep .5))
+           do (sleep check-delay))
         (or last-state (game-execution-final-state game-exc)))))
 
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
