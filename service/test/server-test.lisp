@@ -79,11 +79,18 @@
     ;; (stefil:is (equal test-game-no (nth 3 game-status)))
     ))
 
+(defvar *shape-count* nil)
+
+(stefil:deftest test-shapes nil
+  (let ((shapes (req "/shapes")))
+    (stefil:is (>= (length shapes) 4))
+    (setf *shape-count* (length shapes))))
+
 (stefil:deftest test-game-move-success nil
   (let ((game-move (req (format nil "/games/~D/moves/~D" test-game-no 0))))
     (stefil:is (equal 3 (length game-move)))
     (stefil:is (loop for v in game-move always (>= v 0)))
-    (stefil:is (< (nth 0 game-move) libtetris:SHAPE-COUNT))
+    (stefil:is (< (nth 0 game-move) *shape-count*))
     (stefil:is (< (nth 1 game-move) 4))
     (stefil:is (< (nth 2 game-move) libtetris:WIDTH))
     ))
