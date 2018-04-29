@@ -68,9 +68,10 @@
   (let ((acceptor (service-acceptor service)))
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
-  ;; TODO kill running game threads
-  )
-
+  (loop for game-exc being the hash-values of (service-game-executions *service*)
+     as thread = (game-execution-thread game-exc)
+     if thread do
+       (sb-thread:terminate-thread thread)))
 
 (defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
   `(progn
