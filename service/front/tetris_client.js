@@ -645,6 +645,7 @@ function init ( response )
     console.log("game_no is: " +game_no);
 
     move_no = response.pop();
+    move_no = 0;
     grid.width = response.pop();
     grid.height = response.pop();
     grid.rowcounts = []
@@ -670,6 +671,7 @@ function init ( response )
     // for (var xy in response)
     for (var i = 0;i<response.length;i++)
     {
+        continue;
         xy = response[i];
         x = xy%grid.width;
         y = Math.floor(xy/grid.width);
