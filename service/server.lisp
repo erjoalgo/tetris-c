@@ -132,11 +132,11 @@
                 collect game-no)))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
-       "/index.html" "index.html")
+       "/index.html" "html/tetris.html")
       hunchentoot:*dispatch-table*)
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
-       "/tetris_client.js" "tetris_client.js")
+       "/js/tetris_client.js" "js/tetris_client.js")
       hunchentoot:*dispatch-table*)
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
