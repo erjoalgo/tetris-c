@@ -815,7 +815,8 @@ function timer (  )
 
 	    else
 	    {
-		setTimeout(timer,timer_delay);
+                var extra = move.name=="plan"? 200*Math.random() : 0;
+		setTimeout(timer,timer_delay+extra);
 	    }
 
 	}
@@ -858,7 +859,7 @@ two_step_moves = {"fetch":true, "init":true};*/
 
 paint_moves = {rotcw:true, rotccw:true, drop:true, left:true, right:true, down:true};
 two_step_moves = {fetch:true, init:true, init_shapes:true};
-no_delay_moves = {fetch:true, init:true, plan:true};
+no_delay_moves = {fetch:true, init:true};
 
 /*unfortunate hack for IE, in which function.name doesn't work:*/
 init.name = "init";
