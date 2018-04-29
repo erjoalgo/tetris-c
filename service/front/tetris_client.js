@@ -633,7 +633,7 @@ function init ( response )
 {
     if (response==null)
 	{
-	    server_request("/game", init);
+	    server_request("/games/0", init);
 	    return;
 	}
 
