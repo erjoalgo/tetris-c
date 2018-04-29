@@ -668,10 +668,12 @@ function init ( response )
     }
 
     // for (var xy in response)
-    for (var i = 0;i<response.length;i+=2)
+    for (var i = 0;i<response.length;i++)
     {
-	x = response[i];
-	y = grid.height-1-response[i+1];
+        xy = response[i];
+        x = xy%grid.width;
+        y = Math.floor(xy/grid.width);
+        y = grid.height-1-y;
 
 	grid.grid[y][x] = colors.BLUE;
 	cell_grid[y][x].bgColor = colors.BLUE;
