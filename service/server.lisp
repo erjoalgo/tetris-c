@@ -1,13 +1,11 @@
 (defpackage #:server
   (:use :cl)
-  ;; (:use :cl :hunchentoot)
   (:export
    #:service-start
    #:service-stop
    #:game-create-run
    #:game-create-run-thread
    #:make-config
-   ;; #:file-string #:list-directory-recursive #:list-directory #:list-to-hash-table
    )
   )
 
@@ -46,8 +44,6 @@
   max-moves
   ai-move-delay-secs
   )
-
-;; (defstruct game-execution-opts)
 
 (defstruct last-recorded-state
   timestamp
@@ -141,35 +137,34 @@
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
-  ;; (setf (hunchentoot:content-type*) "text/plain")
   (let* ((game-exc (gethash game-no (service-game-executions *service*)))
-        (moves (and game-exc (game-execution-moves game-exc))))
+         (moves (and game-exc (game-execution-moves game-exc))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
-          (cond
-            ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
-             (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
-                        '(:error "requested move outside of range of completed game")))
-            (t (loop with
-                  max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                                (service-config *service*))
-                  for i below max-move-catchup-wait-secs
-                  as behind = (>= move-no (length moves))
-                  while behind
-                  do (progn
-                       (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
-                               (length moves) move-no game-no (- max-move-catchup-wait-secs i))
-                            (sleep 1))
-                  finally
-                    (if behind
-                        (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                                   '(:error "reached timeout catching up to requested move~%" ))
-                        (return
-                          (json-resp nil
-                                     (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
-                                         (aref moves move-no)
-                                       (list libtetris::shape-code libtetris::rot
-                                             libtetris::col)))))))))))
+        (cond
+          ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
+           (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+                      '(:error "requested move outside of range of completed game")))
+          (t (loop with
+                max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                              (service-config *service*))
+                for i below max-move-catchup-wait-secs
+                as behind = (>= move-no (length moves))
+                while behind
+                do (progn
+                     (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
+                             (length moves) move-no game-no (- max-move-catchup-wait-secs i))
+                     (sleep 1))
+                finally
+                  (if behind
+                      (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                                 '(:error "reached timeout catching up to requested move~%" ))
+                      (return
+                        (json-resp nil
+                                   (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
+                                       (aref moves move-no)
+                                     (list libtetris::shape-code libtetris::rot
+                                           libtetris::col)))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
@@ -201,38 +196,40 @@
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
   (with-slots (game moves max-moves mutex ai-move-delay-secs) game-exc
-  (loop
-     with last-recorded-state-check-multiple = 5
-     for i from 0
-     as next-move = (libtetris:game-apply-next-move game)
-     while (and next-move (or (null max-moves) (< i max-moves)))
-     as string = (libtetris:game-printable-string game string)
-     do (format t string)
-     do
-       (let ((native (libtetris:my-translate-from-foreign next-move)))
-         (progn
-           (format t "on move ~D, shape ~D, rot ~D, col ~D~%" i
-                   (slot-value native 'libtetris::shape-code)
-                   (slot-value native 'libtetris::rot)
-                   (slot-value native 'libtetris::col))
-           (unless (zerop ai-move-delay-secs)
-             (sleep ai-move-delay-secs))
-           (vector-push-extend native moves)))
-     if (and (zerop (mod i last-recorded-state-check-multiple))
-             (null (game-execution-last-recorded-state game-exc)))
-     do
-       (sb-thread:with-mutex (mutex)
-         (setf (game-execution-last-recorded-state game-exc)
-               (game-serialize-state game i)))
-     finally
-       (setf (game-execution-running-p game-exc) nil
-             (game-execution-final-state game-exc) (game-serialize-state game i)))))
+    (loop
+       with last-recorded-state-check-multiple = 5
+       for i from 0
+       as next-move = (libtetris:game-apply-next-move game)
+       while (and next-move (or (null max-moves) (< i max-moves)))
+       as string = (libtetris:game-printable-string game string)
+       do (format t string)
+       do
+         (let ((native (libtetris:my-translate-from-foreign next-move)))
+           (progn
+             (format t "on move ~D, shape ~D, rot ~D, col ~D~%" i
+                     (slot-value native 'libtetris::shape-code)
+                     (slot-value native 'libtetris::rot)
+                     (slot-value native 'libtetris::col))
+             (unless (zerop ai-move-delay-secs)
+               (sleep ai-move-delay-secs))
+             (vector-push-extend native moves)))
+       if (and (zerop (mod i last-recorded-state-check-multiple))
+               (null (game-execution-last-recorded-state game-exc)))
+       do
+         (sb-thread:with-mutex (mutex)
+           (setf (game-execution-last-recorded-state game-exc)
+                 (game-serialize-state game i)))
+       finally
+         (setf (game-execution-running-p game-exc) nil
+               (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &key max-moves (ai-move-delay-secs .5))
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
-        (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
+        (game (libtetris:game-init libtetris:HEIGHT
+                                   libtetris:WIDTH
+                                   libtetris:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game
                                :moves moves
@@ -250,7 +247,6 @@
   (let* ((game-exc (apply 'game-create game-no create-args)))
     (values
      (setf (game-execution-thread game-exc)
-          (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                                 :name (format nil "game ~D" game-no)))
+           (sb-thread:make-thread 'game-run :arguments (list game-exc)
+                                  :name (format nil "game ~D" game-no)))
      game-exc)))
-

@@ -66,7 +66,6 @@
        ,parsed
        )))
 
-
 (stefil:deftest test-games nil
   (let ((gameno-list (req "/games")))
     (stefil:is (equal 1 (length gameno-list)))
