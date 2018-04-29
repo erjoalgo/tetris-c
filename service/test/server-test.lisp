@@ -10,7 +10,7 @@
 
 (defvar test-game-no 5)
 (defvar max-no-moves 3)
-(defvar test-service-config
+(defparameter test-service-config
   (server:make-config
    :port 4243
    ;; shapes-file
