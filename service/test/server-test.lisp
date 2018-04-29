@@ -70,7 +70,7 @@
     (stefil:is (equal test-game-no (nth 0 gameno-list)))))
 
 (stefil:deftest test-game-status nil
-  (let ((game-status (req "/game")))
+  (let ((game-status (req (format nil "/games/~D" test-game-no))))
     (stefil:is (equal 4 (length game-status)))
     ;; (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)
     (stefil:is (equal libtetris:HEIGHT (nth 0 game-status)))
