@@ -70,6 +70,8 @@
   move-no
   )
 
+(defvar thread-name-prefix "tetris-game-thread")
+
 (defun main (argv)
   (declare (ignore argv))
   ;; TODO parse args
@@ -267,5 +269,5 @@
     (values
      (setf (game-execution-thread game-exc)
            (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                                  :name (format nil "game ~D" game-no)))
+                                  :name (format nil "~A ~D" thread-name-prefix game-no))
      game-exc)))
