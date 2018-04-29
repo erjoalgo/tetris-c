@@ -89,10 +89,7 @@
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
                    '(:error "no current games"))
         (json-resp nil
-                   (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)))
-    '(libtetris:game-grid-iter game (lambda (r c v) (when (not (zerop v))
-                                                      (push c resp)
-                                                      (push r resp))))))
+                   (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)))))
 
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
