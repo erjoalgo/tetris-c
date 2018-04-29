@@ -56,8 +56,10 @@
 (defmacro req (uri &rest args)
   (with-unique-names (resp parsed)
     `(let* ((,resp (drakma:http-request (concatenate 'string base-url ,uri) ,@args))
-           (,parsed (jonathan:parse ,resp)))
-       (format t "~A => ~A~%" ,uri ,parsed)
+           (,parsed nil))
+       (format t "drakma req: ~A => ~A~%" ,uri ,resp)
+       (setf ,parsed (jonathan:parse ,resp))
+       (format t "drakma req: ~A => ~A~%" ,uri ,parsed)
        ,parsed
        )))
 
