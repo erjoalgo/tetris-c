@@ -39,6 +39,7 @@
   thread
   last-recorded-state
   final-state
+  running-p
   max-moves
   mutex
   )
@@ -118,7 +119,7 @@
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
           (cond
-            ((and t (>= move-no (length moves)))
+            ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
              (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
                         '(:error "requested move outside of range of completed game")))
             (t (loop with
@@ -169,6 +170,7 @@
    :on-cells (libtetris:game-on-cells-packed game)))
 
 (defun game-run (game-exc)
+  (setf (game-execution-running-p game-exc) t)
   (loop
      with game = (game-execution-game game-exc)
      with moves = (game-execution-moves game-exc)
@@ -196,7 +198,7 @@
          (setf (game-execution-last-recorded-state game-exc)
                (game-serialize-state game i)))
      finally
-       (setf
+       (setf (game-execution-running-p game-exc) nil
              (game-execution-final-state game-exc) (game-serialize-state game i))))
 
 (defun game-create (game-no &optional max-moves)
