@@ -5,6 +5,7 @@
    #:service-start
    #:service-stop
    #:game-create-run
+   #:game-create-run-thread
    #:make-config
    ;; #:file-string #:list-directory-recursive #:list-directory #:list-to-hash-table
    )
