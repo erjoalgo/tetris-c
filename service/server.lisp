@@ -195,12 +195,9 @@
 
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
+  (with-slots (game moves max-moves mutex) game-exc
   (loop
-     with game = (game-execution-game game-exc)
-     with moves = (game-execution-moves game-exc)
-     with max-moves = (game-execution-max-moves game-exc)
      with last-recorded-state-check-multiple = 5
-     with mutex = (game-execution-mutex game-exc)
      for i from 0
      as next-move = (libtetris:game-apply-next-move game)
      while (and next-move (or (null max-moves) (< i max-moves)))
@@ -223,7 +220,7 @@
                (game-serialize-state game i)))
      finally
        (setf (game-execution-running-p game-exc) nil
-             (game-execution-final-state game-exc) (game-serialize-state game i))))
+             (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &optional max-moves)
   (let ((moves (make-array 0 :adjustable t
