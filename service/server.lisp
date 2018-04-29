@@ -158,7 +158,8 @@
      for i from 0
      as next-move = (libtetris:game-apply-next-move game)
      while (and next-move (or (null max-moves) (< i max-moves)))
-     do (libtetris:game-print game)
+     as string = (libtetris:game-printable-string game string)
+     do (format t string)
      do
        (let ((native (libtetris:my-translate-from-foreign next-move)))
          (progn
