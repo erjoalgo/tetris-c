@@ -37,7 +37,16 @@
   game
   moves
   thread
+  last-recorded-state
+  final-state
   max-moves
+  mutex
+  )
+
+(defstruct last-recorded-state
+  timestamp
+  on-cells
+  move-no
   )
 
 (defun main (argv)
@@ -152,11 +161,20 @@
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
 
+(defun game-serialize-state (game move-no)
+  (make-last-recorded-state
+   :timestamp (multiple-value-bind (secs usecs) (sb-ext:get-time-of-day)
+                (declare (ignore usecs)) secs)
+   :move-no move-no
+   :on-cells (libtetris:game-on-cells-packed game)))
+
 (defun game-run (game-exc)
   (loop
      with game = (game-execution-game game-exc)
      with moves = (game-execution-moves game-exc)
      with max-moves = (game-execution-max-moves game-exc)
+     with last-recorded-state-check-multiple = 5
+     with mutex = (game-execution-mutex game-exc)
      for i from 0
      as next-move = (libtetris:game-apply-next-move game)
      while (and next-move (or (null max-moves) (< i max-moves)))
@@ -170,7 +188,16 @@
                    (slot-value native 'libtetris::rot)
                    (slot-value native 'libtetris::col))
            (sleep .5)
-           (vector-push-extend native moves)))))
+           (vector-push-extend native moves)))
+     if (and (zerop (mod i last-recorded-state-check-multiple))
+             (null (game-execution-last-recorded-state game-exc)))
+     do
+       (sb-thread:with-mutex (mutex)
+         (setf (game-execution-last-recorded-state game-exc)
+               (game-serialize-state game i)))
+     finally
+       (setf
+             (game-execution-final-state game-exc) (game-serialize-state game i))))
 
 (defun game-create (game-no &optional max-moves)
   (let ((moves (make-array 0 :adjustable t
@@ -179,7 +206,7 @@
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game :moves moves :max-moves max-moves
-                               ))))
+                               :mutex (sb-thread:make-mutex)))))
 
 (defun game-create-run (&optional game-no max-moves)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
