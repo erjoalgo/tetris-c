@@ -247,7 +247,9 @@
 
 (defun game-create-run-thread (&optional game-no &rest create-args)
   (let* ((game-exc (apply 'game-create game-no create-args)))
+    (values
      (setf (game-execution-thread game-exc)
           (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                                 :name (format nil "game ~D" game-no)))))
+                                 :name (format nil "game ~D" game-no)))
+     game-exc)))
 
