@@ -40,7 +40,7 @@
 
 ;; https://sites.google.com/site/sabraonthehill/home/json-libraries
 ;; hack to return json as a string
-(let ((application-json (cons "application" "jsonn")))
+(let ((application-json (cons "application" "json")))
   (unless (member application-json drakma:*text-content-types* :test 'equal)
     (push application-json drakma:*text-content-types*)))
 
