@@ -227,7 +227,7 @@
        (setf (game-execution-running-p game-exc) nil
              (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
-(defun game-create (game-no &optional max-moves)
+(defun game-create (game-no &key max-moves (ai-move-delay-secs .5))
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
@@ -236,18 +236,18 @@
           (make-game-execution :game game
                                :moves moves
                                :max-moves max-moves
-                               :ai-move-delay-secs .5
+                               :ai-move-delay-secs ai-move-delay-secs
                                :mutex (sb-thread:make-mutex)))))
 
-(defun game-create-run (&optional game-no max-moves)
+(defun game-create-run (&optional game-no &rest create-args)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
     (when (gethash game-no (service-game-executions *service*))
       (error "game ~D exists" game-no))
-    (game-run (game-create game-no max-moves))))
+    (game-run (apply 'game-create game-no create-args))))
 
-(defun game-create-run-thread (game-no &optional max-moves)
-  (let* ((game-exc (game-create game-no max-moves)))
-    (setf (game-execution-thread game-exc)
+(defun game-create-run-thread (&optional game-no &rest create-args)
+  (let* ((game-exc (apply 'game-create game-no create-args)))
+     (setf (game-execution-thread game-exc)
           (sb-thread:make-thread 'game-run :arguments (list game-exc)
                                  :name (format nil "game ~D" game-no)))))
 
