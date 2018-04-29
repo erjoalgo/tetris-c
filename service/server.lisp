@@ -41,9 +41,13 @@
   last-recorded-state
   final-state
   running-p
-  max-moves
   mutex
+
+  max-moves
+  ai-move-delay-secs
   )
+
+;; (defstruct game-execution-opts)
 
 (defstruct last-recorded-state
   timestamp
@@ -195,7 +199,7 @@
 
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
-  (with-slots (game moves max-moves mutex) game-exc
+  (with-slots (game moves max-moves mutex ai-move-delay-secs) game-exc
   (loop
      with last-recorded-state-check-multiple = 5
      for i from 0
@@ -210,7 +214,8 @@
                    (slot-value native 'libtetris::shape-code)
                    (slot-value native 'libtetris::rot)
                    (slot-value native 'libtetris::col))
-           (sleep .5)
+           (unless (zerop ai-move-delay-secs)
+             (sleep ai-move-delay-secs))
            (vector-push-extend native moves)))
      if (and (zerop (mod i last-recorded-state-check-multiple))
              (null (game-execution-last-recorded-state game-exc)))
@@ -228,7 +233,10 @@
                            :element-type 'libtetris:game-move-native))
         (game (libtetris:game-init libtetris:HEIGHT libtetris:WIDTH libtetris:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
-          (make-game-execution :game game :moves moves :max-moves max-moves
+          (make-game-execution :game game
+                               :moves moves
+                               :max-moves max-moves
+                               :ai-move-delay-secs .5
                                :mutex (sb-thread:make-mutex)))))
 
 (defun game-create-run (&optional game-no max-moves)
