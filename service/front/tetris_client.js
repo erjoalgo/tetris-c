@@ -578,6 +578,8 @@ function repaint_rows ( ymin, ymax )
 function fetch ( response )
 {
 
+    assert(game_no != null && move_no !=  null);
+
     //console.log( "fetching..." );
     if (!(server_moves_ahead.i<server_moves_ahead.max_i) )
     {
@@ -646,6 +648,7 @@ function init ( response )
 
     move_no = response.pop();
     move_no = 0;
+    console.log("move no is: " +move_no);
     grid.width = response.pop();
     grid.height = response.pop();
     grid.rowcounts = []
