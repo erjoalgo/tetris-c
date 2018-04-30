@@ -118,7 +118,8 @@
             (setf (game-execution-last-recorded-state exc) nil)
             (jonathan:to-json exc)))
 
-(init)
-(test-handlers)
+(defun run-tests ()
+  (init)
+  (test-handlers))
 
 ;; (run-tests :all)
