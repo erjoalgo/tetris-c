@@ -634,8 +634,9 @@ function fetch ( response )
 function init ( response )
 {
     if (response==null)
-	{
-	    server_request("/games/0", init);
+    {
+        game_no = 0;
+	    server_request("/games/"+game_no, init);
 	    return;
 	}
 
