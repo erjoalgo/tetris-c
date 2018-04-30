@@ -47,24 +47,13 @@
   (unless (member application-json drakma:*text-content-types* :test 'equal)
     (push application-json drakma:*text-content-types*)))
 
-;; https://www.cliki.net/WITH-UNIQUE-NAMES
-(defmacro with-unique-names ((&rest bindings) &body body)
-  `(let ,(mapcar #'(lambda (binding)
-                     (destructuring-bind (var prefix)
-                         (if (consp binding) binding (list binding binding))
-                       `(,var (gensym ,(string prefix)))))
-                 bindings)
-     ,@body))
-
-(defmacro req (uri &rest args)
-  (with-unique-names (resp parsed)
-    `(let* ((,resp (drakma:http-request (concatenate 'string base-url ,uri) ,@args))
-           (,parsed nil))
-       (format t "drakma req: ~A => ~A~%" ,uri ,resp)
-       (setf ,parsed (jonathan:parse ,resp))
-       (format t "drakma req: ~A => ~A~%" ,uri ,parsed)
-       ,parsed
-       )))
+(defun req (uri &rest args)
+  (let* ((resp (apply 'drakma:http-request (concatenate 'string base-url uri) args))
+         parsed)
+    (format t "drakma req: ~A => ~A~%" uri resp)
+    (setf parsed (jonathan:parse resp))
+    (format t "drakma req: ~A => ~A~%" uri parsed)
+    parsed))
 
 (stefil:deftest test-games nil
   (let ((gameno-list (req "/games")))
