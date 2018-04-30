@@ -82,6 +82,8 @@
 (defvar *service* nil)
 
 (defun service-start (config)
+  (when (service-running-p *service*)
+    (error "service is running"))
   (apply 'libtetris:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
@@ -104,6 +106,13 @@
      as thread = (game-execution-thread game-exc)
      if thread do
        (sb-thread:terminate-thread thread)))
+
+(defun service-running-p (&optional service)
+  (let* ((service (or service *service*))
+         ;; (acceptor (service-acceptor service))
+         (acceptor (slot-value service 'acceptor))
+         )
+    (and acceptor (hunchentoot:started-p acceptor))))
 
 (defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
   `(progn
@@ -245,6 +254,8 @@
                (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &key max-moves (ai-move-delay-secs .5))
+  (unless (service-running-p *service*)
+    (error "service not running"))
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
                            :element-type 'libtetris:game-move-native))
