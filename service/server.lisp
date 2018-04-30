@@ -98,8 +98,9 @@
                         :game-executions (make-hash-table)
                         :curr-game-no 0))))
 
-(defun service-stop (service)
-  (let ((acceptor (service-acceptor service)))
+(defun service-stop (&optional service)
+  (let* ((service (or service *service*))
+         (acceptor (service-acceptor service)))
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
   (loop for game-exc being the hash-values of (service-game-executions *service*)
