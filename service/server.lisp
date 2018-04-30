@@ -149,23 +149,29 @@
            do (sleep check-delay))
         (or last-state (game-execution-final-state game-exc)))))
 
+(defmethod jonathan:%to-json ((game-exc game-execution))
+  (with-slots (game running-p last-recorded-state) game-exc
+    ;; (with-slots (libtetris:height libtetris:width) game
+    (jonathan:with-object
+        (jonathan:write-key-value "width" (libtetris:game-width game))
+      (jonathan:write-key-value "height" (libtetris:game-height game))
+      (jonathan:write-key-value "running_p" running-p)
+      (let ((move-no 0) on-cells
+            (last-recorded-state
+             (game-execution-last-recorded-state-blocking game-exc)))
+        (when last-recorded-state
+          (setf move-no (slot-value last-recorded-state 'move-no)
+                on-cells (slot-value last-recorded-state 'on-cells)))
+        (jonathan:write-key-value "move_no" move-no)
+        (jonathan:write-key-value "on_cells" on-cells)))))
+
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
                                                  (#'parse-integer game-no))
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
                    '(:error "no such game"))
-        (let ((game (game-execution-game game-exc))
-              (last-recorded-state (game-execution-last-recorded-state-blocking game-exc))
-              (move-no 0)
-              (on-cells nil))
-          (when last-recorded-state
-            (setf move-no (last-recorded-state-move-no last-recorded-state)
-                  on-cells (last-recorded-state-on-cells last-recorded-state)))
-          (json-resp nil (append on-cells
-                                 (list (libtetris:game-height game)
-                                       (libtetris:game-width game)
-                                       move-no game-no)))))))
+        (json-resp nil game-exc))))
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
