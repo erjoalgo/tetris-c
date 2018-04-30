@@ -106,6 +106,7 @@
          ;; (acceptor (service-acceptor service))
          (acceptor (slot-value service 'acceptor)))
     (when (and acceptor (hunchentoot:started-p acceptor))
+      (format t "stopping acceptor...~%" )
       (hunchentoot:stop acceptor)))
   (loop for thread in (sb-thread:list-all-threads)
      if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
