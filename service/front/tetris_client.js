@@ -705,8 +705,12 @@ function init_shapes ( response )
     if (response == null)    {
         server_request("shapes", init_shapes)
     }else     {
-        for (var i = 0; i<response.length; i++)    {
-            var shape = response[i];
+        var server_shapes = response;
+        if (server_shapes.length == 0)    {
+            error("0 shapes received from server!");
+        }
+        for (var i = 0; i<server_shapes.length; i++)    {
+            var shape = server_shapes[i];
             var rots = shape.rotation_configurations;
             for (var r = 0; r<rots.length; r++)    {
                 var rot_h = shape.rot_wh[r][1];
