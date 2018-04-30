@@ -646,8 +646,11 @@ function init ( response )
 
     game = response;
 
-    move_no = game.move_no ;
-    move_no = 0;
+    move_no = game.move_no;
+
+    // game.move_no is for current move.
+    move_no++;
+
     console.log("move no is: " +move_no);
     grid.width = game.width;
     grid.height = game.height;
@@ -675,7 +678,6 @@ function init ( response )
     // for (var xy in response)
     for (var i = 0;i<game.on_cells.length;i++)
     {
-        continue;
         xy = game.on_cells[i];
         x = xy%grid.width;
         y = Math.floor(xy/grid.width);
