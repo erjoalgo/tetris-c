@@ -120,6 +120,8 @@
 
 (defun run-tests ()
   (init)
-  (test-handlers))
+  (test-handlers)
 
-;; (run-tests :all)
+  ;; TODO stop service
+  ;; (server:service-stop *test-service*)
+  )
