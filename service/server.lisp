@@ -107,7 +107,9 @@
                  (when (config-seed config)
                    (list :seed (config-seed config)))))
 
-  (let ((acceptor (make-instance 'hunchentoot:easy-acceptor :port (config-port config))))
+  (let ((acceptor (make-instance 'hunchentoot:easy-acceptor
+                                 :port (config-port config)
+                                 :access-log-destination nil)))
     (setf (hunchentoot:acceptor-document-root acceptor) (truename "./www"))
     (hunchentoot:start acceptor)
     (setf *service*
