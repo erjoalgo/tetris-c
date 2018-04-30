@@ -93,6 +93,16 @@
     (declare (ignore resp))
     (stefil:is (equal hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+ return-code))))
 
+(stefil:deftest test-game-move-timeout nil
+  (let ((slow-game-no (1+ test-game-no)))
+    (server:game-create-run-thread slow-game-no :max-moves max-no-moves
+                                                :AI-MOVE-DELAY-SECS 99999)
+    (multiple-value-bind (resp return-code)
+        (drakma:http-request (format nil "~A/games/~D/moves/1"
+                                     base-url slow-game-no))
+      (declare (ignore resp))
+      (stefil:is (equal hunchentoot:+HTTP-SERVICE-UNAVAILABLE+ return-code)))))
+
 '(let ((exc (gethash 0 (server::service-game-executions *service*))))
           (sb-thread:with-mutex ((game-execution-mutex exc))
             (setf (game-execution-last-recorded-state exc) nil)
