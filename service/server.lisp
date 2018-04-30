@@ -80,9 +80,10 @@
 
 (defvar *service* nil)
 
-(defun service-start (config)
+(defun service-start (&optional config &rest make-config-args)
   (when (service-running-p *service*)
     (error "service is running"))
+  (unless config (setf config (apply 'make-config make-config-args)))
   (apply 'libtetris:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
