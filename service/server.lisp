@@ -153,12 +153,15 @@
         (or last-state (game-execution-final-state game-exc)))))
 
 (defmethod jonathan:%to-json ((game-exc game-execution))
-  (with-slots (game running-p last-recorded-state) game-exc
+  (with-slots (game running-p last-recorded-state
+                    ai-move-delay-secs)
+      game-exc
     ;; (with-slots (libtetris:height libtetris:width) game
     (jonathan:with-object
         (jonathan:write-key-value "width" (libtetris:game-width game))
       (jonathan:write-key-value "height" (libtetris:game-height game))
       (jonathan:write-key-value "running_p" running-p)
+      (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
       (let ((move-no 0) on-cells
             (last-recorded-state
              (game-execution-last-recorded-state-blocking game-exc)))
