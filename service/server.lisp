@@ -272,7 +272,7 @@
     (error "service not running"))
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
-                           :element-type 'libtetris:game-move-native))
+                           :element-type 'libtetris:game-move))
         (game (libtetris:game-init libtetris:HEIGHT
                                    libtetris:WIDTH
                                    libtetris:ai-default-weights)))
