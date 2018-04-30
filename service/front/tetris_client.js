@@ -635,7 +635,6 @@ function init ( response )
 {
     if (response==null)
     {
-        game_no = 0;
 	    server_request("/games/"+game_no, init);
 	    return;
 	}
@@ -741,6 +740,22 @@ function init_shapes ( response )
     }
 }
 
+function init_game_no ( response )
+{
+    if (response == null)    {
+        server_request("/games", init_game_no);
+    }else     {
+        gameno_list = response;
+        if (gameno_list.length == 0)    {
+            error("no current games on server");
+        }else     {
+            // game_no = gameno_list.pop();
+            game_no = gameno_list[gameno_list.length-1];
+            console.log( "init game_no is "+game_no );
+            timer();
+        }
+    }
+}
 
 function plan (  )
 {
@@ -864,7 +879,7 @@ function timer (  )
 two_step_moves = {"fetch":true, "init":true};*/
 
 paint_moves = {rotcw:true, rotccw:true, drop:true, left:true, right:true, down:true};
-two_step_moves = {fetch:true, init:true, init_shapes:true};
+two_step_moves = {fetch:true, init:true, init_shapes:true, init_game_no:true};
 no_delay_moves = {fetch:true, init:true};
 
 /*unfortunate hack for IE, in which function.name doesn't work:*/
@@ -887,6 +902,7 @@ add_tetro.name = "add_tetro";
 
 
 // server_request(-1);
+move_queue.push(init_game_no);
 move_queue.push(init);
 move_queue.push(init_shapes);
 move_queue.push(fetch);
