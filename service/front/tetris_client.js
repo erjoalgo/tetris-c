@@ -740,6 +740,12 @@ function init_shapes ( response )
     }
 }
 
+function error ( message )    {
+    var msg = "error: "+message;
+    console.log(msg);
+    alert(msg);
+}
+
 function init_game_no ( response )
 {
     if (response == null)    {
