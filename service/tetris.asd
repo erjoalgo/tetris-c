@@ -5,8 +5,8 @@
 	       #:hunchentoot
 	       #:cl-ppcre
 	       #:getopt
-	       ;; #:lisp-unit
 	       #:jonathan
+	       #:vom
 	       )
   :components (
 	       (:file "libtetris")

@@ -35,19 +35,18 @@
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
 (defun init-tetris (&key (seed seed) (shapes-file shapes-file))
-  (format t "reading shapes...~%" )
+  (vom:debug "reading shapes...~%" )
   (setf shapes
         (cffi:foreign-funcall "shapes_read"
                               :string shapes-file
                               :pointer (cffi:get-var-pointer 'SHAPE-COUNT)
                               :pointer))
-  (format t "loaded ~D shapes ~%" SHAPE-COUNT)
+  (vom:info "loaded ~D shapes ~%" SHAPE-COUNT)
   (cffi:foreign-funcall "srand" :int seed)
   (assert (> SHAPE-COUNT 0))
   (cffi:foreign-funcall "ai_init" :void))
 
 (defun grid-test ()
-  (format t "starting test...~%" )
   (cffi:foreign-funcall "grid_test"))
 
 (defstruct game
@@ -67,13 +66,13 @@
        (ss :pointer)
        )
 
-    (format t "initializing grid...~%" )
+    (vom:debug4 "initializing grid...~%" )
     (setf g (cffi:foreign-funcall "grid_new" :int height :int width :pointer))
 
-    (format t "initializing block...~%" )
+    (vom:debug4 "initializing block...~%" )
     (setf b (cffi:foreign-funcall "block_new" :pointer))
 
-    (format t "initializing ss...~%" )
+    (vom:debug4 "initializing ss...~%" )
     (setf ss (cffi:foreign-funcall "shape_stream_new" :int 3 :pointer))
     (make-game :g g :b b :ss ss :height height :width width :ai-weights ai-weights)
     ))
@@ -85,7 +84,7 @@
                                            :pointer)))
 
 
-    (format t "initializing block shape...~%" )
+    (vom:debug4 "initializing block shape...~%" )
 
     (setf next-shape (cffi:foreign-funcall "block_init"
                                            :pointer (game-b game)
@@ -186,7 +185,6 @@
 
 (defmethod translate-from-foreign (pointer game-move)
   (declare (ignore game-move))
-  (format t "translating...~%" )
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move-foreign))
     (let ((shape-id (mem-ref shape :int)))
       (make-game-move :shape-code shape-id :rot rot :col col))))
@@ -207,7 +205,7 @@
       do
          (progn
            (game-apply-next-move game)
-           (format t string)
+           (vom:info string)
            (sleep .5)))))
 
 (defun serialize-shape (shape-ptr)

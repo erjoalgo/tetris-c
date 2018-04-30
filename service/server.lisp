@@ -201,7 +201,7 @@
                    as behind = (>= move-no (length moves))
                    while behind
                    do (progn
-                        (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
+                        (vom:debug "catching up from ~D to ~D on game ~D (~D secs left)~%"
                                 (length moves) move-no game-no (- max-move-catchup-wait-secs i))
                         (sleep 1))
                    finally
@@ -242,11 +242,10 @@
       as next-move = (libtetris:game-apply-next-move game)
       while (and next-move (or (null max-moves) (< i max-moves)))
       as string = (libtetris:game-printable-string game string)
-      do (format t string)
+      do (vom:debug string)
       do
          (let ((native (cffi::translate-from-foreign next-move 'libtetris::game-move)))
            (progn
-             (format t "~D: ~A~%" i (jonathan:%to-json native))
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
              (vector-push-extend native moves)))

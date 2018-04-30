@@ -1,6 +1,7 @@
 (progn (ql:quickload "hunchentoot") (ql:quickload "cffi")
        (ql:quickload "drakma") (ql:quickload "stefil")
        (ql:quickload "jonathan")
+       (ql:quickload "vom")
        (load "libtetris.lisp")
        (load "server.lisp")
        (load "test/server-test.lisp")
