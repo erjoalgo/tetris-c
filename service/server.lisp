@@ -57,7 +57,6 @@
   last-recorded-state
   final-state
   running-p
-  mutex
 
   max-moves
   ai-move-delay-secs
@@ -153,24 +152,6 @@
   (setf (hunchentoot:content-type*) "application/json")
   (jonathan:to-json body))
 
-(defun game-execution-last-recorded-state-blocking (game-exc &key (timeout-secs 10))
-  (if (not (game-execution-running-p game-exc))
-      (game-execution-final-state game-exc)
-      (let ((mutex (game-execution-mutex game-exc))
-            last-state)
-        (sb-thread:with-mutex (mutex)
-          (setf (game-execution-last-recorded-state game-exc) nil))
-        (loop
-           with checks-per-sec = 2
-           with check-delay = (/ 1 checks-per-sec)
-           with max-i = (max (* checks-per-sec timeout-secs) 1)
-
-           until (setf last-state (game-execution-last-recorded-state game-exc))
-           for i below max-i
-           do (format t "waiting for last state~%")
-           do (sleep check-delay))
-        (or last-state (game-execution-final-state game-exc)))))
-
 (defmethod jonathan:%to-json ((game-exc game-execution))
   (with-slots (game running-p last-recorded-state
                     ai-move-delay-secs)
@@ -181,12 +162,7 @@
       (jonathan:write-key-value "height" (libtetris:game-height game))
       (jonathan:write-key-value "running_p" running-p)
       (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
-      (let ((move-no 0) on-cells
-            (last-recorded-state
-             (game-execution-last-recorded-state-blocking game-exc)))
-        (when last-recorded-state
-          (setf move-no (slot-value last-recorded-state 'move-no)
-                on-cells (slot-value last-recorded-state 'on-cells)))
+      (with-slots (move-no on-cells) (game-execution-last-recorded-state game-exc)
         (jonathan:write-key-value "move_no" move-no)
         (jonathan:write-key-value "on_cells" on-cells)))))
 
@@ -257,7 +233,7 @@
 
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
-  (with-slots (game moves max-moves mutex ai-move-delay-secs
+  (with-slots (game moves max-moves ai-move-delay-secs
                last-recorded-state-check-delay-secs)
       game-exc
     (loop
@@ -275,12 +251,10 @@
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
              (vector-push-extend native moves)))
-       if (and (zerop (mod i last-recorded-state-check-multiple))
-               (null (game-execution-last-recorded-state game-exc)))
+       if (zerop (mod i last-recorded-state-check-multiple))
        do
-         (sb-thread:with-mutex (mutex)
-           (setf (game-execution-last-recorded-state game-exc)
-                 (game-serialize-state game i)))
+         (setf (game-execution-last-recorded-state game-exc)
+                 (game-serialize-state game i))
        finally
          (setf (game-execution-running-p game-exc) nil
                (game-execution-final-state game-exc) (game-serialize-state game i)))))
@@ -302,10 +276,10 @@
           (make-game-execution :game game
                                :moves moves
                                :max-moves max-moves
+                               :last-recorded-state (game-serialize-state game 0)
                                :ai-move-delay-secs ai-move-delay-secs
                                :last-recorded-state-check-delay-secs
-                               last-recorded-state-check-delay-secs
-                               :mutex (sb-thread:make-mutex)))))
+                               last-recorded-state-check-delay-secs))))
 
 (defun game-create-run (&optional game-no &rest create-args)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
