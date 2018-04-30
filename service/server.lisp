@@ -66,6 +66,7 @@
 (defstruct last-recorded-state
   timestamp
   on-cells
+  ;; on-cells-cnt
   move-no
   )
 
