@@ -160,7 +160,7 @@
     (jonathan:with-object
         (jonathan:write-key-value "width" (libtetris:game-width game))
       (jonathan:write-key-value "height" (libtetris:game-height game))
-      (jonathan:write-key-value "running_p" running-p)
+      (jonathan:write-key-value "running_p" (or running-p :false))
       (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
       (with-slots (move-no on-cells) (game-execution-last-recorded-state game-exc)
         (jonathan:write-key-value "move_no" move-no)
