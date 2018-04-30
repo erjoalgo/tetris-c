@@ -91,6 +91,7 @@
                    (list :seed (config-seed config)))))
 
   (let ((acceptor (make-instance 'hunchentoot:easy-acceptor :port (config-port config))))
+    (setf (hunchentoot:acceptor-document-root acceptor) (truename "./www"))
     (hunchentoot:start acceptor)
     (setf *service*
           (make-service :config (or config config-default)
@@ -215,18 +216,6 @@
   (json-resp nil
              (loop for game-no being the hash-keys of (service-game-executions *service*)
                 collect game-no)))
-
-(push (hunchentoot:create-static-file-dispatcher-and-handler
-       "/index.html" "html/tetris.html")
-      hunchentoot:*dispatch-table*)
-
-(push (hunchentoot:create-static-file-dispatcher-and-handler
-       "/js/tetris_client.js" "js/tetris_client.js")
-      hunchentoot:*dispatch-table*)
-
-(push (hunchentoot:create-static-file-dispatcher-and-handler
-       "/loading.gif" "loading.gif")
-      hunchentoot:*dispatch-table*)
 
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
