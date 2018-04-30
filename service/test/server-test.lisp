@@ -102,7 +102,7 @@
       (drakma:http-request (format nil "~A/games/~D/moves/~D"
                                    base-url test-game-no max-no-moves))
     (declare (ignore resp))
-    (stefil:is (equal return-code hunchentoot:+HTTP-SERVICE-UNAVAILABLE+))))
+    (stefil:is (equal hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+ return-code))))
 
 '(let ((exc (gethash 0 (server::service-game-executions *service*))))
           (sb-thread:with-mutex ((game-execution-mutex exc))
