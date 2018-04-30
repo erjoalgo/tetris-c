@@ -57,52 +57,31 @@
   )
 
 (defun game-init (height width &optional ai-weights)
-  (cffi:with-foreign-objects
-      ((g :pointer)
-       (b :pointer)
-       (ss :pointer)
-       )
+  (make-game :g (cffi:foreign-funcall "grid_new" :int height :int width :pointer)
+             :b (cffi:foreign-funcall "block_new" :pointer)
+             :ss (cffi:foreign-funcall "shape_stream_new" :int 3 :pointer)
+             :height height
+             :width width
+             :ai-weights ai-weights))
 
-    (vom:debug4 "initializing grid...~%" )
-    (setf g (cffi:foreign-funcall "grid_new" :int height :int width :pointer))
-
-    (vom:debug4 "initializing block...~%" )
-    (setf b (cffi:foreign-funcall "block_new" :pointer))
-
-    (vom:debug4 "initializing ss...~%" )
-    (setf ss (cffi:foreign-funcall "shape_stream_new" :int 3 :pointer))
-    (make-game :g g :b b :ss ss :height height :width width :ai-weights ai-weights)
-    ))
-
-(defun game-next-shape (game)
-  (let* ((ss (game-ss game))
-         (next-shape (cffi:foreign-funcall "shape_stream_pop"
-                                           :pointer ss
-                                           :pointer)))
-
-
-    (vom:debug4 "initializing block shape...~%" )
-
-    (setf next-shape (cffi:foreign-funcall "block_init"
-                                           :pointer (game-b game)
-                                           :pointer next-shape
-                                           :void))
-
-    (cffi:foreign-funcall "grid_block_center_elevate"
-                          :pointer (game-g game)
-                          :pointer (game-b game))
-
-    ;; return whether new block could be successfully placed
-    (if (not (cffi:foreign-funcall "grid_block_intersects"
-                                   :pointer (game-g game)
-                                   :pointer (game-b game)
-                                   :boolean))
-        next-shape
-        nil;; game over
-        )))
-
-
-
+(defun game-cycle-next-shape (game)
+  (with-slots (g b ss) game
+    (let (next-shape)
+      (setf next-shape (cffi:foreign-funcall "shape_stream_pop"
+                                             :pointer ss
+                                             :pointer))
+      (cffi:foreign-funcall "block_init"
+                            :pointer b
+                            :pointer next-shape
+                            :void)
+      (cffi:foreign-funcall "grid_block_center_elevate"
+                            :pointer g
+                            :pointer b)
+      (unless (cffi:foreign-funcall "grid_block_intersects"
+                                    :pointer g
+                                    :pointer b
+                                    :boolean)
+        b))))
 
 (defun game-apply-move (game move &optional no-add)
   (cffi:foreign-funcall "grid_block_apply_move"
@@ -191,7 +170,7 @@
     ;; TODO allow specifying move
     )
   (let* ((next-move (ai-best-move game (game-ai-weights game))))
-    (game-next-shape game)
+    (game-cycle-next-shape game)
     (when (game-apply-move game next-move) next-move)))
 
 (defun serialize-shape (shape-ptr)
