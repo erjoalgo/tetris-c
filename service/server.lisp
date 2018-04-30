@@ -285,6 +285,7 @@
                               (last-recorded-state-check-delay-secs 2))
   (unless (service-running-p *service*)
     (error "service not running"))
+  (assert (numberp game-no))
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
   (let ((moves (make-array 0 :adjustable t
