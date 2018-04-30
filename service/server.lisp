@@ -187,6 +187,13 @@
         (jonathan:write-key-value "move_no" move-no)
         (jonathan:write-key-value "on_cells" on-cells)))))
 
+(defmethod jonathan:%to-json ((game-move libtetris:game-move))
+  (with-slots (libtetris::shape-code libtetris::rot libtetris::col) game-move
+    (jonathan:with-object
+      (jonathan:write-key-value "shape" libtetris::shape-code)
+      (jonathan:write-key-value "rot" libtetris::rot)
+      (jonathan:write-key-value "col" libtetris::col))))
+
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
                                                  (#'parse-integer game-no))
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
@@ -254,10 +261,7 @@
        do
          (let ((native (cffi::translate-from-foreign next-move 'libtetris::game-move)))
            (progn
-             (format t "on move ~D, shape ~D, rot ~D, col ~D~%" i
-                     (slot-value native 'libtetris::shape-code)
-                     (slot-value native 'libtetris::rot)
-                     (slot-value native 'libtetris::col))
+             (format t "~D: ~A~%" i (jonathan:%to-json native))
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
              (vector-push-extend native moves)))
