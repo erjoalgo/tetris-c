@@ -248,7 +248,7 @@
        as string = (libtetris:game-printable-string game string)
        do (format t string)
        do
-         (let ((native (libtetris:my-translate-from-foreign next-move)))
+         (let ((native (cffi::translate-from-foreign next-move 'libtetris::game-move)))
            (progn
              (format t "on move ~D, shape ~D, rot ~D, col ~D~%" i
                      (slot-value native 'libtetris::shape-code)

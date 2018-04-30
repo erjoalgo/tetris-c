@@ -7,7 +7,6 @@
    #:game-init #:game-width #:game-height
    #:HEIGHT #:WIDTH #:ai-default-weights
    #:game-apply-next-move
-   #:my-translate-from-foreign
    #:game-print
    #:serialize-shapes
    #:init-tetris
@@ -184,9 +183,7 @@
   (rot :int)
   (col :int))
 
-;; (defmethod translate-from-foreign (pointer (type game-move))
-;; TODO use proper defmethod
-(defun my-translate-from-foreign (pointer &optional game-move)
+(defmethod translate-from-foreign (pointer game-move)
   (declare (ignore game-move))
   (format t "translating...~%" )
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move))
