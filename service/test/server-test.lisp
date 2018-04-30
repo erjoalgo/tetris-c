@@ -19,7 +19,7 @@
    ;; shapes-file
    ;; seed
    :grid-dimensions (cons game-height game-width)
-   :max-move-catchup-wait-secs 20))
+   :max-move-catchup-wait-secs 1))
 
 (defparameter base-url (format nil "http://localhost:~D"
                                (server::config-port test-service-config)))
