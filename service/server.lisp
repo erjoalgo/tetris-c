@@ -258,6 +258,8 @@
 (defun game-create (game-no &key max-moves (ai-move-delay-secs .5))
   (unless (service-running-p *service*)
     (error "service not running"))
+  (when (gethash game-no (service-game-executions *service*))
+    (error "game ~D exists" game-no))
   (let ((moves (make-array 0 :adjustable t
                            :fill-pointer t
                            :element-type 'libtetris:game-move))
@@ -273,8 +275,6 @@
 
 (defun game-create-run (&optional game-no &rest create-args)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
-    (when (gethash game-no (service-game-executions *service*))
-      (error "game ~D exists" game-no))
     (game-run (apply 'game-create game-no create-args))))
 
 (defun game-create-run-thread (&optional game-no &rest create-args)
