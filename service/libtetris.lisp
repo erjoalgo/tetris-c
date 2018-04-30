@@ -16,7 +16,6 @@
    #:game-on-cells-packed
    #:game-grid-loop
    #:game-printable-string
-   #:game-move-id-rot-col
    )
   )
 
@@ -184,19 +183,14 @@
   (rot :int)
   (col :int))
 
-(defun game-move-id-rot-col (foreign-game-move)
-  (with-foreign-slots ((shape rot col) pointer (:struct %game-move))
-    ;; You can change this and get return value in other format
-    ;; for example: (values width height)
-    (values
-     (mem-ref shape :int)
-     rot
-     col)))
-
 (defmethod translate-from-foreign (pointer game-move)
   (declare (ignore game-move))
   (format t "translating...~%" )
-  )
+  (with-foreign-slots ((shape rot col) pointer (:struct %game-move))
+    ;; You can change this and get return value in other format
+    ;; for example: (values width height)
+    (let ((shape-id (mem-ref shape :int)))
+      (make-game-move-native :shape-code shape-id :rot rot :col col))))
 
 (defun game-apply-next-move (game &optional game-move)
   (unless game-move
