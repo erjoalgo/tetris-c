@@ -54,7 +54,6 @@
 (defstruct game-execution
   game
   moves
-  thread
   last-recorded-state
   final-state
   running-p
@@ -98,15 +97,19 @@
                         :game-executions (make-hash-table)
                         :curr-game-no 0))))
 
+(defun s-starts-with (prefix string)
+  (and (<= (length prefix) (length string))
+       (string= prefix (subseq string 0 (length prefix)))))
+
 (defun service-stop (&optional service)
   (let* ((service (or service *service*))
          ;; (acceptor (service-acceptor service))
          (acceptor (slot-value service 'acceptor)))
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
-  (loop for game-exc being the hash-values of (service-game-executions *service*)
-     as thread = (game-execution-thread game-exc)
-     if thread do
+  (loop for thread in (sb-thread:list-all-threads)
+     if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
+     do
        (sb-thread:terminate-thread thread)))
 
 (defun service-running-p (&optional service)
@@ -286,7 +289,6 @@
 (defun game-create-run-thread (&optional game-no &rest create-args)
   (let* ((game-exc (apply 'game-create game-no create-args)))
     (values
-     (setf (game-execution-thread game-exc)
-           (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                                  :name (format nil "~A ~D" thread-name-prefix game-no))
+     (sb-thread:make-thread 'game-run :arguments (list game-exc)
+                            :name (format nil "~A ~D" thread-name-prefix game-no))
      game-exc)))
