@@ -100,7 +100,8 @@
 
 (defun service-stop (&optional service)
   (let* ((service (or service *service*))
-         (acceptor (service-acceptor service)))
+         ;; (acceptor (service-acceptor service))
+         (acceptor (slot-value service 'acceptor)))
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
   (loop for game-exc being the hash-values of (service-game-executions *service*)
