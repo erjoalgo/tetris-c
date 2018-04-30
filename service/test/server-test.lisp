@@ -103,6 +103,16 @@
       (declare (ignore resp))
       (stefil:is (equal hunchentoot:+HTTP-SERVICE-UNAVAILABLE+ return-code)))))
 
+(stefil:deftest test-new-game-serialize nil
+  (let* ((new-game (libtetris:game-init 10
+                                        10
+                                        nil))
+         (last-state (server::game-serialize-state new-game 0)))
+    (is (null (server::last-recorded-state-on-cells last-state)))))
+
+
+
+
 '(let ((exc (gethash 0 (server::service-game-executions *service*))))
           (sb-thread:with-mutex ((game-execution-mutex exc))
             (setf (game-execution-last-recorded-state exc) nil)
