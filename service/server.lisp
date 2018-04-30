@@ -61,6 +61,7 @@
 
   max-moves
   ai-move-delay-secs
+  last-recorded-state-check-delay-secs
   )
 
 (defstruct last-recorded-state
@@ -250,9 +251,12 @@
 
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
-  (with-slots (game moves max-moves mutex ai-move-delay-secs) game-exc
+  (with-slots (game moves max-moves mutex ai-move-delay-secs
+               last-recorded-state-check-delay-secs)
+      game-exc
     (loop
-       with last-recorded-state-check-multiple = 5
+      with last-recorded-state-check-multiple
+        = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
        for i from 0
        as next-move = (libtetris:game-apply-next-move game)
        while (and next-move (or (null max-moves) (< i max-moves)))
@@ -275,7 +279,8 @@
          (setf (game-execution-running-p game-exc) nil
                (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
-(defun game-create (game-no &key max-moves (ai-move-delay-secs .5))
+(defun game-create (game-no &key max-moves (ai-move-delay-secs .5)
+                              (last-recorded-state-check-delay-secs 2))
   (unless (service-running-p *service*)
     (error "service not running"))
   (when (gethash game-no (service-game-executions *service*))
@@ -291,6 +296,8 @@
                                :moves moves
                                :max-moves max-moves
                                :ai-move-delay-secs ai-move-delay-secs
+                               :last-recorded-state-check-delay-secs
+                               last-recorded-state-check-delay-secs
                                :mutex (sb-thread:make-mutex)))))
 
 (defun game-create-run (&optional game-no &rest create-args)
