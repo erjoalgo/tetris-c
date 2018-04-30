@@ -80,10 +80,26 @@
 
 (defvar *service* nil)
 
+(defun merge-structs (type &rest objs)
+  "values appearing earlier have higher precedence. nil interpreted as undefined"
+  (loop with ret = (make-instance type)
+     with slots = (loop for slot in (sb-mop:class-direct-slots (find-class type))
+                     collect (slot-value slot 'SB-PCL::NAME))
+     for obj in (reverse objs) if obj do
+       (loop for slot in slots
+          as val = (slot-value obj slot)
+          if val do
+            (setf (slot-value ret slot) val))
+     finally (return ret)))
+
 (defun service-start (&optional config &rest make-config-args)
   (when (service-running-p *service*)
     (error "service is running"))
-  (unless config (setf config (apply 'make-config make-config-args)))
+  (setf config (merge-structs 'config
+                              config
+                              (apply 'make-config make-config-args)
+                              config-default
+                              ))
   (apply 'libtetris:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
