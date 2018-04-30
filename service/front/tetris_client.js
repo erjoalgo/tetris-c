@@ -166,7 +166,7 @@ function server_request ( requestcode, response_hanlder )
 		// alert(xhr.responseText); // 'This is the returned text.'
 		// var array = new JSONArray(xhr.responseText);
 		try{
-		    response = eval(xhr.responseText+";");
+		    response = JSON.parse(xhr.responseText);
 		}
 		catch (err)
 		{
@@ -643,14 +643,14 @@ function init ( response )
     // response = [];
     var miny = grid.height;
 
-    game_no = response.pop()
-    console.log("game_no is: " +game_no);
+    game = response;
 
-    move_no = response.pop();
+    move_no = game.move_no ;
     move_no = 0;
     console.log("move no is: " +move_no);
-    grid.width = response.pop();
-    grid.height = response.pop();
+    grid.width = game.width;
+    grid.height = game.height;
+
     grid.rowcounts = []
     grid.grid = [];
     grid.relief = [];
@@ -672,10 +672,10 @@ function init ( response )
     }
 
     // for (var xy in response)
-    for (var i = 0;i<response.length;i++)
+    for (var i = 0;i<game.on_cells.length;i++)
     {
         continue;
-        xy = response[i];
+        xy = game.on_cells[i];
         x = xy%grid.width;
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
