@@ -194,7 +194,7 @@
       (jonathan:write-key-value "rot" libtetris::rot)
       (jonathan:write-key-value "col" libtetris::col))))
 
-(define-regexp-route current-game-state-handler ("^/games/([0-9]+)$"
+(define-regexp-route current-game-state-handler ("^/games/([0-9]+)/?$"
                                                  (#'parse-integer game-no))
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
