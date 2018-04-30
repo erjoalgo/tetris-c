@@ -46,9 +46,6 @@
   (assert (> SHAPE-COUNT 0))
   (cffi:foreign-funcall "ai_init" :void))
 
-(defun grid-test ()
-  (cffi:foreign-funcall "grid_test"))
-
 (defstruct game
   g ;; grid
   b ;; block
@@ -196,17 +193,6 @@
   (let* ((next-move (ai-best-move game (game-ai-weights game))))
     (game-next-shape game)
     (when (game-apply-move game next-move) next-move)))
-
-(defun test-game ()
-  (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
-    (loop
-      for i below 10
-      as string = (game-printable-string game string)
-      do
-         (progn
-           (game-apply-next-move game)
-           (vom:info string)
-           (sleep .5)))))
 
 (defun serialize-shape (shape-ptr)
   (cffi:foreign-funcall "shape_serialize"
