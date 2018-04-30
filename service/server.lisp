@@ -83,14 +83,14 @@
 (defun merge-structs (type &rest objs)
   "values appearing earlier have higher precedence. nil interpreted as undefined"
   (loop with ret = (make-instance type)
-     with slots = (loop for slot in (sb-mop:class-direct-slots (find-class type))
-                     collect (slot-value slot 'SB-PCL::NAME))
-     for obj in (reverse objs) if obj do
-       (loop for slot in slots
-          as val = (slot-value obj slot)
-          if val do
-            (setf (slot-value ret slot) val))
-     finally (return ret)))
+        with slots = (loop for slot in (sb-mop:class-direct-slots (find-class type))
+                           collect (slot-value slot 'SB-PCL::NAME))
+        for obj in (reverse objs) if obj do
+          (loop for slot in slots
+                as val = (slot-value obj slot)
+                if val do
+                  (setf (slot-value ret slot) val))
+        finally (return ret)))
 
 (defun service-start (&optional config &rest make-config-args)
   (when (service-running-p *service*)
@@ -128,9 +128,9 @@
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
   (loop for thread in (sb-thread:list-all-threads)
-     if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
-     do
-       (sb-thread:terminate-thread thread)))
+        if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
+          do
+             (sb-thread:terminate-thread thread)))
 
 (defun service-running-p (&optional service)
   (unless service (setf service *service*))
@@ -154,11 +154,10 @@
 
 (defmethod jonathan:%to-json ((game-exc game-execution))
   (with-slots (game running-p last-recorded-state
-                    ai-move-delay-secs)
+               ai-move-delay-secs)
       game-exc
-    ;; (with-slots (libtetris:height libtetris:width) game
     (jonathan:with-object
-        (jonathan:write-key-value "width" (libtetris:game-width game))
+      (jonathan:write-key-value "width" (libtetris:game-width game))
       (jonathan:write-key-value "height" (libtetris:game-height game))
       (jonathan:write-key-value "running_p" (or running-p :false))
       (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
@@ -196,30 +195,30 @@
            (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
                       '(:error "requested move outside of range of completed game")))
           (t (loop with
-                max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                              (service-config *service*))
-                for i below max-move-catchup-wait-secs
-                as behind = (>= move-no (length moves))
-                while behind
-                do (progn
-                     (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
-                             (length moves) move-no game-no (- max-move-catchup-wait-secs i))
-                     (sleep 1))
-                finally
-                  (if behind
-                      (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                                 '(:error "reached timeout catching up to requested move~%" ))
-                      (return
-                        (json-resp nil
-                                   (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
-                                       (aref moves move-no)
-                                     (list libtetris::shape-code libtetris::rot
-                                           libtetris::col)))))))))))
+                   max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                                 (service-config *service*))
+                   for i below max-move-catchup-wait-secs
+                   as behind = (>= move-no (length moves))
+                   while behind
+                   do (progn
+                        (format t "catching up from ~D to ~D on game ~D (~D secs left)~%"
+                                (length moves) move-no game-no (- max-move-catchup-wait-secs i))
+                        (sleep 1))
+                   finally
+                      (if behind
+                          (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                                     '(:error "reached timeout catching up to requested move~%" ))
+                          (return
+                            (json-resp nil
+                                       (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
+                                           (aref moves move-no)
+                                         (list libtetris::shape-code libtetris::rot
+                                               libtetris::col)))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
              (loop for game-no being the hash-keys of (service-game-executions *service*)
-                collect game-no)))
+                   collect game-no)))
 
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
   (libtetris:serialize-shapes))
@@ -239,23 +238,23 @@
     (loop
       with last-recorded-state-check-multiple
         = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
-       for i from 0
-       as next-move = (libtetris:game-apply-next-move game)
-       while (and next-move (or (null max-moves) (< i max-moves)))
-       as string = (libtetris:game-printable-string game string)
-       do (format t string)
-       do
+      for i from 0
+      as next-move = (libtetris:game-apply-next-move game)
+      while (and next-move (or (null max-moves) (< i max-moves)))
+      as string = (libtetris:game-printable-string game string)
+      do (format t string)
+      do
          (let ((native (cffi::translate-from-foreign next-move 'libtetris::game-move)))
            (progn
              (format t "~D: ~A~%" i (jonathan:%to-json native))
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
              (vector-push-extend native moves)))
-       if (zerop (mod i last-recorded-state-check-multiple))
-       do
-         (setf (game-execution-last-recorded-state game-exc)
+      if (zerop (mod i last-recorded-state-check-multiple))
+        do
+           (setf (game-execution-last-recorded-state game-exc)
                  (game-serialize-state game i))
-       finally
+      finally
          (setf (game-execution-running-p game-exc) nil
                (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
@@ -267,8 +266,8 @@
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
   (let ((moves (make-array 0 :adjustable t
-                           :fill-pointer t
-                           :element-type 'libtetris:game-move))
+                             :fill-pointer t
+                             :element-type 'libtetris:game-move))
         (game (libtetris:game-init libtetris:HEIGHT
                                    libtetris:WIDTH
                                    libtetris:ai-default-weights)))
@@ -289,5 +288,5 @@
   (let* ((game-exc (apply 'game-create game-no create-args)))
     (values
      (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                            :name (format nil "~A ~D" thread-name-prefix game-no))
+                                      :name (format nil "~A ~D" thread-name-prefix game-no))
      game-exc)))

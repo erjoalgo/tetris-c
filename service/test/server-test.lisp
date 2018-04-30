@@ -114,9 +114,9 @@
 
 
 '(let ((exc (gethash 0 (server::service-game-executions *service*))))
-          (sb-thread:with-mutex ((game-execution-mutex exc))
-            (setf (game-execution-last-recorded-state exc) nil)
-            (jonathan:to-json exc)))
+  (sb-thread:with-mutex ((game-execution-mutex exc))
+    (setf (game-execution-last-recorded-state exc) nil)
+    (jonathan:to-json exc)))
 
 (defun run-tests ()
   (init)

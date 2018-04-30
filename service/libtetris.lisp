@@ -127,15 +127,15 @@
         (rows (gensym "rows"))
         (row (gensym "row")))
     `(loop
-        with ,rows = (cffi:mem-ref (game-g game) :pointer 0)
-        for ,r-sym downfrom (1- (game-height game)) to 0
-        as ,row = (cffi:mem-aref ,rows :pointer r)
-          ,outer-action
-          (loop for ,c-sym below (game-width ,game)
-             as ,val-sym = (cffi:mem-aref ,row :int c)
-               ,@if-cond
-               ,inner-action
-               ,body))))
+       with ,rows = (cffi:mem-ref (game-g game) :pointer 0)
+       for ,r-sym downfrom (1- (game-height game)) to 0
+       as ,row = (cffi:mem-aref ,rows :pointer r)
+       ,outer-action
+        (loop for ,c-sym below (game-width ,game)
+              as ,val-sym = (cffi:mem-aref ,row :int c)
+              ,@if-cond
+              ,inner-action
+              ,body))))
 
 
 (defun cell-pack (r c width)
@@ -202,9 +202,9 @@
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
     (loop
-       for i below 10
-       as string = (game-printable-string game string)
-         do
+      for i below 10
+      as string = (game-printable-string game string)
+      do
          (progn
            (game-apply-next-move game)
            (format t string)
@@ -217,7 +217,7 @@
 
 (defun serialize-shapes ()
   (format nil "[~%~{~a~^,~%~}~%]~%"
-          (loop for id below SHAPE-COUNT collect
-               (serialize-shape (mem-aref SHAPES :pointer id)))))
+          (loop for id below SHAPE-COUNT
+                collect (serialize-shape (mem-aref SHAPES :pointer id)))))
 
 ;; (test-game)
