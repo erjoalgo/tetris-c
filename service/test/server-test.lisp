@@ -86,7 +86,7 @@
     (stefil:is (< (nth 2 game-move) game-width))
     ))
 
-(stefil:deftest test-game-move-timeout nil
+(stefil:deftest test-game-move-outside-of-range nil
   (multiple-value-bind (resp return-code)
       (drakma:http-request (format nil "~A/games/~D/moves/~D"
                                    base-url test-game-no max-no-moves))
