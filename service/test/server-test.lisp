@@ -104,6 +104,11 @@
     (declare (ignore resp))
     (stefil:is (equal return-code hunchentoot:+HTTP-SERVICE-UNAVAILABLE+))))
 
+'(let ((exc (gethash 0 (server::service-game-executions *service*))))
+          (sb-thread:with-mutex ((game-execution-mutex exc))
+            (setf (game-execution-last-recorded-state exc) nil)
+            (jonathan:to-json exc)))
+
 (init)
 (test-handlers)
 
