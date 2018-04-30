@@ -115,11 +115,9 @@
        (sb-thread:terminate-thread thread)))
 
 (defun service-running-p (&optional service)
-  (let* ((service (or service *service*))
-         ;; (acceptor (service-acceptor service))
-         (acceptor (slot-value service 'acceptor))
-         )
-    (and acceptor (hunchentoot:started-p acceptor))))
+  (unless service (setf service *service*))
+  (and service (slot-value service 'acceptor)
+       (hunchentoot:started-p (slot-value service 'acceptor))))
 
 (defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
   `(progn
