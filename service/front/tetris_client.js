@@ -195,9 +195,9 @@ function server_request ( requestcode, response_hanlder )
 		// alert(array);
 		// return array;
             }
-/*	    else{
-		alert('Error: '+xhr.status); // An error occurred during the request
-            }*/
+	    else{
+		error(xhr.status+": "+xhr.responseText);
+            }
 
 	}
     }
