@@ -40,8 +40,9 @@
 
 (defvar config-default
   (make-config :port 4242
-               :shapes-file nil ; use tetris-ai default
-               :grid-dimensions nil ; use tetris-ai default
+               :shapes-file tetris-ai:default-shapes-file
+               :grid-dimensions (cons tetris-ai:default-height
+                                      tetris-ai:default-width)
                :max-move-catchup-wait-secs 10))
 
 (defstruct service
