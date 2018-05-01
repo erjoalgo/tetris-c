@@ -166,6 +166,7 @@
 (defun game-apply-next-move (game &optional game-move)
   (unless game-move
     ;; TODO allow specifying move
+    ;; ensure shapes match
     )
   (let* ((next-move (ai-best-move game (game-ai-weights game))))
     (game-cycle-next-shape game)
