@@ -30,3 +30,7 @@ clean:
 	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
 
 FORCE:
+
+install: libtetris.so
+	ln -s $@ /usr/local/lib/
+	ldconfig
