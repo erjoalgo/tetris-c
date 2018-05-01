@@ -35,6 +35,7 @@
 (defun init ()
   (when *test-service*
     (server:service-stop *test-service*))
+  (server:service-stop) ;;TODO support multiple services
   (setf *test-service*
         (server:service-start test-service-config))
   (server:game-create-run test-game-no :max-moves max-no-moves)
