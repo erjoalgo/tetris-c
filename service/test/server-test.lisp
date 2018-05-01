@@ -66,18 +66,6 @@
     (stefil:is (equal 1 (length gameno-list)))
     (stefil:is (equal test-game-no (nth 0 gameno-list)))))
 
-(stefil:deftest test-game-status nil
-  (let* ((game-status (req (format nil "/games/~D" test-game-no)))
-         (config (tetris-ai-rest:service-config *test-service*))
-         (hw (tetris-ai-rest:config-grid-dimensions config)))
-    (stefil:is (>= (json-get "move_no" game-status) 0))
-    (stefil:is (= (cdr hw) (json-get "width" game-status) ))
-    (stefil:is (= (car hw) (json-get "height" game-status)))
-    ;; (stefil:is (eq t (json-get "running_p" game-status)))
-    ;; (stefil:is (eq t (json-get "ai-move-delay-secs" game-status)))
-
-    ))
-
 (defvar *shape-count* nil)
 
 (stefil:deftest test-shapes nil
@@ -117,6 +105,18 @@
                                         nil))
          (last-state (tetris-ai-rest::game-serialize-state new-game 0)))
     (is (null (tetris-ai-rest::last-recorded-state-on-cells last-state)))))
+
+(stefil:deftest test-game-status nil
+  (let* ((game-status (req (format nil "/games/~D" test-game-no)))
+         (config (tetris-ai-rest:service-config *test-service*))
+         (hw (tetris-ai-rest:config-grid-dimensions config)))
+    (stefil:is (>= (json-get "move_no" game-status) 0))
+    (stefil:is (= (cdr hw) (json-get "width" game-status) ))
+    (stefil:is (= (car hw) (json-get "height" game-status)))
+    (stefil:is (not (json-get "running_p" game-status)))
+    ;; (stefil:is (eq t (json-get "ai-move-delay-secs" game-status)))
+
+    ))
 
 
 
