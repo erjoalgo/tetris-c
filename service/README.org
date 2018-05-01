@@ -1,0 +1,38 @@
+* Building
+  - build libtetris
+   #+BEGIN_SRC sh
+   make clean
+   make libtetris.so
+   sudo make install
+   # ensure installation succeeded
+   ldconfig -p | grep libtetris
+   #+END_SRC
+  - build service
+    - obtain buildapp
+      : sudo apt-get install buildapp
+    - obtain quicklisp
+      #+BEGIN_SRC sh
+      cd /tmp
+      curl -O https://beta.quicklisp.org/quicklisp.lisp
+      curl -O https://beta.quicklisp.org/quicklisp.lisp.asc
+      # gpg --verify quicklisp.lisp.asc quicklisp.lisp
+      sbcl --load quicklisp.lisp --non-interactive \
+           --eval '(quicklisp-quickstart:install)' \
+           --eval '(quicklisp-quickstart:install)'
+      rm quicklisp.lisp{,.asc}
+      #+END_SRC
+    - build and run service
+      #+BEGIN_SRC sh
+      cd ./service/back/
+      make
+      ./bin/tetris-ai-rest -h
+        -p --port                       integer  service port
+        -s --shapes-file                boolean  path to a libtetris shapes.in
+        -e --seed                       integer  libtetris ai seed to use
+        -d --dims                       integer  dimensions of the grid, in the form of HxW, e.g. 19x10
+        -v --verbose                    boolean  verbose logging
+        -h --help                       boolean  display help
+        -V --version                    boolean  display version
+      ./bin/tetris-ai-rest -p 4242
+        <WARN> [18:24:23] tetris-ai-rest - started on port 4242
+      #+END_SRC
