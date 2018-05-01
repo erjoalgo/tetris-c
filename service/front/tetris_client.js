@@ -116,8 +116,6 @@ var consec_failed_mills = 0;
 var server_timeout = 20000;
 // var timer_delay = 200;
 var timer_delay = 90;
-var server_moves_ahead = [];
-
 
 
 
@@ -248,9 +246,6 @@ var grid = {
     rowcounts:null,
     grid:null
 };
-
-var server_moves_ahead = {
-    i:0, max_i:0, q:[]};
 
 /*function virtual_iterate ()
 {
@@ -581,54 +576,20 @@ function fetch ( response )
     assert(game_no != null && move_no !=  null);
 
     //console.log( "fetching..." );
-    if (!(server_moves_ahead.i<server_moves_ahead.max_i) )
+    if (response==null)
     {
-	// //debugger;
-	if (response!=null)
-	{
-	    assert(server_moves_ahead.i==server_moves_ahead.max_i,  " assertion failed at 566 ");
-	    assert(!(response.length%3),  " assertion failed at 567 ");
+        var uri = "/games/"+game_no+"/moves/"+move_no;
+        server_request(uri, fetch);
+	return;
+    }else
+    {
+        move = response;
 
-	    var to = min(server_moves_ahead.q.length, response.length);
-	    for (var i = 0; i<to; i++)
-	    {server_moves_ahead.q[i] = response[i];}
-	    for (var i = server_moves_ahead.q.length; i<response.length; i++)
-	    {server_moves_ahead.q.push(response[i]);}
-
-	    server_moves_ahead.max_i = response.length;
-	    server_moves_ahead.i = 0;
-
-	    assert(server_moves_ahead.i + 2 <server_moves_ahead.max_i,  " assertion failed at 578 ");
-
-	}
-	else
-	{
-	    assert(server_moves_ahead.i==server_moves_ahead.max_i,  " assertion failed at 583 ");
-	    //debugger;
-	    //console.log( "requesting moves from server" );
-            var uri = "/games/"+game_no+"/moves/"+move_no;
-            server_request(uri, fetch); //model, rotation, x
-	    return;
-	}
+        mrxy[0] = move.shape, mrxy[1] = 0, mrxy[2] = grid.width/2-1, mrxy[3] = 0;
+        answer_rx[0] = move.rot, answer_rx[1] = move.col;
+        move_no++;
+        timer();
     }
-
-    assert(server_moves_ahead.i + 2 <server_moves_ahead.max_i, " assertion failed at 590 ");
-
-    // assert(first_move, "failed assertion at line 459 ");
-    var first_move = null;
-    first_move = [null, null, null];
-    first_move[0] = server_moves_ahead.q[server_moves_ahead.i++];
-    first_move[1] = server_moves_ahead.q[server_moves_ahead.i++];
-    first_move[2] = server_moves_ahead.q[server_moves_ahead.i++];
-    ////debugger;
-
-
-    mrxy[0] = first_move[0], mrxy[1] = 0, mrxy[2] = grid.width/2-1, mrxy[3] = 0;
-    answer_rx[0] = first_move[1], answer_rx[1] = first_move[2];
-    move_no++;
-
-
-    timer();
 }
 
 function init ( response )
