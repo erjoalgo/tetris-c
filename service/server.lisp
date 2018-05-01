@@ -265,7 +265,7 @@
         (height-width (config-grid-dimensions (service-config *service*)))
         (game (tetris-ai:game-init (car height-width)
                                    (cdr height-width)
-                                   tetris-ai:ai-default-weights)))
+                                   :ai-weights tetris-ai:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game
                                :moves moves

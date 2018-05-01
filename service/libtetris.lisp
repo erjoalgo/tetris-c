@@ -54,10 +54,10 @@
   over-p
   )
 
-(defun game-init (height width &optional ai-weights)
+(defun game-init (height width &key ai-weights (ai-depth 3))
   (make-game :g (cffi:foreign-funcall "grid_new" :int height :int width :pointer)
              :b (cffi:foreign-funcall "block_new" :pointer)
-             :ss (cffi:foreign-funcall "shape_stream_new" :int 3 :pointer)
+             :ss (cffi:foreign-funcall "shape_stream_new" :int ai-depth :pointer)
              :height height
              :width width
              :ai-weights ai-weights))
