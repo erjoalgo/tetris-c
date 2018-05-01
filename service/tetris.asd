@@ -13,8 +13,9 @@
   :description "A restful service on top of tetris-ai"
   :license "BSD-2-Clause"
   :author "Ernesto Alfonso <erjoalgo@gmail.com>"
-  :components ((:file "server"))
-  :depends-on (:tetris-ai :hunchentoot :jonathan :vom))
+  :components ((:file "server")
+               (:file "main"))
+  :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments))
 
 (asdf:defsystem :tetris-ai-rest-test
   :description "tetris-ai-rest tests package"

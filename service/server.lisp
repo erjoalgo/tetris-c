@@ -72,13 +72,6 @@
 
 (defvar thread-name-prefix "tetris-game-thread")
 
-(defun main (argv)
-  (declare (ignore argv))
-  ;; TODO parse args
-  (let ((config config-default))
-    (service-start config))
-  (loop do (game-create-run)))
-
 (defvar *service* nil)
 
 (defun merge-structs (type &rest objs)
