@@ -50,43 +50,48 @@
   (unless (member application-json drakma:*text-content-types* :test 'equal)
     (push application-json drakma:*text-content-types*)))
 
-(defun req (uri &rest args)
-  (let* ((resp (apply 'drakma:http-request (concatenate 'string base-url uri) args))
+(defun req (uri &key (as :alist))
+  (let* ((resp (apply 'drakma:http-request (concatenate 'string base-url uri) nil))
          parsed)
     (format t "drakma req: ~A => ~A~%" uri resp)
-    (setf parsed (jonathan:parse resp))
+    (setf parsed (jonathan:parse resp :as as))
     (format t "drakma req: ~A => ~A~%" uri parsed)
     parsed))
 
+(defun json-get (key map)
+  (cdr (assoc key map :test 'equal)))
+
 (stefil:deftest test-games nil
-  (let ((gameno-list (req "/games")))
+  (let ((gameno-list (req "/games" :as :list)))
     (stefil:is (equal 1 (length gameno-list)))
     (stefil:is (equal test-game-no (nth 0 gameno-list)))))
 
 (stefil:deftest test-game-status nil
-  (let ((game-status (req (format nil "/games/~D" test-game-no))))
-    (stefil:is (>= (length game-status) 4))
-    ;; (list (tetris-ai:game-height game) (tetris-ai:game-width game) move-no game-no)
-    ;; (stefil:is (equal tetris-ai:HEIGHT (nth 0 game-status)))
-    ;; (stefil:is (equal tetris-ai:WIDTH (nth 1 game-status)))
-    ;; (stefil:is (equal 0 (nth 2 game-status)))
-    ;; (stefil:is (equal test-game-no (nth 3 game-status)))
+  (let* ((game-status (req (format nil "/games/~D" test-game-no)))
+         (config (tetris-ai-rest:service-config *test-service*))
+         (hw (tetris-ai-rest:config-grid-dimensions config)))
+    (stefil:is (>= (json-get "move_no" game-status) 0))
+    (stefil:is (= (cdr hw) (json-get "width" game-status) ))
+    (stefil:is (= (car hw) (json-get "height" game-status)))
+    ;; (stefil:is (eq t (json-get "running_p" game-status)))
+    ;; (stefil:is (eq t (json-get "ai-move-delay-secs" game-status)))
+
     ))
 
 (defvar *shape-count* nil)
 
 (stefil:deftest test-shapes nil
-  (let ((shapes (req "/shapes")))
-    (stefil:is (>= (length shapes) 4))
+  (let ((shapes (req "/shapes" :as :list)))
+    (stefil:is (>= (length shapes) 0))
     (setf *shape-count* (length shapes))))
 
 (stefil:deftest test-game-move-success nil
   (let ((game-move (req (format nil "/games/~D/moves/~D" test-game-no 0))))
-    (stefil:is (equal 3 (length game-move)))
-    (stefil:is (loop for v in game-move always (>= v 0)))
-    (stefil:is (< (nth 0 game-move) *shape-count*))
-    (stefil:is (< (nth 1 game-move) 4))
-    (stefil:is (< (nth 2 game-move) game-width))
+    (stefil:is (= 3 (length game-move)))
+    (stefil:is (loop for (k . v) in game-move always (>= v 0)))
+    (stefil:is (< (json-get "shape" game-move) *shape-count*))
+    (stefil:is (< (json-get "rot" game-move) 4))
+    (stefil:is (< (json-get "col" game-move) game-width))
     ))
 
 (stefil:deftest test-game-move-outside-of-range nil
