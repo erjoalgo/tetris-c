@@ -15,24 +15,6 @@
     (("version" #\V) :type boolean :optional t :documentation "display version")))
 
 
-(defmacro pull-some-kw-args ((syms remaining) args &body body)
-  (let ((k (gensym "k"))
-        (v (gensym "v"))
-        (sym (gensym "sym")))
-    `(let (,@syms remaining)
-       (loop for (,k ,v) on ,args
-          by #'cddr
-          as ,sym = (find-symbol (symbol-name ,k))
-          do (format t "sym ~A ~A~%" ,sym (member ,sym ',syms))
-          if (member ,sym ',syms)
-          do (progn (set ,sym ,v)
-                    (format t "(setf ~A ~A) => ~A~%"
-                            (symbol-name ,sym) ,v (symbol-value ,sym)))
-          else nconc (cons ,k ,v) into ,remaining)
-       (setf ,(car syms) 'test)
-       ,@body)))
-
-
 (defun main-parse-args (&rest args &key positional verbose dims help version &allow-other-keys)
   (declare (ignore positional))
   ;; destructure any argument that need to be handled before proxying to make-config
