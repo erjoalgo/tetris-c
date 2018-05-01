@@ -32,5 +32,5 @@ clean:
 FORCE:
 
 install: libtetris.so
-	ln -s $@ /usr/local/lib/
+	cp -f $< /usr/local/lib/
 	ldconfig
