@@ -109,8 +109,8 @@
 
   (let ((acceptor (make-instance 'hunchentoot:easy-acceptor
                                  :port (config-port config)
+                                 :document-root (truename "./www")
                                  :access-log-destination nil)))
-    (setf (hunchentoot:acceptor-document-root acceptor) (truename "./www"))
     (hunchentoot:start acceptor)
     (setf *service*
           (make-service :config (or config config-default)
