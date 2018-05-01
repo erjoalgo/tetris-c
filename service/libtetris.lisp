@@ -101,15 +101,15 @@
         (rows (gensym "rows"))
         (row (gensym "row")))
     `(loop
-       with ,rows = (cffi:mem-ref (game-g game) :pointer 0)
-       for ,r-sym downfrom (1- (game-height game)) to 0
-       as ,row = (cffi:mem-aref ,rows :pointer r)
-       ,outer-action
-        (loop for ,c-sym below (game-width ,game)
-              as ,val-sym = (cffi:mem-aref ,row :int c)
-              ,@if-cond
-              ,inner-action
-              ,body))))
+        with ,rows = (cffi:mem-ref (game-g game) :pointer 0)
+        for ,r-sym downfrom (1- (game-height game)) to 0
+        as ,row = (cffi:mem-aref ,rows :pointer r)
+          ,outer-action
+          (loop for ,c-sym below (game-width ,game)
+             as ,val-sym = (cffi:mem-aref ,row :int c)
+               ,@if-cond
+               ,inner-action
+               ,body))))
 
 
 (defun cell-pack (r c width)
@@ -181,6 +181,7 @@
 (defun serialize-shapes ()
   (format nil "[~%~{~a~^,~%~}~%]~%"
           (loop for id below SHAPE-COUNT
-                collect (serialize-shape (mem-aref SHAPES :pointer id)))))
+             collect (serialize-shape (mem-aref SHAPES :pointer id)))))
 
 ;; (test-game)
+

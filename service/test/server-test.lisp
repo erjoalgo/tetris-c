@@ -92,7 +92,7 @@
 (stefil:deftest test-game-move-timeout nil
   (let ((slow-game-no (1+ test-game-no)))
     (tetris-ai-rest:game-create-run-thread slow-game-no :max-moves max-no-moves
-                                                :AI-MOVE-DELAY-SECS 99999)
+                                           :AI-MOVE-DELAY-SECS 99999)
     (multiple-value-bind (resp return-code)
         (drakma:http-request (format nil "~A/games/~D/moves/1"
                                      base-url slow-game-no))

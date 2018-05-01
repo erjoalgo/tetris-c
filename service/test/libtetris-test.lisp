@@ -3,9 +3,9 @@
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
     (loop
-      for i below 10
-      as string = (game-printable-string game string)
-      do
+       for i below 10
+       as string = (game-printable-string game string)
+       do
          (progn
            (game-apply-next-move game)
            (vom:warn string)
