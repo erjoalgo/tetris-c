@@ -1,5 +1,6 @@
 (load #p"tetris.asd")
 (ql:quickload 'tetris-ai-rest)
+(ql:quickload 'tetris-ai-rest-test)
 
 '(progn
   ;; (setf hunchentoot:*catch-errors-p* nil)
