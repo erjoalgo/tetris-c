@@ -25,6 +25,9 @@
    #:game-create-run
    #:game-create-run-thread
    #:make-config
+   #:service-config
+   #:grid-dimensions
+   #:config-grid-dimensions
    )
   )
 
