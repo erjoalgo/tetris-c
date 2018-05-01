@@ -258,8 +258,8 @@
   (let ((moves (make-array 0 :adjustable t
                              :fill-pointer t
                              :element-type 'tetris-ai:game-move))
-        (game (tetris-ai:game-init tetris-ai:HEIGHT
-                                   tetris-ai:WIDTH
+        (game (tetris-ai:game-init tetris-ai:default-height
+                                   tetris-ai:default-width
                                    tetris-ai:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game

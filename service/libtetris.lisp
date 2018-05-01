@@ -3,7 +3,7 @@
   (:export
    #:make-game-move-native #:game-move-native
    #:game-init #:game-width #:game-height
-   #:HEIGHT #:WIDTH #:ai-default-weights
+   #:default-height #:default-width #:default-shapes-file #:ai-default-weights
    #:game-apply-next-move
    #:game-print
    #:serialize-shapes
@@ -26,13 +26,13 @@
 
 (use-foreign-library libtetris)
 
-(defparameter seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
-(defparameter shapes-file "shapes.in")
+(defvar default-seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
+(defvar default-shapes-file "shapes.in")
 
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
-(defun init-tetris (&key (seed seed) (shapes-file shapes-file))
+(defun init-tetris (&key (seed default-seed) (shapes-file default-shapes-file))
   (vom:debug "reading shapes...~%" )
   (setf shapes
         (cffi:foreign-funcall "shapes_read"
@@ -137,8 +137,8 @@
                                 (if (zerop val) #\Space #\*)))
     string))
 
-(defparameter HEIGHT 19)
-(defparameter WIDTH 10)
+(defvar default-height 19)
+(defvar default-width 10)
 
 (cffi:defcvar ("default_weights" ai-default-weights) :pointer)
 
