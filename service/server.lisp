@@ -209,7 +209,7 @@
                   (return
                       (if behind
                           (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                                     '(:error "reached timeout catching up to requested move~%" ))
+                                     '(:error "reached timeout catching up to requested move" ))
                             (json-resp nil
                                        (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
                                            (aref moves move-no)
