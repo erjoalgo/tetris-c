@@ -23,7 +23,7 @@
       #+END_SRC
     - build and run service
       #+BEGIN_SRC sh
-      cd ./service/back/
+      cd ./service/
       make
       ./bin/tetris-ai-rest -h
         -p --port                       integer  service port

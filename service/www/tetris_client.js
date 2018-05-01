@@ -1,1 +1,1 @@
-../../front/tetris_client.js
+../front/tetris_client.js
