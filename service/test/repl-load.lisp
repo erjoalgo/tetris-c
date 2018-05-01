@@ -1,6 +1,10 @@
+(declaim (optimize (debug 3) (speed 0)))
+
 (load #p"tetris.asd")
 (ql:quickload 'tetris-ai-rest)
 (ql:quickload 'tetris-ai-rest-test)
+
+(in-package #:tetris-ai-rest)
 
 (progn
   ;; (setf hunchentoot:*catch-errors-p* nil)
