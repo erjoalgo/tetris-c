@@ -204,11 +204,7 @@
                       (if behind
                           (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
                                      '(:error "reached timeout catching up to requested move" ))
-                            (json-resp nil
-                                       (with-slots (tetris-ai::shape-code tetris-ai::rot tetris-ai::col)
-                                           (aref moves move-no)
-                                         (list tetris-ai::shape-code tetris-ai::rot
-                                               tetris-ai::col)))))))))))
+                            (json-resp nil (aref moves move-no))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
