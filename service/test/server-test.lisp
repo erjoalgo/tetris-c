@@ -1,7 +1,9 @@
 (defpackage #:tetris-ai-rest-test
   ;; (:use :cl :lisp-unit)
   (:use :cl :stefil)
-  (:export))
+  (:export
+   #:run-tests
+   ))
 
 
 (in-package #:tetris-ai-rest-test)
