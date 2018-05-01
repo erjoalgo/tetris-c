@@ -40,6 +40,7 @@
                               :pointer (cffi:get-var-pointer 'SHAPE-COUNT)
                               :pointer))
   (vom:info "loaded ~D shapes ~%" SHAPE-COUNT)
+  (vom:warn "using seed: ~D~%" seed)
   (cffi:foreign-funcall "srand" :int seed)
   (assert (> SHAPE-COUNT 0))
   (cffi:foreign-funcall "ai_init" :void))
