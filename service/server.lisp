@@ -39,6 +39,7 @@
   seed
   grid-dimensions
   max-move-catchup-wait-secs
+  ai-depth
   )
 
 (defvar config-default
@@ -262,10 +263,13 @@
   (let* ((moves (make-array 0 :adjustable t
                              :fill-pointer t
                              :element-type 'tetris-ai:game-move))
-        (height-width (config-grid-dimensions (service-config *service*)))
-        (game (tetris-ai:game-init (car height-width)
+         (config (service-config *service*))
+         (height-width (config-grid-dimensions config))
+         (ai-depth (config-ai-depth config))
+         (game (tetris-ai:game-init (car height-width)
                                    (cdr height-width)
-                                   :ai-weights tetris-ai:ai-default-weights)))
+                                   :ai-weights tetris-ai:ai-default-weights
+                                   :ai-depth ai-depth)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game
                                :moves moves
