@@ -105,6 +105,7 @@
                                  :document-root (truename "./www")
                                  :access-log-destination nil)))
     (hunchentoot:start acceptor)
+    (vom:warn "started on port ~D" (config-port config))
     (setf *service*
           (make-service :config (or config config-default)
                         :acceptor acceptor
