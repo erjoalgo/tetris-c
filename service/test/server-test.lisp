@@ -123,7 +123,5 @@
 (defun run-tests ()
   (init)
   (test-handlers)
-
-  ;; TODO stop service
-  ;; (tetris-ai-rest:service-stop *test-service*)
+  (tetris-ai-rest:service-stop *test-service*)
   )
