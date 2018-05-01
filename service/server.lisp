@@ -123,15 +123,15 @@
        (string= prefix (subseq string 0 (length prefix)))))
 
 (defun service-stop (&optional service)
-  (let* ((service (or service *service*))
-         ;; (acceptor (service-acceptor service))
+  (when (setf service (or service *service*))
+    (let* (;; (acceptor (service-acceptor service))
          (acceptor (slot-value service 'acceptor)))
     (when (and acceptor (hunchentoot:started-p acceptor))
       (hunchentoot:stop acceptor)))
   (loop for thread in (sb-thread:list-all-threads)
         if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
           do
-             (sb-thread:terminate-thread thread)))
+         (sb-thread:terminate-thread thread))))
 
 (defun service-running-p (&optional service)
   (unless service (setf service *service*))
