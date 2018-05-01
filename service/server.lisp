@@ -40,6 +40,7 @@
   grid-dimensions
   max-move-catchup-wait-secs
   ai-depth
+  default-ai-move-delay-secs
   )
 
 (defvar config-default
@@ -47,6 +48,7 @@
                :shapes-file tetris-ai:default-shapes-file
                :grid-dimensions (cons tetris-ai:default-height
                                       tetris-ai:default-width)
+               :default-ai-move-delay-secs .5
                :max-move-catchup-wait-secs 10))
 
 (defstruct service
@@ -253,19 +255,22 @@
          (setf (game-execution-running-p game-exc) nil
                (game-execution-final-state game-exc) (game-serialize-state game i)))))
 
-(defun game-create (game-no &key max-moves (ai-move-delay-secs .5)
+(defun game-create (game-no &key max-moves ai-move-delay-secs
                               (last-recorded-state-check-delay-secs 2))
   (unless (service-running-p *service*)
     (error "service not running"))
   (assert (numberp game-no))
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
+
   (let* ((moves (make-array 0 :adjustable t
                              :fill-pointer t
                              :element-type 'tetris-ai:game-move))
          (config (service-config *service*))
          (height-width (config-grid-dimensions config))
          (ai-depth (config-ai-depth config))
+         (ai-move-delay-secs (or ai-move-delay-secs
+                                 (config-default-ai-move-delay-secs config)))
          (game (tetris-ai:game-init (car height-width)
                                    (cdr height-width)
                                    :ai-weights tetris-ai:ai-default-weights
