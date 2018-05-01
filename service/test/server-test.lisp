@@ -1,10 +1,10 @@
-(defpackage #:server-test
+(defpackage #:tetris-ai-rest-test
   ;; (:use :cl :lisp-unit)
   (:use :cl :stefil)
   (:export))
 
 
-(in-package #:server-test)
+(in-package #:tetris-ai-rest-test)
 
 (declaim (optimize (debug 3) (speed 0)))
 
@@ -14,7 +14,7 @@
 (defvar game-height 19)
 
 (defparameter test-service-config
-  (server:make-config
+  (tetris-ai-rest:make-config
    :port 4243
    ;; shapes-file
    ;; seed
@@ -22,7 +22,7 @@
    :max-move-catchup-wait-secs 1))
 
 (defparameter base-url (format nil "http://localhost:~D"
-                               (server::config-port test-service-config)))
+                               (tetris-ai-rest::config-port test-service-config)))
 
 (defvar *test-service* nil)
 
@@ -34,12 +34,12 @@
 
 (defun init ()
   (when *test-service*
-    (server:service-stop *test-service*))
-  (server:service-stop) ;;TODO support multiple services
+    (tetris-ai-rest:service-stop *test-service*))
+  (tetris-ai-rest:service-stop) ;;TODO support multiple services
   (setf *test-service*
-        (server:service-start test-service-config))
-  (server:game-create-run test-game-no :max-moves max-no-moves)
-  (setf (server::service-curr-game-no *test-service*) test-game-no);;TODO
+        (tetris-ai-rest:service-start test-service-config))
+  (tetris-ai-rest:game-create-run test-game-no :max-moves max-no-moves)
+  (setf (tetris-ai-rest::service-curr-game-no *test-service*) test-game-no);;TODO
   )
 
 ;; https://sites.google.com/site/sabraonthehill/home/json-libraries
@@ -64,9 +64,9 @@
 (stefil:deftest test-game-status nil
   (let ((game-status (req (format nil "/games/~D" test-game-no))))
     (stefil:is (>= (length game-status) 4))
-    ;; (list (libtetris:game-height game) (libtetris:game-width game) move-no game-no)
-    ;; (stefil:is (equal libtetris:HEIGHT (nth 0 game-status)))
-    ;; (stefil:is (equal libtetris:WIDTH (nth 1 game-status)))
+    ;; (list (tetris-ai:game-height game) (tetris-ai:game-width game) move-no game-no)
+    ;; (stefil:is (equal tetris-ai:HEIGHT (nth 0 game-status)))
+    ;; (stefil:is (equal tetris-ai:WIDTH (nth 1 game-status)))
     ;; (stefil:is (equal 0 (nth 2 game-status)))
     ;; (stefil:is (equal test-game-no (nth 3 game-status)))
     ))
@@ -96,7 +96,7 @@
 
 (stefil:deftest test-game-move-timeout nil
   (let ((slow-game-no (1+ test-game-no)))
-    (server:game-create-run-thread slow-game-no :max-moves max-no-moves
+    (tetris-ai-rest:game-create-run-thread slow-game-no :max-moves max-no-moves
                                                 :AI-MOVE-DELAY-SECS 99999)
     (multiple-value-bind (resp return-code)
         (drakma:http-request (format nil "~A/games/~D/moves/1"
@@ -105,16 +105,16 @@
       (stefil:is (equal hunchentoot:+HTTP-SERVICE-UNAVAILABLE+ return-code)))))
 
 (stefil:deftest test-new-game-serialize nil
-  (let* ((new-game (libtetris:game-init 10
+  (let* ((new-game (tetris-ai:game-init 10
                                         10
                                         nil))
-         (last-state (server::game-serialize-state new-game 0)))
-    (is (null (server::last-recorded-state-on-cells last-state)))))
+         (last-state (tetris-ai-rest::game-serialize-state new-game 0)))
+    (is (null (tetris-ai-rest::last-recorded-state-on-cells last-state)))))
 
 
 
 
-'(let ((exc (gethash 0 (server::service-game-executions *service*))))
+'(let ((exc (gethash 0 (tetris-ai-rest::service-game-executions *service*))))
   (sb-thread:with-mutex ((game-execution-mutex exc))
     (setf (game-execution-last-recorded-state exc) nil)
     (jonathan:to-json exc)))
@@ -124,5 +124,5 @@
   (test-handlers)
 
   ;; TODO stop service
-  ;; (server:service-stop *test-service*)
+  ;; (tetris-ai-rest:service-stop *test-service*)
   )

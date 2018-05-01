@@ -1,6 +1,4 @@
-(defpackage #:libtetris
-  ;; (:use  #:cl)
-  ;; (:use :common-lisp :cffi)
+(defpackage #:tetris-ai
   (:use :cl :cffi)
   (:export
    #:make-game-move-native #:game-move-native
@@ -20,7 +18,7 @@
    )
   )
 
-(in-package #:libtetris)
+(in-package #:tetris-ai)
 
 (define-foreign-library libtetris
   (:unix (:or "libtetris.so.1" "libtetris.so"))

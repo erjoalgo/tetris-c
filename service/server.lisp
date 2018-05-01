@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-(defpackage #:server
+(defpackage #:tetris-ai-rest
   (:use :cl)
   (:export
    #:service-start
@@ -28,7 +28,7 @@
    )
   )
 
-(in-package #:server)
+(in-package #:tetris-ai-rest)
 
 (defstruct config
   port
@@ -40,8 +40,8 @@
 
 (defvar config-default
   (make-config :port 4242
-               :shapes-file nil ; use libtetris default
-               :grid-dimensions nil ; use libtetris default
+               :shapes-file nil ; use tetris-ai default
+               :grid-dimensions nil ; use tetris-ai default
                :max-move-catchup-wait-secs 10))
 
 (defstruct service
@@ -101,7 +101,7 @@
                               (apply 'make-config make-config-args)
                               config-default
                               ))
-  (apply 'libtetris:init-tetris
+  (apply 'tetris-ai:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
                  (when (config-seed config)
@@ -158,20 +158,20 @@
                ai-move-delay-secs)
       game-exc
     (jonathan:with-object
-      (jonathan:write-key-value "width" (libtetris:game-width game))
-      (jonathan:write-key-value "height" (libtetris:game-height game))
+      (jonathan:write-key-value "width" (tetris-ai:game-width game))
+      (jonathan:write-key-value "height" (tetris-ai:game-height game))
       (jonathan:write-key-value "running_p" (or running-p :false))
       (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
       (with-slots (move-no on-cells) (game-execution-last-recorded-state game-exc)
         (jonathan:write-key-value "move_no" move-no)
         (jonathan:write-key-value "on_cells" on-cells)))))
 
-(defmethod jonathan:%to-json ((game-move libtetris:game-move))
-  (with-slots (libtetris::shape-code libtetris::rot libtetris::col) game-move
+(defmethod jonathan:%to-json ((game-move tetris-ai:game-move))
+  (with-slots (tetris-ai::shape-code tetris-ai::rot tetris-ai::col) game-move
     (jonathan:with-object
-      (jonathan:write-key-value "shape" libtetris::shape-code)
-      (jonathan:write-key-value "rot" libtetris::rot)
-      (jonathan:write-key-value "col" libtetris::col))))
+      (jonathan:write-key-value "shape" tetris-ai::shape-code)
+      (jonathan:write-key-value "rot" tetris-ai::rot)
+      (jonathan:write-key-value "col" tetris-ai::col))))
 
 (push (hunchentoot:create-static-file-dispatcher-and-handler
        "/" "./www/index.html")
@@ -211,10 +211,10 @@
                           (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
                                      '(:error "reached timeout catching up to requested move" ))
                             (json-resp nil
-                                       (with-slots (libtetris::shape-code libtetris::rot libtetris::col)
+                                       (with-slots (tetris-ai::shape-code tetris-ai::rot tetris-ai::col)
                                            (aref moves move-no)
-                                         (list libtetris::shape-code libtetris::rot
-                                               libtetris::col)))))))))))
+                                         (list tetris-ai::shape-code tetris-ai::rot
+                                               tetris-ai::col)))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   (json-resp nil
@@ -222,14 +222,14 @@
                    collect game-no)))
 
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
-  (libtetris:serialize-shapes))
+  (tetris-ai:serialize-shapes))
 
 (defun game-serialize-state (game move-no)
   (make-last-recorded-state
    :timestamp (multiple-value-bind (secs usecs) (sb-ext:get-time-of-day)
                 (declare (ignore usecs)) secs)
    :move-no move-no
-   :on-cells (libtetris:game-on-cells-packed game)))
+   :on-cells (tetris-ai:game-on-cells-packed game)))
 
 (defun game-run (game-exc)
   (setf (game-execution-running-p game-exc) t)
@@ -240,12 +240,12 @@
       with last-recorded-state-check-multiple
         = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
       for i from 0
-      as next-move = (libtetris:game-apply-next-move game)
+      as next-move = (tetris-ai:game-apply-next-move game)
       while (and next-move (or (null max-moves) (< i max-moves)))
-      as string = (libtetris:game-printable-string game string)
+      as string = (tetris-ai:game-printable-string game string)
       do (vom:debug string)
       do
-         (let ((native (cffi::translate-from-foreign next-move 'libtetris::game-move)))
+         (let ((native (cffi::translate-from-foreign next-move 'tetris-ai::game-move)))
            (progn
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
@@ -267,10 +267,10 @@
     (error "game ~D exists" game-no))
   (let ((moves (make-array 0 :adjustable t
                              :fill-pointer t
-                             :element-type 'libtetris:game-move))
-        (game (libtetris:game-init libtetris:HEIGHT
-                                   libtetris:WIDTH
-                                   libtetris:ai-default-weights)))
+                             :element-type 'tetris-ai:game-move))
+        (game (tetris-ai:game-init tetris-ai:HEIGHT
+                                   tetris-ai:WIDTH
+                                   tetris-ai:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game
                                :moves moves

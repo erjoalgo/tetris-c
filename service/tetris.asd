@@ -1,4 +1,4 @@
-(asdf:defsystem #:tetris
+(asdf:defsystem :tetris-ai
   :serial t
   :depends-on (
 	       #:cffi
@@ -14,8 +14,8 @@
                )
   )
 
-(defsystem :server-test
-  :description "tetris server tests package"
+(asdf:defsystem :tetris-ai-test
+  :description "tetris-ai-rest tests package"
   :components ((:module "test"
                         :serial t
                         :components ((:file "server"))))

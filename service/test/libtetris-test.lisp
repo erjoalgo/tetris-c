@@ -1,4 +1,4 @@
-(in-package #:libtetris)
+(in-package #:tetris-ai)
 
 (defun test-game ()
   (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
