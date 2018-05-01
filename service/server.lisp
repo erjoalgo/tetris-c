@@ -256,11 +256,12 @@
   (assert (numberp game-no))
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
-  (let ((moves (make-array 0 :adjustable t
+  (let* ((moves (make-array 0 :adjustable t
                              :fill-pointer t
                              :element-type 'tetris-ai:game-move))
-        (game (tetris-ai:game-init tetris-ai:default-height
-                                   tetris-ai:default-width
+        (height-width (config-grid-dimensions (service-config *service*)))
+        (game (tetris-ai:game-init (car height-width)
+                                   (cdr height-width)
                                    tetris-ai:ai-default-weights)))
     (setf (gethash game-no (service-game-executions *service*))
           (make-game-execution :game game
