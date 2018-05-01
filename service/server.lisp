@@ -48,6 +48,7 @@
                :shapes-file tetris-ai:default-shapes-file
                :grid-dimensions (cons tetris-ai:default-height
                                       tetris-ai:default-width)
+               :ai-depth 3
                :default-ai-move-delay-secs .5
                :max-move-catchup-wait-secs 10))
 
