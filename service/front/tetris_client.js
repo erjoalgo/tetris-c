@@ -126,10 +126,6 @@ function assert(condition, message) {
         throw message;
     }
 }
-function stackTrace() {
-    var err = new Error();
-    return err.stack;
-}
 
 function server_request ( requestcode, response_hanlder )
 {
