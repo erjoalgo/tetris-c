@@ -236,10 +236,8 @@ function b_iter (){
 }
 
 function grid_block_intersects (  )    {
-    var coords = virtual_iterate();
-    for (var i = 0;i< coords.length; i++)
-    {
-	xy = coords[i];
+    for (var itr = b_iter(); itr.has_next(); )    {
+        var xy = itr.next().value;
 	if (ui.cell_grid[xy[1]][xy[0]].bgColor!=ui.colors.blank)
 	{
             return true;
@@ -254,11 +252,9 @@ function paint_to (color, check_intersects)
     {
         return true;
     }else     {
-        var coords = virtual_iterate();
-        for (var i = 0;i< coords.length; i++)
-        {
-	    var xy = coords[i];
-            ui.paint(xy[1], xy[0], color);
+        for (var itr = b_iter(); itr.has_next(); )    {
+            var xy = itr.next().value;
+            ui.paint(xy[1], xy[0], color); true;
         }
         return true;
     }
@@ -351,11 +347,8 @@ function drop (  )
 	    grid.relief[xy[0] + b.x] = xy[1]+b.y;
         }
 
-        var coords = virtual_iterate();
-        for (var i = 0;i< coords.length; i++)
-	{
-	    xy = coords[i];
-
+        for (var itr = b_iter(); itr.has_next(); )    {
+            var xy = itr.next().value;
 	    if (++grid.rowcounts[xy[1]]==grid.width)
 	    {
 		grid.needs_clear = true;
