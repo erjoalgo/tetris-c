@@ -287,39 +287,38 @@ char* shape_serialize ( shape* s )    {
   i = sprintf(buf, "{\n\t\"id\": %d,\n\t\"length\": %d,\n\t\"rot-count\": %d",
               s->id, s->len, s->rot_count);
 
-  i+=sprintf(buf+i, ",\n\t\"rotation_configurations\": [");
+  i+=sprintf(buf+i, ",\n\t\"rotations\": [");
   for ( r = 0; r < s->rot_count; r++ )    {
-    i+=sprintf(buf+i, "%s\n\t\t[", r? ",": "");
+
+    i+=sprintf(buf+i, "%s\n\t\t{", r? ",": "");
+
+    i+=sprintf(buf+i, "\n\t\t\t\"width\": %d", s->rot_wh[r][0]);
+    i+=sprintf(buf+i, ",\n\t\t\t\"height\": %d", s->rot_wh[r][1]);
+
+    i+=sprintf(buf+i, ",\n\t\t\t\"configurations\": [");
     for ( b = 0; b < s->len; b++ )    {
       i+=sprintf(buf+i, "%s[%d, %d]", b? ", ": "", s->rot_flat[r][b][0], s->rot_flat[r][b][1]);
     }
     i+=sprintf(buf+i, "]");
-  }
-  i+=sprintf(buf+i, "\n\t]");
 
-  i+=sprintf(buf+i, ",\n\t\"crust_configurations\": {");
-  for ( d = 0; d < 4; d++ )    {
-    char* crust_name = CRUST_NAMES[d];
-    i+=sprintf(buf+i, "%s\n\t\t\"%s\": [", d? ",": "", crust_name);
-    for ( r = 0; r < s->rot_count; r++ )    {
-      i+=sprintf(buf+i, "%s\n\t\t\t[", r? ",": "");
+
+    i+=sprintf(buf+i, ",\n\t\t\t\"crusts\": {");
+    for ( d = 0; d < 4; d++ )    {
+      char* crust_name = CRUST_NAMES[d];
+      i+=sprintf(buf+i, "%s\n\t\t\t\t\"%s\": [", d? ",": "", crust_name);
       for ( b = 0; b < s->crust_len[r][d]; b++ )    {
         i+=sprintf(buf+i, "%s[%d, %d]", b? ", ":"",
                    s->crust[r][d][b][0], s->crust[r][d][b][1]);
       }
       i+=sprintf(buf+i, "]");
     }
-    i+=sprintf(buf+i, "\n\t\t]");
+    i+=sprintf(buf+i, "\n\t\t\t}");
+    i+=sprintf(buf+i, "\n\t\t}");
   }
-  i+=sprintf(buf+i, "\n\t}");
-
-  i+=sprintf(buf+i, ",\n\t\"rot_wh\": [");
-  for ( r = 0; r < 4; r++ )    {
-    i+=sprintf(buf+i, "%s[%d, %d]", r?", ":"", s->rot_wh[r][0], s->rot_wh[r][1]);
-  }
-  i+=sprintf(buf+i, "]");
-
+  i+=sprintf(buf+i, "\n\t]");
   i+=sprintf(buf+i, "\n}");
+  buf[i++] = 0;
+
   return buf;
 }
 
