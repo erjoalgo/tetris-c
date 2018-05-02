@@ -566,6 +566,7 @@ function initShapes ( response )
 }
 
 function error ( message )    {
+    console.log(new Error().stack);
     var msg = "error: "+message;
     console.log(msg);
     alert(msg);
