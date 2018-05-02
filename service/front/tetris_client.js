@@ -208,27 +208,17 @@ var grid = {
 
 function virtual_iterate ()
 {
-
-    // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = state.b.m, r = state.b.r, x = state.b.x, y = state.b.y;
-    ////debugger;
-    // assert(!(m==null), " assertion failed at 244 ");
-    var shape = shapes[m];
-    var rot = shape.rotations[r];
-    var rot_coords = rot.configurations;
-    var xy = [];
-    // for (var coord in shape)
+    // TODO re-do this
+    var b = state.b;
+    var rot_coords = shapes[b.m].rotations[b.r].configurations;
     var coords = [];
     for (var i = 0; i<rot_coords.length;i++)
     {
-	// xy[0] = shape[i][0]+x;
-	// xy[1] = shape[i][1]+y;
-	coords.push([rot_coords[i][0]+x, rot_coords[i][1]+y]);
-	// yield xy;
+	coords.push([rot_coords[i][0]+b.x, rot_coords[i][1]+b.y]);
     }
-
     return coords;
 }
+
 function paint_to (color, no_overwrite)
 {
 
