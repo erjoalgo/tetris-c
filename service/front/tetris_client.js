@@ -641,7 +641,7 @@ function timer (  )
 	}
 	if (state.gameOver)
 	{
-	    state.gameOverFun();
+	    gameOverFun();
 	}
 	else if (!(move.name in twoStepMoves))
 	{
