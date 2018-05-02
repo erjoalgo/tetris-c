@@ -268,15 +268,17 @@ function virtual_iterate ()
     var m = mrxy[0], r = mrxy[1], x = mrxy[2], y = mrxy[3];
     ////debugger;
     // assert(!(m==null), " assertion failed at 244 ");
-    var shape = shapes[m][r];
+    var shape = shapes[m];
+    var rot = shape.rotations[r];
+    var rot_coords = rot.configurations;
     var xy = [];
     // for (var coord in shape)
     var coords = [];
-    for (var i = 0; i<shape.length;i++)
+    for (var i = 0; i<rot_coords.length;i++)
     {
 	// xy[0] = shape[i][0]+x;
 	// xy[1] = shape[i][1]+y;
-	coords.push([shape[i][0]+x, shape[i][1]+y]);
+	coords.push([rot_coords[i][0]+x, rot_coords[i][1]+y]);
 	// yield xy;
     }
 
@@ -368,7 +370,9 @@ function down ( undo ) {
 
 function get_drop_distance (  )
 {
-    var bot_crust = bot_crusts[mrxy[0]][mrxy[1]];
+    var m = mrxy[0];
+    var r = mrxy[1];
+    var bot_crust = shapes[m].rotations[r].crusts["bot"];
 
     // var height = heights[mrxy[0]][mrxy[1]];
 
@@ -419,13 +423,13 @@ function drop (  )
     var y = mrxy[3];
     var x = mrxy[2];
 
-    var top_crust = top_crusts[mrxy[0]][mrxy[1]];
+    var m = mrxy[0];
+    var r = mrxy[1];
+    var top_crust = shapes[m].rotations[r].crusts["top"];
     for (var i = 0, xy = null; i<top_crust.length; i++)
     {
 	xy = top_crust[i];
 	grid.relief[xy[0] + x] = xy[1]+y;
-
-
     }
 
     var coords = virtual_iterate();
@@ -657,8 +661,6 @@ function init ( response )
     timer();
 }
 
-var top_crusts = [];
-var bot_crusts = [];
 var shapes = [];
 
 function init_shapes ( response )
@@ -666,28 +668,30 @@ function init_shapes ( response )
     if (response == null)    {
         server_request("shapes", init_shapes)
     }else     {
-        var server_shapes = response;
-        if (server_shapes.length == 0)    {
+        shapes = response;
+        if (shapes.length == 0)    {
             error("0 shapes received from server!");
         }
-        for (var i = 0; i<server_shapes.length; i++)    {
-            var shape = server_shapes[i];
-            var rots = shape.rotation_configurations;
+        for (var i = 0; i<shapes.length; i++)    {
+            var shape = shapes[i];
+            var rots = shape.rotations;
             for (var r = 0; r<rots.length; r++)    {
-                var rot_h = shape.rot_wh[r][1];
                 var zero_seen = false;
                 var rot = rots[r];
-                for (var b = 0; b<rot.length; b++)    {
-                    rot[b][1] *= -1;
-                    rot[b][1] += rot_h-1;
-                    assert(rot[b][1]>=0);
-                    zero_seen = zero_seen || rot[b][1] == 0;
+                var rot_h = rot.height;
+                var rot_coords = rot.configurations;
+                for (var b = 0; b<rot_coords.length; b++)    {
+                    var cr = rot_coords[b];
+                    cr[1] *= -1;
+                    cr[1] += rot_h-1;
+                    assert(cr[1]>=0);
+                    zero_seen = zero_seen || cr[1] == 0;
                 }
                 assert(zero_seen);
 
                 CRUST_NAMES = ["top", "bot", "left", "right"];
                 for (var c = 0; c<CRUST_NAMES.length; c++)    {
-                    var crust = shape.crust_configurations[CRUST_NAMES[c]][r];
+                    var crust = rot.crusts[CRUST_NAMES[c]];
                     for (var b = 0; b<crust.length; b++)    {
                         var cr = crust[b];
                         cr[1]*=-1;
@@ -696,10 +700,6 @@ function init_shapes ( response )
                     }
                 }
             }
-            shapes.push(shape.rotation_configurations);
-            assert(shape.id == i);
-            top_crusts.push(shape.crust_configurations.top);
-            bot_crusts.push(shape.crust_configurations.bot);
         }
         timer();
     }
