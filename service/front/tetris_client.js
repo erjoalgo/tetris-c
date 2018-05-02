@@ -565,7 +565,6 @@ function init_game_no ( response )
         if (gameno_list.length == 0)    {
             error("no current games on server");
         }else     {
-            // game_no = gameno_list.pop();
             state.game_no = gameno_list[gameno_list.length-1];
             console.log( "init game_no is "+state.game_no );
             timer();
@@ -575,16 +574,14 @@ function init_game_no ( response )
 
 function plan (  )
 {
-    //console.log( "planning..." );
     for (var r  = state.b.r, direc = state.b.r<state.answer.r?1:-1; r!=state.answer.r; r+=direc)
-	{
-	    state.move_queue.push(direc>0?rotcw:rotcw);
-	}
-    // move_queue.push(direc>0?moves.ROTCW:moves.ROTCW);
+    {
+	state.move_queue.push(direc>0?rotcw:rotcw);
+    }
     for (var x  = state.b.x, direc = state.b.x<state.answer.x?1:-1; x!=state.answer.x; x+=direc)
-	{
-	    state.move_queue.push(direc>0?right:left);
-	}
+    {
+	state.move_queue.push(direc>0?right:left);
+    }
     state.move_queue.push(drop);
     state.move_queue.push(clear_lines);
     state.move_queue.push(fetch);
@@ -594,9 +591,6 @@ function plan (  )
 
 function pause_toggle (  )
 {
-console.log("calling pause_toggle");//autogen function logger
-
-
     state.paused_p = !pause_p;
 }
 
@@ -611,27 +605,16 @@ function game_over_fun (  )
 
 function timer (  )
 {
-    ////debugger;
-
     if (state.paused_p)
     {
-	//unpause must bring timer back to life
 	return ;
     }
-    // alert("timer executing");
     if (state.move_queue.length>0)
     {
 	var move = state.move_queue.shift();
-	//debugger;
-
 	if (move.name in paint_moves)
 	{
 	    move_tetro(move);
-	    if (move==drop && grid.needs_clear)
-	    {
-		;//con
-	    }
-
 	}
 	else
 	{
@@ -685,7 +668,6 @@ pause_toggle.name = "pause_toggle";
 plan.name = "plan";
 add_tetro.name = "add_tetro";
 
-// server_request(-1);
 state.move_queue.push(init_game_no);
 state.move_queue.push(init);
 state.move_queue.push(init_shapes);
@@ -693,10 +675,6 @@ state.move_queue.push(fetch);
 state.move_queue.push(add_tetro);
 state.move_queue.push(plan);
 
-// alert("hola");
 console.log("hola");
 
-// debugger;
-
 timer();
-// init([19, 10, 0]);
