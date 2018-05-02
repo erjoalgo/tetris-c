@@ -241,7 +241,7 @@ function paint_to (color, check_intersects)
     }else     {
         for (var itr = b_iter(); itr.has_next(); )    {
             var xy = itr.next().value;
-            ui.paint(xy[1], xy[0], color); true;
+            ui.paint(xy[1], xy[0], color);
         }
         return true;
     }
