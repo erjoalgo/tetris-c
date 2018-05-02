@@ -1,4 +1,4 @@
- /*
+/*
         @licstart  The following is the entire license notice for the
         JavaScript code in this page.
 
@@ -21,7 +21,7 @@
 
         @licend  The above is the entire license notice
         for the JavaScript code in this page.
-        */
+*/
 
 var square = "30";
 var cell_grid = [];
@@ -48,38 +48,23 @@ function hide_show_loading ( show )
 }
 function table_create (width, height) {
 
-    //body reference
-    // debugger;
     var body = document.getElementsByTagName("body")[0];
 
     loading = document.createElement("img");
-    // loading.src = "http://root.erjoalgo.com/loading.gif";
     loading.src = "/loading.gif";
 
     hide_show_loading(false);
     body.appendChild(loading);
 
-
-    // create elements <table> and a <tbody>
     var tbl     = document.createElement("table");
     tbl.class = "table";
-    // tbl.style.border = "1px solid red"
     var tblBody = document.createElement("tbody");
-    // tblBody.border = "1";
-    // tblBody.style.border="1px solid red";
-    // tblBody.style.borderWidth="1px";
 
-    // var tblBody = tbl;
-    // cells creation
     for (var j = 0; j < height; j++) {
-        // table row creation
 	cell_row = [];
 	cell_grid.push(cell_row);
         var row = document.createElement("tr");
         for (var i = 0; i < width; i++) {
-            // create element <td> and text node
-            //Make text node the contents of <td> element
-            // put <td> at end of the table row
             var cell = document.createElement("td");
 	    cell_row.push(cell);
 
@@ -88,28 +73,21 @@ function table_create (width, height) {
 	    cell.bgColor = blank_color;
 	    cell.style.border = "1px solid #000"
 
-            // var cellText = document.createTextNode("cell is row "+j+", column "+i);
             var cellText = document.createTextNode("");
             cell.appendChild(cellText);
             row.appendChild(cell);
         }
 
-        //row added to end of table body
-        // tblBody.appendChild(row);
         tblBody.appendChild(row);
     }
-    // append the <tbody> inside the <table>
     tbl.appendChild(tblBody);
-    // put <table> in the <body>
     body.appendChild(tbl);
-    // tbl border attribute to
     tbl.setAttribute("border", "2");
     completed = true;
-
 }
+
 var consec_failed_mills = 0;
 var server_timeout = 20000;
-// var timer_delay = 200;
 var timer_delay = 90;
 
 
@@ -444,14 +422,10 @@ function repaint_rows ( ymin, ymax )
     }
 }
 
-
-
 function fetch ( response )
 {
-
     assert(state.game_no != null && state.move_no !=  null);
 
-    //console.log( "fetching..." );
     if (response==null)
     {
         var uri = "/games/"+state.game_no+"/moves/"+state.move_no;
@@ -476,8 +450,6 @@ function init ( response )
 	    return;
 	}
 
-    // response = [[0, 18], [0, 17], [1, 18], [1,17], [1,16], 10, 19, 0];
-    // response = [];
     var miny = grid.height;
 
     game = response;
@@ -511,7 +483,6 @@ function init ( response )
 	grid.relief.push(grid.height);
     }
 
-    // for (var xy in response)
     for (var i = 0;i<game.on_cells.length;i++)
     {
         xy = game.on_cells[i];
@@ -692,34 +663,6 @@ function timer (  )
 	alert("no more pending moves");
     }
 }
-
-/*moves = function() {return {
-    'INIT' : init,
-    'FETCH' : fetch,
-    'ROTCW'	: rotcw,
-    'ROTCCW'	: rotccw,
-    'LEFT'	: left,
-    'RIGHT'	: right,
-    'DROP'	: drop,
-    'DOWN'	: down,
-    'CLEARLINES'	: clear_lines,
-    'MAYBECLEAR'	: maybe_clear,
-    'PAUSE'	: pause_toggle,
-    'PLAN'	: plan,
-    'ADD_TETRO'	: add_tetro,
-}} ();*/
-
-
-/*paint_moves = function() {return {
-    'ROTCW'	: rotcw,
-    'ROTCCW'	: rotccw,
-    'LEFT'	: left,
-    'RIGHT'	: right,
-    'DROP'	: drop,
-    'DOWN'	: down,
-}} ();*/
-/*paint_moves = {"rotcw":true, "rotccw":true, "drop":true, "left":true, "right":true, "down":true};
-two_step_moves = {"fetch":true, "init":true};*/
 
 paint_moves = {rotcw:true, rotccw:true, drop:true, left:true, right:true, down:true};
 two_step_moves = {fetch:true, init:true, init_shapes:true, init_game_no:true};
