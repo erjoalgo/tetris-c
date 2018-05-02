@@ -178,11 +178,10 @@ var colors = function(){return {
     'GREEN':3
     }}();
 
-var shape_color = [colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE];
+var default_filled_color = colors.BLUE;
 var blank = colors.WHITE;
 
 var move_queue = [];
-
 
 var mrxy = [null, null, null, null];//model, rotate state, x distance from left, y from top
 var answer_rx = null;
@@ -264,11 +263,11 @@ function move_tetro ( move_fun )
 
     paint_to(blank);
     move_fun();
-    var succ = paint_to(colors.BLUE, true);//undo last move and repaint if this doesn't succeed
+    var succ = paint_to(default_filled_color, true);//undo last move and repaint if this doesn't succeed
     if (!succ)
     {
 	move_fun(true);//undo
-	paint_to(colors.BLUE);
+	paint_to(default_filled_color);
     }
 
 }
@@ -276,7 +275,7 @@ function add_tetro (  )
 {
     //console.log( "adding tetro" );
 
-    paint_to(colors.BLUE);
+    paint_to(default_filled_color);
 }
 
 
@@ -382,7 +381,7 @@ function drop (  )
 		    grid.needs_clear = true;
 		    grid.need_clear.push(xy[1]);
 		}
-	    grid.grid[xy[1]][xy[0]] = colors.BLUE;
+	    grid.grid[xy[1]][xy[0]] = default_filled_color;
 	}
 }
 
@@ -587,8 +586,8 @@ function init ( response )
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
 
-	grid.grid[y][x] = colors.BLUE;
-	cell_grid[y][x].bgColor = colors.BLUE;
+	grid.grid[y][x] = default_filled_color;
+	cell_grid[y][x].bgColor = default_filled_color;
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
