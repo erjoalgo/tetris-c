@@ -45,8 +45,19 @@ var ui = {
             }
         };
         return elm;
-    })()
+    })(),
+    colors: {
+        'BLUE':"#0000f0",
+        'BLACK':"#000000",
+        'WHITE':"#ffffff",
+        'GREEN':3,
+        filled : this.BLUE,
+        blank: this.WHITE
+    }
 }
+
+ui.colors.filled =  ui.colors.BLUE;
+ui.colors.blank =  ui.colors.WHITE;
 
 const RETRY_TIMEOUT = 500;
 const SERVER_TIMEOUT = 20000;
@@ -73,7 +84,7 @@ function table_create (width, height) {
 
 	    cell.width = ui.cell_size;
 	    cell.height = ui.cell_size;
-	    cell.bgColor = colors.blank;
+	    cell.bgColor = ui.colors.blank;
 	    cell.style.border = "1px solid #000"
 
             var cellText = document.createTextNode("");
@@ -149,16 +160,6 @@ function server_request ( requestcode, response_hanlder )
     xhr.send(null);
 }
 
-var colors = {
-    'BLUE':"#0000f0",
-    'BLACK':"#000000",
-    'WHITE':"#ffffff",
-    'GREEN':3
-};
-
-colors.filled = colors.BLUE;
-colors.blank = colors.WHITE;
-
 var state = {
     move_queue:[],
     b:{ //active block
@@ -207,7 +208,7 @@ function grid_block_intersects (  )    {
     for (var i = 0;i< coords.length; i++)
     {
 	xy = coords[i];
-	if (ui.cell_grid[xy[1]][xy[0]].bgColor!=colors.blank)
+	if (ui.cell_grid[xy[1]][xy[0]].bgColor!=ui.colors.blank)
 	{
             return true;
 	}
@@ -237,21 +238,21 @@ function move_tetro ( move_fun )
 {
 
 
-    paint_to(colors.blank);
+    paint_to(ui.colors.blank);
     move_fun();
-    var succ = paint_to(colors.filled, true);//undo last move and repaint if this doesn't succeed
+    var succ = paint_to(ui.colors.filled, true);//undo last move and repaint if this doesn't succeed
     if (!succ)
     {
         state.game_over = true;
 	move_fun(true);//undo
-	paint_to(colors.filled);
+	paint_to(ui.colors.filled);
     }
 
 }
 
 function add_tetro (  )
 {
-    paint_to(colors.filled);
+    paint_to(ui.colors.filled);
 }
 
 
@@ -330,7 +331,7 @@ function drop (  )
 		grid.needs_clear = true;
 		grid.need_clear.push(xy[1]);
 	    }
-	    grid.grid[xy[1]][xy[0]] = colors.filled;
+	    grid.grid[xy[1]][xy[0]] = ui.colors.filled;
 	}
     }
 }
@@ -397,7 +398,7 @@ function clear_lines (  )
         grid.grid[y] = cleared.pop ();
         grid.rowcounts[y] = 0;
         for (var i = 0; i<grid.width;i++)
-            grid.grid[y][i] = colors.blank;
+            grid.grid[y][i] = ui.colors.blank;
         y-=1;
     }
 
@@ -407,7 +408,7 @@ function clear_lines (  )
     for (var i = 0; i<grid.width; i++)
     {
         var relief = grid.relief[i];
-        while (relief<grid.height && grid.grid[relief][i] ==colors.blank)
+        while (relief<grid.height && grid.grid[relief][i] ==ui.colors.blank)
 	    relief+=1;
         grid.relief[i] = relief;
     }
@@ -481,7 +482,7 @@ function init ( response )
 	var row = [];
 	grid.grid.push(row);
 	for (var ii = 0; ii<grid.height;ii++)
-	    row.push(colors.blank);
+	    row.push(ui.colors.blank);
     }
     for (var i = 0; i<grid.width;i++)
     {
@@ -495,8 +496,8 @@ function init ( response )
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
 
-	grid.grid[y][x] = colors.filled;
-	ui.cell_grid[y][x].bgColor = colors.filled;
+	grid.grid[y][x] = ui.colors.filled;
+	ui.cell_grid[y][x].bgColor = ui.colors.filled;
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
