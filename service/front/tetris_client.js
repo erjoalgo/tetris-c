@@ -133,58 +133,41 @@ function server_request ( requestcode, response_hanlder )
     assert(requestcode!=null && response_hanlder != null);
 
     var xhr = new XMLHttpRequest();
-    // xhr.open('get', 'http://root.erjoalgo.com/tetris_updater/send_ajax_data.php');
-    // xhr.open('get', "http://root.erjoalgo.com/tetris_updater/send_ajax_data.php?tcode="+requestcode);
-    // xhr.open('get', "http://root.erjoalgo.com/tetris.uwsgi?"+requestcode);
-    //console.log( "making server request" );
     xhr.open('get', requestcode);
-    // Track the state changes of the request
     xhr.onreadystatechange = function(){
 	// Ready state 4 means the request is done
 	if(xhr.readyState === 4){
-            // 200 is a successful return
-            if(xhr.status === 200)
+            if(xhr.status != 200)
+            {
+		error(xhr.status+": "+xhr.responseText);
+            }else
 	    {
 		var response = null;
-		// alert(xhr.responseText); // 'This is the returned text.'
-		// var array = new JSONArray(xhr.responseText);
 		try{
 		    response = JSON.parse(xhr.responseText);
 		}
 		catch (err)
 		{
-		    if (xhr.responseText=="game over :(")
-			{
-			    game_over_fun();
-			    return ;
-			}
-		    console.log("failed to parse request: "+xhr.responseText);
-		    // alert("error parsing response from server");
+		    console.log("failed to parse request: " + xhr.responseText);
+
 		    consec_failed_mills+=retry_timeout;
 
 		    if (consec_failed_mills>server_timeout)
 		    {
-			alert("server seems unresponsive. try again later")
+			error("server seems unresponsive. try again later")
 		    }
 		    else
 		    {
 			setTimeout(function(){server_request(requestcode, response_handler)},retry_timeout);
 		    }
-		    return ;
+		    return;
 		}
 		assert(! (response==null), " error from server");
 		consec_failed_mills = 0;
 		response_hanlder(response);
-		// alert(array);
-		// return array;
             }
-	    else{
-		error(xhr.status+": "+xhr.responseText);
-            }
-
 	}
     }
-    // Send the request to send-ajax-data.php
     xhr.send(null);
 }
 
