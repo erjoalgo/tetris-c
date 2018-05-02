@@ -23,11 +23,12 @@
         for the JavaScript code in this page.
 */
 
-var square = "30";
-var cell_grid = [];
 var retry_timeout = 500;
-// function hola{return 1;}
 var loading;
+var ui = {
+    cell_size: "30",
+    cell_grid: []
+}
 
 function hide_show_loading ( show )
 {
@@ -62,14 +63,14 @@ function table_create (width, height) {
 
     for (var j = 0; j < height; j++) {
 	cell_row = [];
-	cell_grid.push(cell_row);
+	ui.cell_grid.push(cell_row);
         var row = document.createElement("tr");
         for (var i = 0; i < width; i++) {
             var cell = document.createElement("td");
 	    cell_row.push(cell);
 
-	    cell.width = square;
-	    cell.height = square;
+	    cell.width = ui.cell_size;
+	    cell.height = ui.cell_size;
 	    cell.bgColor = colors.blank;
 	    cell.style.border = "1px solid #000"
 
@@ -206,7 +207,7 @@ function grid_block_intersects (  )    {
     for (var i = 0;i< coords.length; i++)
     {
 	xy = coords[i];
-	if (cell_grid[xy[1]][xy[0]].bgColor!=colors.blank)
+	if (ui.cell_grid[xy[1]][xy[0]].bgColor!=colors.blank)
 	{
             return true;
 	}
@@ -225,8 +226,8 @@ function paint_to (color, check_intersects)
         for (var i = 0;i< coords.length; i++)
         {
 	    xy = coords[i];
-	    cell_grid[xy[1]][xy[0]].bgColor = color;
-	    cell_grid[xy[1]][xy[0]].bgColor = color;
+	    ui.cell_grid[xy[1]][xy[0]].bgColor = color;
+	    ui.cell_grid[xy[1]][xy[0]].bgColor = color;
         }
         return true;
     }
@@ -421,7 +422,7 @@ function repaint_rows ( ymin, ymax )
     {
 	for (var x = 0; x<grid.width; x++)
 	{
-	    cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
+	    ui.cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
 	}
     }
 }
@@ -495,7 +496,7 @@ function init ( response )
         y = grid.height-1-y;
 
 	grid.grid[y][x] = colors.filled;
-	cell_grid[y][x].bgColor = colors.filled;
+	ui.cell_grid[y][x].bgColor = colors.filled;
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
