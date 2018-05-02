@@ -435,14 +435,13 @@ function clear_lines (  )
 
 function repaint_rows ( ymin, ymax )
 {
-
     for (;ymin<ymax;ymin++)
+    {
+	for (var x = 0; x<grid.width; x++)
 	{
-	    for (var x = 0; x<grid.width; x++)
-		{
-		    cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
-		}
+	    cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
 	}
+    }
 }
 
 
