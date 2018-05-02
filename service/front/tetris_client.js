@@ -89,7 +89,6 @@ function table_create (width, height) {
     completed = true;
 }
 
-var consec_failed_mills = 0;
 
 
 
@@ -142,7 +141,7 @@ function server_request ( requestcode, response_hanlder )
 		    return;
 		}
 		assert(! (response==null), " error from server");
-		consec_failed_mills = 0;
+		state.consec_failed_mills = 0;
 		response_hanlder(response);
             }
 	}
@@ -176,7 +175,8 @@ var state = {
     game_over:false,
     move_no:null,
     game_no:null,
-    shapes:null
+    shapes:null,
+    consec_failed_mills:0
 }
 
 var grid = {
