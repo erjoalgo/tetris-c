@@ -133,7 +133,7 @@ function serverRequest ( requestcode, responseHanlder )
 	if(xhr.readyState === 4){
             if(xhr.status != 200)
             {
-		error(xhr.status+": "+xhr.responseText);
+		error(requestcode + " returned non-200 status: " + xhr.status+": server response: "+xhr.responseText);
             }else
 	    {
 		var response = null;
