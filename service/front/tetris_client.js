@@ -181,18 +181,18 @@ var state = {
     move_no:null,
     game_no:null,
     shapes:null,
-    consec_failed_mills:0
-}
+    consec_failed_mills:0,
 
-var grid = {
-    relief:null,
-    width:null,
-    height:null,
-    need_clear:[],
-    needs_clear:false,
-    rowcounts:null,
-    g:null
-};
+    grid :{
+        relief:null,
+        width:null,
+        height:null,
+        need_clear:[],
+        needs_clear:false,
+        rowcounts:null,
+        g:null
+    }
+}
 
 function b_iter (){
     return (function(){
@@ -296,6 +296,7 @@ function get_drop_distance (  )
     var b = state.b;
     var bot_crust = state.shapes[b.m].rotations[b.r].crusts["bot"];
 
+    var grid = state.grid;
     var dist, min_dist = grid.height;
     var x = state.b.x;
     var y = state.b.y;
@@ -318,6 +319,7 @@ function get_drop_distance (  )
 
 function drop (  )
 {
+    var grid = state.grid;
     var drop_distance  = get_drop_distance();
     if (drop_distance<0)
     {
@@ -360,6 +362,7 @@ function list_min ( list )
 
 function clear_lines (  )
 {
+    var grid = state.grid;
     if (!grid.needs_clear) return ;
 
     var cmpNum = function(a,b){return a-b}
@@ -429,6 +432,7 @@ function clear_lines (  )
 
 function repaint_rows ( ymin, ymax )
 {
+    var grid = state.grid;
     for (;ymin<ymax;ymin++)
     {
 	for (var x = 0; x<grid.width; x++)
@@ -451,7 +455,7 @@ function fetch ( response )
     {
         move = response;
 
-        state.b.m = move.shape, state.b.r = 0, state.b.x = grid.width/2-1, state.b.y = 0;
+        state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width/2-1, state.b.y = 0;
         state.answer.r = move.rot, state.answer.x = move.col;
         state.move_no++;
         timer();
@@ -464,7 +468,8 @@ function init ( response )
     {
 	    server_request("/games/"+state.game_no, init);
 	    return;
-	}
+    }
+    var grid = state.grid;
 
     var miny = grid.height;
 
