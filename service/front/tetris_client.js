@@ -352,20 +352,6 @@ function drop (  )
     }
 }
 
-function maybe_clear (  )
-{
-    //console.log( "maybe clearing..." );
-    if (state.move_no>=5)
-    {
-	// //debugger;
-    }
-
-    if (grid.needs_clear)
-    {
-	clear_lines();
-    }
-}
-
 function sum ( list )
 {
 
@@ -397,6 +383,7 @@ var cmpNum = function(a,b){return a-b}
 
 function clear_lines (  )
 {
+    if (!grid.needs_clear) return ;
 
     // grid.last_cleared = grid.need_clear.length;
     assert(grid.need_clear.length>0,  " assertion failed at 464 ");
@@ -647,7 +634,7 @@ function plan (  )
 	    state.move_queue.push(direc>0?right:left);
 	}
     state.move_queue.push(drop);
-    state.move_queue.push(maybe_clear);
+    state.move_queue.push(clear_lines);
     state.move_queue.push(fetch);
     state.move_queue.push(add_tetro);
     state.move_queue.push(plan);
@@ -770,7 +757,6 @@ drop.name = "drop";
 down.name = "down";
 init_shapes.name = "init_shapes";
 clear_lines.name = "clear_lines";
-maybe_clear.name = "maybe_clear";
 pause_toggle.name = "pause_toggle";
 plan.name = "plan";
 add_tetro.name = "add_tetro";
