@@ -321,44 +321,35 @@ function get_drop_distance (  )
 
 function drop (  )
 {
-
-
-    //assert(answer_rx[0]==mrxy[1] && answer_rx[1]==mrxy[2], " assertion failed at 380 ");
-
-
     var drop_distance  = get_drop_distance();
     if (drop_distance<0)
-	{
-	    //debugger;
-	    state.game_over = true;
-	    return ;
-	}
-
-    state.b.y += drop_distance;
-    var y = state.b.y;
-    var x = state.b.x;
-
-    var m = state.b.m;
-    var r = state.b.r;
-    var top_crust = shapes[m].rotations[r].crusts["top"];
-    for (var i = 0, xy = null; i<top_crust.length; i++)
     {
-	xy = top_crust[i];
-	grid.relief[xy[0] + x] = xy[1]+y;
-    }
+	state.game_over = true;
+    }else     {
 
-    var coords = virtual_iterate();
-    for (var i = 0;i< coords.length; i++)
+        var b = state.b;
+        b.y += drop_distance;
+
+        var top_crust = shapes[b.m].rotations[b.r].crusts["top"];
+        for (var i = 0, xy = null; i<top_crust.length; i++)
+        {
+	    xy = top_crust[i];
+	    grid.relief[xy[0] + b.x] = xy[1]+b.y;
+        }
+
+        var coords = virtual_iterate();
+        for (var i = 0;i< coords.length; i++)
 	{
 	    xy = coords[i];
 
 	    if (++grid.rowcounts[xy[1]]==grid.width)
-		{
-		    grid.needs_clear = true;
-		    grid.need_clear.push(xy[1]);
-		}
+	    {
+		grid.needs_clear = true;
+		grid.need_clear.push(xy[1]);
+	    }
 	    grid.grid[xy[1]][xy[0]] = filled_color;
 	}
+    }
 }
 
 function maybe_clear (  )
