@@ -284,7 +284,7 @@ char* shape_serialize ( shape* s )    {
 
   int i = 0;
   int r, b, d;
-  i = sprintf(buf, "{\n\t\"id\": %d,\n\t\"length\": %d,\n\t\"rot-count\": %d",
+  i = sprintf(buf, "{\n\t\"id\": %d,\n\t\"length\": %d,\n\t\"rot_count\": %d",
               s->id, s->len, s->rot_count);
 
   i+=sprintf(buf+i, ",\n\t\"rotations\": [");
