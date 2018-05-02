@@ -191,7 +191,7 @@ var grid = {
     need_clear:[],
     needs_clear:false,
     rowcounts:null,
-    grid:null
+    g:null
 };
 
 function b_iter (){
@@ -341,7 +341,7 @@ function drop (  )
 		grid.needs_clear = true;
 		grid.need_clear.push(xy[1]);
 	    }
-	    grid.grid[xy[1]][xy[0]] = ui.colors.filled;
+	    grid.g[xy[1]][xy[0]] = ui.colors.filled;
 	}
     }
 }
@@ -387,28 +387,28 @@ function clear_lines (  )
 	{
             assert(grid.need_clear[grid.need_clear.length-1] == y, " assertion failed at 485 ");
             grid.need_clear.pop ();
-            cleared.push(grid.grid[y]);
+            cleared.push(grid.g[y]);
 	}
 	//copy nextNonFull row into y-th row
-        grid.grid[y] = grid.grid[nextNonFull];
+        grid.g[y] = grid.g[nextNonFull];
         grid.rowcounts[y] = grid.rowcounts[nextNonFull];
         y-=1;
         nextNonFull -=1;
 	}
 
     while (grid.need_clear.length>0)
-        cleared.push(grid.grid[grid.need_clear.pop ()]);
+        cleared.push(grid.g[grid.need_clear.pop ()]);
 
     while (y>=YMAX)
     {
         // assert((cleared.length>0  && sum(cleared[0])==grid.width)
-            // || sum(grid.grid[y])==grid.width);
+            // || sum(grid.g[y])==grid.width);
 
         assert(cleared.length> 0,  " cleared.length assertion ");
-        grid.grid[y] = cleared.pop ();
+        grid.g[y] = cleared.pop ();
         grid.rowcounts[y] = 0;
         for (var i = 0; i<grid.width;i++)
-            grid.grid[y][i] = ui.colors.blank;
+            grid.g[y][i] = ui.colors.blank;
         y-=1;
     }
 
@@ -418,7 +418,7 @@ function clear_lines (  )
     for (var i = 0; i<grid.width; i++)
     {
         var relief = grid.relief[i];
-        while (relief<grid.height && grid.grid[relief][i] ==ui.colors.blank)
+        while (relief<grid.height && grid.g[relief][i] ==ui.colors.blank)
 	    relief+=1;
         grid.relief[i] = relief;
     }
@@ -433,7 +433,7 @@ function repaint_rows ( ymin, ymax )
     {
 	for (var x = 0; x<grid.width; x++)
 	{
-	    ui.paint(ymin, x, grid.grid[ymin][x]);
+	    ui.paint(ymin, x, grid.g[ymin][x]);
 	}
     }
 }
@@ -480,7 +480,7 @@ function init ( response )
     grid.height = game.height;
 
     grid.rowcounts = []
-    grid.grid = [];
+    grid.g = [];
     grid.relief = [];
     state.answer_rx = [null, null];
 
@@ -490,7 +490,7 @@ function init ( response )
     {
 	grid.rowcounts.push(0);
 	var row = [];
-	grid.grid.push(row);
+	grid.g.push(row);
 	for (var ii = 0; ii<grid.height;ii++)
 	    row.push(ui.colors.blank);
     }
@@ -506,7 +506,7 @@ function init ( response )
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
 
-	grid.grid[y][x] = ui.colors.filled;
+	grid.g[y][x] = ui.colors.filled;
         ui.paint(y, x, ui.colors.filled);
 	if (y<miny)
 	    miny = y;
