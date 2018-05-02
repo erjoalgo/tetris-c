@@ -363,12 +363,12 @@ function list_min ( list )
     return min;
 }
 
-var cmpNum = function(a,b){return a-b}
 
 function clear_lines (  )
 {
     if (!grid.needs_clear) return ;
 
+    var cmpNum = function(a,b){return a-b}
     // grid.last_cleared = grid.need_clear.length;
     assert(grid.need_clear.length>0,  " assertion failed at 464 ");
     if (grid.need_clear.length>0)	{
