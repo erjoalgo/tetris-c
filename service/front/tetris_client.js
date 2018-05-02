@@ -194,19 +194,6 @@ var grid = {
     grid:null
 };
 
-function virtual_iterate ()
-{
-    // TODO re-do this
-    var b = state.b;
-    var rot_coords = state.shapes[b.m].rotations[b.r].configurations;
-    var coords = [];
-    for (var i = 0; i<rot_coords.length;i++)
-    {
-	coords.push([rot_coords[i][0]+b.x, rot_coords[i][1]+b.y]);
-    }
-    return coords;
-}
-
 function b_iter (){
     return (function(){
         var i = 0;
