@@ -181,14 +181,15 @@ var colors = function(){return {
 var filled_color = colors.BLUE;
 var blank_color = colors.WHITE;
 
-var move_queue = [];
-
-var mrxy = [null, null, null, null];//model, rotate state, x distance from left, y from top
-var answer_rx = null;
-var paused_p = false;
-var game_over = false;
-var move_no = null;
-var game_no = null;
+var state = {
+    move_queue:[],
+    mrxy:[null, null, null, null],//model, rotate state, x distance from left, y from top
+    answer_rx:null,
+    paused_p:false,
+    game_over:false,
+    move_no:null,
+    game_no:null
+}
 
 var grid = {
     relief:null,
@@ -204,7 +205,7 @@ function virtual_iterate ()
 {
 
     // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = mrxy[0], r = mrxy[1], x = mrxy[2], y = mrxy[3];
+    var m = state.mrxy[0], r = state.mrxy[1], x = state.mrxy[2], y = state.mrxy[3];
     ////debugger;
     // assert(!(m==null), " assertion failed at 244 ");
     var shape = shapes[m];
@@ -238,7 +239,7 @@ function paint_to (color, no_overwrite)
 	    if (cell_grid[xy[1]][xy[0]].bgColor!=blank_color)
 	    {
 		//debugger;
-		game_over = true;
+		state.game_over = true;
 
 		return false;
 	    }
@@ -282,43 +283,43 @@ function add_tetro (  )
 function left ( undo ) {
 
 
-    !undo?mrxy[2]--:mrxy[2]++;
+    !undo?state.mrxy[2]--:state.mrxy[2]++;
 }
 function right ( undo ) {
 
 
-    !undo?mrxy[2]++:mrxy[2]--;
+    !undo?state.mrxy[2]++:state.mrxy[2]--;
 }
 function rotcw ( undo ) {
 
 
-    !undo?mrxy[1]++:mrxy[1]--;
-    mrxy[1]%=4;
+    !undo?state.mrxy[1]++:state.mrxy[1]--;
+    state.mrxy[1]%=4;
 }
 function rotccw ( undo ) {
 
 
-    !undo?mrxy[1]--:mrxy[1]++;
+    !undo?state.mrxy[1]--:state.mrxy[1]++;
 }
 function down ( undo ) {
 
 
-    !undo?mrxy[3]++:mrxy[3]--;
+    !undo?state.mrxy[3]++:state.mrxy[3]--;
 }
 
 
 function get_drop_distance (  )
 {
-    var m = mrxy[0];
-    var r = mrxy[1];
+    var m = state.mrxy[0];
+    var r = state.mrxy[1];
     var bot_crust = shapes[m].rotations[r].crusts["bot"];
 
     // var height = heights[mrxy[0]][mrxy[1]];
 
 
     var dist, min_dist = grid.height;
-    var x = mrxy[2];
-    var y = mrxy[3];
+    var x = state.mrxy[2];
+    var y = state.mrxy[3];
 
     // for (xy in bot_crust)
     for (var i = 0, relief_y; i<bot_crust.length; i++)
@@ -354,16 +355,16 @@ function drop (  )
     if (drop_distance<0)
 	{
 	    //debugger;
-	    game_over = true;
+	    state.game_over = true;
 	    return ;
 	}
 
-    mrxy[3] += drop_distance;
-    var y = mrxy[3];
-    var x = mrxy[2];
+    state.mrxy[3] += drop_distance;
+    var y = state.mrxy[3];
+    var x = state.mrxy[2];
 
-    var m = mrxy[0];
-    var r = mrxy[1];
+    var m = state.mrxy[0];
+    var r = state.mrxy[1];
     var top_crust = shapes[m].rotations[r].crusts["top"];
     for (var i = 0, xy = null; i<top_crust.length; i++)
     {
@@ -388,7 +389,7 @@ function drop (  )
 function maybe_clear (  )
 {
     //console.log( "maybe clearing..." );
-    if (move_no>=5)
+    if (state.move_no>=5)
     {
 	// //debugger;
     }
@@ -484,7 +485,7 @@ function clear_lines (  )
     //        map (partial (operator.__setitem__, a=grid.relief));
 
     assert(grid.need_clear.length==0,  " assertion failed at 536 ");
-    assert(cleared.length==0,  " assertion failed at 537. game_no: "+game_no);//this is failing
+    assert(cleared.length==0,  " assertion failed at 537. game_no: "+state.game_no);//this is failing
 
     for (var i = 0; i<grid.width; i++)
     {
@@ -516,21 +517,21 @@ function repaint_rows ( ymin, ymax )
 function fetch ( response )
 {
 
-    assert(game_no != null && move_no !=  null);
+    assert(state.game_no != null && state.move_no !=  null);
 
     //console.log( "fetching..." );
     if (response==null)
     {
-        var uri = "/games/"+game_no+"/moves/"+move_no;
+        var uri = "/games/"+state.game_no+"/moves/"+state.move_no;
         server_request(uri, fetch);
 	return;
     }else
     {
         move = response;
 
-        mrxy[0] = move.shape, mrxy[1] = 0, mrxy[2] = grid.width/2-1, mrxy[3] = 0;
-        answer_rx[0] = move.rot, answer_rx[1] = move.col;
-        move_no++;
+        state.mrxy[0] = move.shape, state.mrxy[1] = 0, state.mrxy[2] = grid.width/2-1, state.mrxy[3] = 0;
+        state.answer_rx[0] = move.rot, state.answer_rx[1] = move.col;
+        state.move_no++;
         timer();
     }
 }
@@ -539,7 +540,7 @@ function init ( response )
 {
     if (response==null)
     {
-	    server_request("/games/"+game_no, init);
+	    server_request("/games/"+state.game_no, init);
 	    return;
 	}
 
@@ -549,19 +550,19 @@ function init ( response )
 
     game = response;
 
-    move_no = game.move_no;
+    state.move_no = game.move_no;
 
     // game.move_no is for current move.
-    move_no++;
+    state.move_no++;
 
-    console.log("move no is: " +move_no);
+    console.log("move no is: " +state.move_no);
     grid.width = game.width;
     grid.height = game.height;
 
     grid.rowcounts = []
     grid.grid = [];
     grid.relief = [];
-    answer_rx = [null, null];
+    state.answer_rx = [null, null];
 
     table_create(grid.width, grid.height);//delete previous table
 
@@ -660,8 +661,8 @@ function init_game_no ( response )
             error("no current games on server");
         }else     {
             // game_no = gameno_list.pop();
-            game_no = gameno_list[gameno_list.length-1];
-            console.log( "init game_no is "+game_no );
+            state.game_no = gameno_list[gameno_list.length-1];
+            console.log( "init game_no is "+state.game_no );
             timer();
         }
     }
@@ -670,20 +671,20 @@ function init_game_no ( response )
 function plan (  )
 {
     //console.log( "planning..." );
-    for (var r  = mrxy[1], direc = mrxy[1]<answer_rx[0]?1:-1; r!=answer_rx[0]; r+=direc)
+    for (var r  = state.mrxy[1], direc = state.mrxy[1]<state.answer_rx[0]?1:-1; r!=state.answer_rx[0]; r+=direc)
 	{
-	    move_queue.push(direc>0?rotcw:rotcw);
+	    state.move_queue.push(direc>0?rotcw:rotcw);
 	}
     // move_queue.push(direc>0?moves.ROTCW:moves.ROTCW);
-    for (var x  = mrxy[2], direc = mrxy[2]<answer_rx[1]?1:-1; x!=answer_rx[1]; x+=direc)
+    for (var x  = state.mrxy[2], direc = state.mrxy[2]<state.answer_rx[1]?1:-1; x!=state.answer_rx[1]; x+=direc)
 	{
-	    move_queue.push(direc>0?right:left);
+	    state.move_queue.push(direc>0?right:left);
 	}
-    move_queue.push(drop);
-    move_queue.push(maybe_clear);
-    move_queue.push(fetch);
-    move_queue.push(add_tetro);
-    move_queue.push(plan);
+    state.move_queue.push(drop);
+    state.move_queue.push(maybe_clear);
+    state.move_queue.push(fetch);
+    state.move_queue.push(add_tetro);
+    state.move_queue.push(plan);
 }
 
 function pause_toggle (  )
@@ -691,13 +692,13 @@ function pause_toggle (  )
 console.log("calling pause_toggle");//autogen function logger
 
 
-    paused_p = !pause_p;
+    state.paused_p = !pause_p;
 }
 
 function game_over_fun (  )
 {
 
-    game_over = true;
+    state.game_over = true;
     //debugger;
     alert("game over!");
     console.log("game over");
@@ -707,15 +708,15 @@ function timer (  )
 {
     ////debugger;
 
-    if (paused_p)
+    if (state.paused_p)
     {
 	//unpause must bring timer back to life
 	return ;
     }
     // alert("timer executing");
-    if (move_queue.length>0)
+    if (state.move_queue.length>0)
     {
-	var move = move_queue.shift();
+	var move = state.move_queue.shift();
 	//debugger;
 
 	if (move.name in paint_moves)
@@ -731,11 +732,11 @@ function timer (  )
 	{
 	    move();
 	}
-	if (game_over)
+	if (state.game_over)
 	{
 	    //debugger;
 
-	    game_over_fun();
+	    state.game_over_fun();
 	}
 	else if (!(move.name in two_step_moves))
 	{
@@ -812,12 +813,12 @@ add_tetro.name = "add_tetro";
 
 
 // server_request(-1);
-move_queue.push(init_game_no);
-move_queue.push(init);
-move_queue.push(init_shapes);
-move_queue.push(fetch);
-move_queue.push(add_tetro);
-move_queue.push(plan);
+state.move_queue.push(init_game_no);
+state.move_queue.push(init);
+state.move_queue.push(init_shapes);
+state.move_queue.push(fetch);
+state.move_queue.push(add_tetro);
+state.move_queue.push(plan);
 
 // alert("hola");
 console.log("hola");
