@@ -28,6 +28,7 @@
    #:service-config
    #:grid-dimensions
    #:config-grid-dimensions
+   #:game-serialize-state
    )
   )
 
@@ -243,7 +244,7 @@
        as string = (tetris-ai:game-printable-string game string)
        do (vom:debug string)
        do
-         (let ((native (cffi::translate-from-foreign next-move 'tetris-ai::game-move)))
+         (let ((native (cffi:translate-from-foreign next-move 'tetris-ai::game-move)))
            (progn
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
