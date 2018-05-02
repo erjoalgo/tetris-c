@@ -316,12 +316,7 @@ function get_drop_distance (  )
     }
 
     var drop_dist = min_dist-1-b.y;
-    if (drop_dist<0)
-    {
-        error("internal error");
-    }else     {
-        return drop_dist;
-    }
+    return drop_dist;
 }
 
 function drop (  )
