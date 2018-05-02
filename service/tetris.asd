@@ -14,6 +14,7 @@
   :license "BSD-2-Clause"
   :author "Ernesto Alfonso <erjoalgo@gmail.com>"
   :components ((:file "server")
+               (:file "util")
                (:file "main"))
   :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments))
 
