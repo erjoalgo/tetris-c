@@ -219,38 +219,35 @@ function virtual_iterate ()
     return coords;
 }
 
-function paint_to (color, no_overwrite)
-{
-
-
-    // for (var xy in virtual_iterate())
+function grid_block_intersects (  )    {
     var coords = virtual_iterate();
-    var xy;
-    if (no_overwrite)
-    {
-	for (var i = 0;i< coords.length; i++)
-	{
-	    xy = coords[i];
-	    if (cell_grid[xy[1]][xy[0]].bgColor!=blank_color)
-	    {
-		//debugger;
-		state.game_over = true;
-
-		return false;
-	    }
-
-	}
-    }
-
-
     for (var i = 0;i< coords.length; i++)
     {
 	xy = coords[i];
-	cell_grid[xy[1]][xy[0]].bgColor = color;
-	cell_grid[xy[1]][xy[0]].bgColor = color;
-    }
+	if (cell_grid[xy[1]][xy[0]].bgColor!=blank_color)
+	{
+            return true;
+	}
 
-    return true;
+    }
+    return false;
+}
+function paint_to (color, check_intersects)
+{
+    var xy;
+    if (check_intersects && grid_block_intersects())
+    {
+        return true;
+    }else     {
+        var coords = virtual_iterate();
+        for (var i = 0;i< coords.length; i++)
+        {
+	    xy = coords[i];
+	    cell_grid[xy[1]][xy[0]].bgColor = color;
+	    cell_grid[xy[1]][xy[0]].bgColor = color;
+        }
+        return true;
+    }
 }
 
 function move_tetro ( move_fun )
@@ -262,6 +259,7 @@ function move_tetro ( move_fun )
     var succ = paint_to(filled_color, true);//undo last move and repaint if this doesn't succeed
     if (!succ)
     {
+        state.game_over = true;
 	move_fun(true);//undo
 	paint_to(filled_color);
     }
