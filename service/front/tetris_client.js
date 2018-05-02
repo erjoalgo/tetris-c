@@ -85,7 +85,7 @@ function table_create (width, height) {
 
 	    cell.width = square;
 	    cell.height = square;
-	    cell.bgColor = blank;
+	    cell.bgColor = blank_color;
 	    cell.style.border = "1px solid #000"
 
             // var cellText = document.createTextNode("cell is row "+j+", column "+i);
@@ -178,8 +178,8 @@ var colors = function(){return {
     'GREEN':3
     }}();
 
-var default_filled_color = colors.BLUE;
-var blank = colors.WHITE;
+var filled_color = colors.BLUE;
+var blank_color = colors.WHITE;
 
 var move_queue = [];
 
@@ -235,7 +235,7 @@ function paint_to (color, no_overwrite)
 	for (var i = 0;i< coords.length; i++)
 	{
 	    xy = coords[i];
-	    if (cell_grid[xy[1]][xy[0]].bgColor!=blank)
+	    if (cell_grid[xy[1]][xy[0]].bgColor!=blank_color)
 	    {
 		//debugger;
 		game_over = true;
@@ -261,13 +261,13 @@ function move_tetro ( move_fun )
 {
 
 
-    paint_to(blank);
+    paint_to(blank_color);
     move_fun();
-    var succ = paint_to(default_filled_color, true);//undo last move and repaint if this doesn't succeed
+    var succ = paint_to(filled_color, true);//undo last move and repaint if this doesn't succeed
     if (!succ)
     {
 	move_fun(true);//undo
-	paint_to(default_filled_color);
+	paint_to(filled_color);
     }
 
 }
@@ -275,7 +275,7 @@ function add_tetro (  )
 {
     //console.log( "adding tetro" );
 
-    paint_to(default_filled_color);
+    paint_to(filled_color);
 }
 
 
@@ -381,7 +381,7 @@ function drop (  )
 		    grid.needs_clear = true;
 		    grid.need_clear.push(xy[1]);
 		}
-	    grid.grid[xy[1]][xy[0]] = default_filled_color;
+	    grid.grid[xy[1]][xy[0]] = filled_color;
 	}
 }
 
@@ -405,7 +405,7 @@ function sum ( list )
     var sm = 0;
     for (var i = 0; i<list.length;i++ )
 	{
-	    if (!(list[i]==blank))
+	    if (!(list[i]==blank_color))
 	    {
 		sm++;
 	    }
@@ -478,7 +478,7 @@ function clear_lines (  )
         grid.grid[y] = cleared.pop ();
         grid.rowcounts[y] = 0;
         for (var i = 0; i<grid.width;i++)
-            grid.grid[y][i] = blank;
+            grid.grid[y][i] = blank_color;
         y-=1;
     }
     //        map (partial (operator.__setitem__, a=grid.relief));
@@ -489,7 +489,7 @@ function clear_lines (  )
     for (var i = 0; i<grid.width; i++)
     {
         var relief = grid.relief[i];
-        while (relief<grid.height && grid.grid[relief][i] ==blank)
+        while (relief<grid.height && grid.grid[relief][i] ==blank_color)
 	    relief+=1;
         grid.relief[i] = relief;
     }
@@ -571,7 +571,7 @@ function init ( response )
 	var row = [];
 	grid.grid.push(row);
 	for (var ii = 0; ii<grid.height;ii++)
-	    row.push(blank);
+	    row.push(blank_color);
     }
     for (var i = 0; i<grid.width;i++)
     {
@@ -586,8 +586,8 @@ function init ( response )
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
 
-	grid.grid[y][x] = default_filled_color;
-	cell_grid[y][x].bgColor = default_filled_color;
+	grid.grid[y][x] = filled_color;
+	cell_grid[y][x].bgColor = filled_color;
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
