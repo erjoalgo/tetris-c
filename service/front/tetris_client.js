@@ -70,7 +70,7 @@ function table_create (width, height) {
 
 	    cell.width = square;
 	    cell.height = square;
-	    cell.bgColor = blank_color;
+	    cell.bgColor = colors.blank;
 	    cell.style.border = "1px solid #000"
 
             var cellText = document.createTextNode("");
@@ -149,15 +149,15 @@ function server_request ( requestcode, response_hanlder )
     xhr.send(null);
 }
 
-var colors = function(){return {
+var colors = {
     'BLUE':"#0000f0",
     'BLACK':"#000000",
     'WHITE':"#ffffff",
     'GREEN':3
-    }}();
+};
 
-var filled_color = colors.BLUE;
-var blank_color = colors.WHITE;
+colors.filled = colors.BLUE;
+colors.blank = colors.WHITE;
 
 var state = {
     move_queue:[],
@@ -206,7 +206,7 @@ function grid_block_intersects (  )    {
     for (var i = 0;i< coords.length; i++)
     {
 	xy = coords[i];
-	if (cell_grid[xy[1]][xy[0]].bgColor!=blank_color)
+	if (cell_grid[xy[1]][xy[0]].bgColor!=colors.blank)
 	{
             return true;
 	}
@@ -236,21 +236,21 @@ function move_tetro ( move_fun )
 {
 
 
-    paint_to(blank_color);
+    paint_to(colors.blank);
     move_fun();
-    var succ = paint_to(filled_color, true);//undo last move and repaint if this doesn't succeed
+    var succ = paint_to(colors.filled, true);//undo last move and repaint if this doesn't succeed
     if (!succ)
     {
         state.game_over = true;
 	move_fun(true);//undo
-	paint_to(filled_color);
+	paint_to(colors.filled);
     }
 
 }
 
 function add_tetro (  )
 {
-    paint_to(filled_color);
+    paint_to(colors.filled);
 }
 
 
@@ -329,7 +329,7 @@ function drop (  )
 		grid.needs_clear = true;
 		grid.need_clear.push(xy[1]);
 	    }
-	    grid.grid[xy[1]][xy[0]] = filled_color;
+	    grid.grid[xy[1]][xy[0]] = colors.filled;
 	}
     }
 }
@@ -396,7 +396,7 @@ function clear_lines (  )
         grid.grid[y] = cleared.pop ();
         grid.rowcounts[y] = 0;
         for (var i = 0; i<grid.width;i++)
-            grid.grid[y][i] = blank_color;
+            grid.grid[y][i] = colors.blank;
         y-=1;
     }
 
@@ -406,7 +406,7 @@ function clear_lines (  )
     for (var i = 0; i<grid.width; i++)
     {
         var relief = grid.relief[i];
-        while (relief<grid.height && grid.grid[relief][i] ==blank_color)
+        while (relief<grid.height && grid.grid[relief][i] ==colors.blank)
 	    relief+=1;
         grid.relief[i] = relief;
     }
@@ -480,7 +480,7 @@ function init ( response )
 	var row = [];
 	grid.grid.push(row);
 	for (var ii = 0; ii<grid.height;ii++)
-	    row.push(blank_color);
+	    row.push(colors.blank);
     }
     for (var i = 0; i<grid.width;i++)
     {
@@ -494,8 +494,8 @@ function init ( response )
         y = Math.floor(xy/grid.width);
         y = grid.height-1-y;
 
-	grid.grid[y][x] = filled_color;
-	cell_grid[y][x].bgColor = filled_color;
+	grid.grid[y][x] = colors.filled;
+	cell_grid[y][x].bgColor = colors.filled;
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
