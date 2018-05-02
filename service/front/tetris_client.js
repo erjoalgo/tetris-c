@@ -167,7 +167,10 @@ var state = {
         x:null,//x distance from left
         y:null//y from top
     },
-    answer_rx:null,
+    answer:{ //server game move response
+        r:null,
+        x:null
+    },
     paused_p:false,
     game_over:false,
     move_no:null,
@@ -436,7 +439,7 @@ function fetch ( response )
         move = response;
 
         state.b.m = move.shape, state.b.r = 0, state.b.x = grid.width/2-1, state.b.y = 0;
-        state.answer_rx[0] = move.rot, state.answer_rx[1] = move.col;
+        state.answer.r = move.rot, state.answer.x = move.col;
         state.move_no++;
         timer();
     }
@@ -574,12 +577,12 @@ function init_game_no ( response )
 function plan (  )
 {
     //console.log( "planning..." );
-    for (var r  = state.b.r, direc = state.b.r<state.answer_rx[0]?1:-1; r!=state.answer_rx[0]; r+=direc)
+    for (var r  = state.b.r, direc = state.b.r<state.answer.r?1:-1; r!=state.answer.r; r+=direc)
 	{
 	    state.move_queue.push(direc>0?rotcw:rotcw);
 	}
     // move_queue.push(direc>0?moves.ROTCW:moves.ROTCW);
-    for (var x  = state.b.x, direc = state.b.x<state.answer_rx[1]?1:-1; x!=state.answer_rx[1]; x+=direc)
+    for (var x  = state.b.x, direc = state.b.x<state.answer.x?1:-1; x!=state.answer.x; x+=direc)
 	{
 	    state.move_queue.push(direc>0?right:left);
 	}
