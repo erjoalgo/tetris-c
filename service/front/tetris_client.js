@@ -131,12 +131,6 @@ function stackTrace() {
     return err.stack;
 }
 
-function min (a, b) {
-
-
-    return a<b?a:b;
-}
-
 function server_request ( requestcode, response_hanlder )
 {
 
