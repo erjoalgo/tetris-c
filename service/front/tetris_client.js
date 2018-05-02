@@ -23,11 +23,6 @@
         for the JavaScript code in this page.
         */
 
-// var SERVER = "http://root.erjoalgo.com/"
-// var SERVER = "http://www.andrew.cmu.edu/user/ealfonso/";
-// var SERVER = "http://45.55.140.195/";
-// var SERVER = "http://erjoalgo.com/"
-var SERVER = ""
 var square = "30";
 var cell_grid = [];
 var retry_timeout = 500;
@@ -59,7 +54,7 @@ function table_create (width, height) {
 
     loading = document.createElement("img");
     // loading.src = "http://root.erjoalgo.com/loading.gif";
-    loading.src = SERVER+"/loading.gif";
+    loading.src = "/loading.gif";
 
     hide_show_loading(false);
     body.appendChild(loading);
@@ -152,7 +147,7 @@ function server_request ( requestcode, response_hanlder )
     // xhr.open('get', "http://root.erjoalgo.com/tetris_updater/send_ajax_data.php?tcode="+requestcode);
     // xhr.open('get', "http://root.erjoalgo.com/tetris.uwsgi?"+requestcode);
     //console.log( "making server request" );
-    xhr.open('get', SERVER+requestcode);
+    xhr.open('get', requestcode);
     // Track the state changes of the request
     xhr.onreadystatechange = function(){
 	// Ready state 4 means the request is done
