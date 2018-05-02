@@ -473,6 +473,12 @@ function init ( response )
 
     game = response;
 
+    var skip = false; // start from move 0`
+    if (skip)    {
+        game.move_no = 0;
+        game.on_cells = [];
+    }
+
     state.moveNo = game.move_no;
 
     // game.moveNo is for current move.
