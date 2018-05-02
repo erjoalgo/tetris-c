@@ -53,6 +53,42 @@ var ui = {
         'GREEN':3,
         filled : this.BLUE,
         blank: this.WHITE
+    },
+    table_create : function (width, height){
+
+        var body = document.getElementsByTagName("body")[0];
+
+        this.loading.show(false);
+        body.appendChild(this.loading);
+
+        var tbl     = document.createElement("table");
+        tbl.class = "table";
+        var tblBody = document.createElement("tbody");
+
+        for (var j = 0; j < height; j++) {
+	    cell_row = [];
+	    this.cell_grid.push(cell_row);
+            var row = document.createElement("tr");
+            for (var i = 0; i < width; i++) {
+                var cell = document.createElement("td");
+	        cell_row.push(cell);
+
+	        cell.width = this.cell_size;
+	        cell.height = this.cell_size;
+	        cell.bgColor = this.colors.blank;
+	        cell.style.border = "1px solid #000"
+
+                var cellText = document.createTextNode("");
+                cell.appendChild(cellText);
+                row.appendChild(cell);
+            }
+
+            tblBody.appendChild(row);
+        }
+        tbl.appendChild(tblBody);
+        body.appendChild(tbl);
+        tbl.setAttribute("border", "2");
+        completed = true;
     }
 }
 
@@ -63,42 +99,7 @@ const RETRY_TIMEOUT = 500;
 const SERVER_TIMEOUT = 20000;
 const TIMER_DELAY = 90;
 
-function table_create (width, height) {
 
-    var body = document.getElementsByTagName("body")[0];
-
-    ui.loading.show(false);
-    body.appendChild(ui.loading);
-
-    var tbl     = document.createElement("table");
-    tbl.class = "table";
-    var tblBody = document.createElement("tbody");
-
-    for (var j = 0; j < height; j++) {
-	cell_row = [];
-	ui.cell_grid.push(cell_row);
-        var row = document.createElement("tr");
-        for (var i = 0; i < width; i++) {
-            var cell = document.createElement("td");
-	    cell_row.push(cell);
-
-	    cell.width = ui.cell_size;
-	    cell.height = ui.cell_size;
-	    cell.bgColor = ui.colors.blank;
-	    cell.style.border = "1px solid #000"
-
-            var cellText = document.createTextNode("");
-            cell.appendChild(cellText);
-            row.appendChild(cell);
-        }
-
-        tblBody.appendChild(row);
-    }
-    tbl.appendChild(tblBody);
-    body.appendChild(tbl);
-    tbl.setAttribute("border", "2");
-    completed = true;
-}
 
 
 
@@ -474,7 +475,7 @@ function init ( response )
     grid.relief = [];
     state.answer_rx = [null, null];
 
-    table_create(grid.width, grid.height);//delete previous table
+    ui.table_create(grid.width, grid.height);//delete previous table
 
     for (var i = 0; i<grid.height;i++)
     {
