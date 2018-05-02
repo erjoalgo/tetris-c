@@ -265,38 +265,31 @@ function move_tetro ( move_fun )
     }
 
 }
+
 function add_tetro (  )
 {
-    //console.log( "adding tetro" );
-
     paint_to(filled_color);
 }
 
 
 function left ( undo ) {
-
-
     !undo?state.b.x--:state.b.x++;
 }
+
 function right ( undo ) {
-
-
     !undo?state.b.x++:state.b.x--;
 }
+
 function rotcw ( undo ) {
-
-
     !undo?state.b.r++:state.b.r--;
     state.b.r%=4;
 }
+
 function rotccw ( undo ) {
-
-
     !undo?state.b.r--:state.b.r++;
 }
+
 function down ( undo ) {
-
-
     !undo?state.b.y++:state.b.y--;
 }
 
