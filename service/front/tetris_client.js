@@ -89,6 +89,9 @@ var ui = {
         body.appendChild(tbl);
         tbl.setAttribute("border", "2");
         completed = true;
+    },
+    paint: function(r, c, color){
+        this.cell_grid[r][c].bgColor = color;
     }
 }
 
@@ -219,7 +222,6 @@ function grid_block_intersects (  )    {
 }
 function paint_to (color, check_intersects)
 {
-    var xy;
     if (check_intersects && grid_block_intersects())
     {
         return true;
@@ -227,9 +229,8 @@ function paint_to (color, check_intersects)
         var coords = virtual_iterate();
         for (var i = 0;i< coords.length; i++)
         {
-	    xy = coords[i];
-	    ui.cell_grid[xy[1]][xy[0]].bgColor = color;
-	    ui.cell_grid[xy[1]][xy[0]].bgColor = color;
+	    var xy = coords[i];
+            ui.paint(xy[1], xy[0], color);
         }
         return true;
     }
@@ -424,7 +425,7 @@ function repaint_rows ( ymin, ymax )
     {
 	for (var x = 0; x<grid.width; x++)
 	{
-	    ui.cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
+	    ui.paint(ymin, x, grid.grid[ymin][x]);
 	}
     }
 }
@@ -498,7 +499,7 @@ function init ( response )
         y = grid.height-1-y;
 
 	grid.grid[y][x] = ui.colors.filled;
-	ui.cell_grid[y][x].bgColor = ui.colors.filled;
+        ui.paint(y, x, ui.colors.filled);
 	if (y<miny)
 	    miny = y;
 	if (y<grid.relief[x])
