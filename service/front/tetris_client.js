@@ -91,6 +91,7 @@ var ui = {
         completed = true;
     },
     paint: function(r, c, color){
+        assert(color != null);
         this.cellGrid[r][c].bgColor = color;
     }
 }
@@ -434,7 +435,7 @@ function repaintRows ( ymin, ymax )
     {
 	for (var x = 0; x<grid.width; x++)
 	{
-	    ui.paint(ymin, x, grid.g[ymin][x]);
+	    ui.paint(ymin, x, grid.g[ymin][x], ui.colors.filled);
 	}
     }
 }
