@@ -171,20 +171,6 @@ function server_request ( requestcode, response_hanlder )
     xhr.send(null);
 }
 
-
-//y inverted
-
-
-
-/*        def invert_y (model):
-             maxy=max(map(lambda xy:xy[1], model))
-             return [ [xy[0],maxy-xy[1]] for xy in model]*/
-
-//var heights = [[4, 1], [3, 2, 3, 2], [2, 3, 2, 3], [3, 2], [3, 2], [2], [2, 3, 2, 3]];
-// [[max(defaultShapeSet[i].topCrust[r], key = lambda xy:xy[1])[1]+1 for r in xrange(len(defaultShapeSet[i].topCrust))] for i in xrange(len(defaultShapeSet))]
-
-//no need to recreate rotation code I have on the server
-
 var colors = function(){return {
     'BLUE':"#0000f0",
     'BLACK':"#000000",
@@ -214,20 +200,6 @@ var grid = {
     rowcounts:null,
     grid:null
 };
-
-/*function virtual_iterate ()
-{
-    // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = mrxy[0], r = mrxy[1], x = mrxy[2], y = mrxy[3];
-    var shape = shapes[m][r];
-    var xy = [];
-    for (var coord in shape)
-	{
-	    xy[0] = coord[0]+x;
-	    xy[1] = coord[1]+y;
-	    yield xy;
-	}
-}*/
 
 function virtual_iterate ()
 {
