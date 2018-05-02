@@ -435,7 +435,7 @@ function repaintRows ( ymin, ymax )
     {
 	for (var x = 0; x<grid.width; x++)
 	{
-	    ui.paint(ymin, x, grid.g[ymin][x], ui.colors.filled);
+	    ui.paint(ymin, x, grid.g[ymin][x] || ui.colors.blank);
 	}
     }
 }
