@@ -207,6 +207,34 @@ function virtual_iterate ()
     return coords;
 }
 
+function b_iter (){
+    return (function(){
+        var i = 0;
+
+        var x = state.b.x;
+        var y = state.b.y;
+        var rot_coords = state.shapes[state.b.m].rotations[state.b.r].configurations;
+
+        var cont = {value:[null, null], done: false};
+        var done = {done: true};
+        return {
+            next: function(){
+                if (i<rot_coords.length)    {
+                    cont.value[0] = rot_coords[i][0] + x;
+                    cont.value[1] = rot_coords[i][1] + y;
+                    i++;
+                    return cont;
+                }else     {
+                    return done;
+                }
+            },
+            has_next:function(){
+                return i<rot_coords.length;
+            }
+        }
+    })();
+}
+
 function grid_block_intersects (  )    {
     var coords = virtual_iterate();
     for (var i = 0;i< coords.length; i++)
