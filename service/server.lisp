@@ -183,8 +183,7 @@
 
 (defun game-serialize-state (game move-no)
   (make-last-recorded-state
-   :timestamp (multiple-value-bind (secs usecs) (sb-ext:get-time-of-day)
-                (declare (ignore usecs)) secs)
+   :timestamp (get-universal-time)
    :move-no move-no
    :on-cells (tetris-ai:game-on-cells-packed game)))
 
