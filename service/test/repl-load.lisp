@@ -4,9 +4,9 @@
 (ql:quickload 'tetris-ai-rest)
 (ql:quickload 'tetris-ai-rest-test)
 
-(in-package #:tetris-ai-rest)
+;; (in-package #:tetris-ai-rest)
 
-(progn
+'(progn
   ;; (setf hunchentoot:*catch-errors-p* nil)
   ;; (vom:config t :debug4)
   (service-stop)
