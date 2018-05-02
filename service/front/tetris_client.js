@@ -183,7 +183,12 @@ var blank_color = colors.WHITE;
 
 var state = {
     move_queue:[],
-    mrxy:[null, null, null, null],//model, rotate state, x distance from left, y from top
+    b:{ //active block
+        m:null,//model number
+        r:null,//rotation state
+        x:null,//x distance from left
+        y:null//y from top
+    },
     answer_rx:null,
     paused_p:false,
     game_over:false,
@@ -205,7 +210,7 @@ function virtual_iterate ()
 {
 
     // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = state.mrxy[0], r = state.mrxy[1], x = state.mrxy[2], y = state.mrxy[3];
+    var m = state.b.m, r = state.b.r, x = state.b.x, y = state.b.y;
     ////debugger;
     // assert(!(m==null), " assertion failed at 244 ");
     var shape = shapes[m];
@@ -283,43 +288,43 @@ function add_tetro (  )
 function left ( undo ) {
 
 
-    !undo?state.mrxy[2]--:state.mrxy[2]++;
+    !undo?state.b.x--:state.b.x++;
 }
 function right ( undo ) {
 
 
-    !undo?state.mrxy[2]++:state.mrxy[2]--;
+    !undo?state.b.x++:state.b.x--;
 }
 function rotcw ( undo ) {
 
 
-    !undo?state.mrxy[1]++:state.mrxy[1]--;
-    state.mrxy[1]%=4;
+    !undo?state.b.r++:state.b.r--;
+    state.b.r%=4;
 }
 function rotccw ( undo ) {
 
 
-    !undo?state.mrxy[1]--:state.mrxy[1]++;
+    !undo?state.b.r--:state.b.r++;
 }
 function down ( undo ) {
 
 
-    !undo?state.mrxy[3]++:state.mrxy[3]--;
+    !undo?state.b.y++:state.b.y--;
 }
 
 
 function get_drop_distance (  )
 {
-    var m = state.mrxy[0];
-    var r = state.mrxy[1];
+    var m = state.b.m;
+    var r = state.b.r;
     var bot_crust = shapes[m].rotations[r].crusts["bot"];
 
     // var height = heights[mrxy[0]][mrxy[1]];
 
 
     var dist, min_dist = grid.height;
-    var x = state.mrxy[2];
-    var y = state.mrxy[3];
+    var x = state.b.x;
+    var y = state.b.y;
 
     // for (xy in bot_crust)
     for (var i = 0, relief_y; i<bot_crust.length; i++)
@@ -359,12 +364,12 @@ function drop (  )
 	    return ;
 	}
 
-    state.mrxy[3] += drop_distance;
-    var y = state.mrxy[3];
-    var x = state.mrxy[2];
+    state.b.y += drop_distance;
+    var y = state.b.y;
+    var x = state.b.x;
 
-    var m = state.mrxy[0];
-    var r = state.mrxy[1];
+    var m = state.b.m;
+    var r = state.b.r;
     var top_crust = shapes[m].rotations[r].crusts["top"];
     for (var i = 0, xy = null; i<top_crust.length; i++)
     {
@@ -529,7 +534,7 @@ function fetch ( response )
     {
         move = response;
 
-        state.mrxy[0] = move.shape, state.mrxy[1] = 0, state.mrxy[2] = grid.width/2-1, state.mrxy[3] = 0;
+        state.b.m = move.shape, state.b.r = 0, state.b.x = grid.width/2-1, state.b.y = 0;
         state.answer_rx[0] = move.rot, state.answer_rx[1] = move.col;
         state.move_no++;
         timer();
@@ -671,12 +676,12 @@ function init_game_no ( response )
 function plan (  )
 {
     //console.log( "planning..." );
-    for (var r  = state.mrxy[1], direc = state.mrxy[1]<state.answer_rx[0]?1:-1; r!=state.answer_rx[0]; r+=direc)
+    for (var r  = state.b.r, direc = state.b.r<state.answer_rx[0]?1:-1; r!=state.answer_rx[0]; r+=direc)
 	{
 	    state.move_queue.push(direc>0?rotcw:rotcw);
 	}
     // move_queue.push(direc>0?moves.ROTCW:moves.ROTCW);
-    for (var x  = state.mrxy[2], direc = state.mrxy[2]<state.answer_rx[1]?1:-1; x!=state.answer_rx[1]; x+=direc)
+    for (var x  = state.b.x, direc = state.b.x<state.answer_rx[1]?1:-1; x!=state.answer_rx[1]; x+=direc)
 	{
 	    state.move_queue.push(direc>0?right:left);
 	}
