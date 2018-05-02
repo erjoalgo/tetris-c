@@ -174,7 +174,8 @@ var state = {
     paused_p:false,
     game_over:false,
     move_no:null,
-    game_no:null
+    game_no:null,
+    shapes:null
 }
 
 var grid = {
@@ -191,7 +192,7 @@ function virtual_iterate ()
 {
     // TODO re-do this
     var b = state.b;
-    var rot_coords = shapes[b.m].rotations[b.r].configurations;
+    var rot_coords = state.shapes[b.m].rotations[b.r].configurations;
     var coords = [];
     for (var i = 0; i<rot_coords.length;i++)
     {
@@ -278,7 +279,7 @@ function down ( undo ) {
 function get_drop_distance (  )
 {
     var b = state.b;
-    var bot_crust = shapes[b.m].rotations[b.r].crusts["bot"];
+    var bot_crust = state.shapes[b.m].rotations[b.r].crusts["bot"];
 
     var dist, min_dist = grid.height;
     var x = state.b.x;
@@ -311,7 +312,7 @@ function drop (  )
         var b = state.b;
         b.y += drop_distance;
 
-        var top_crust = shapes[b.m].rotations[b.r].crusts["top"];
+        var top_crust = state.shapes[b.m].rotations[b.r].crusts["top"];
         for (var i = 0, xy = null; i<top_crust.length; i++)
         {
 	    xy = top_crust[i];
@@ -507,19 +508,17 @@ function init ( response )
     timer();
 }
 
-var shapes = [];
-
 function init_shapes ( response )
 {
     if (response == null)    {
         server_request("shapes", init_shapes)
     }else     {
-        shapes = response;
-        if (shapes.length == 0)    {
+        state.shapes = response;
+        if (state.shapes.length == 0)    {
             error("0 shapes received from server!");
         }
-        for (var i = 0; i<shapes.length; i++)    {
-            var shape = shapes[i];
+        for (var i = 0; i<state.shapes.length; i++)    {
+            var shape = state.shapes[i];
             var rots = shape.rotations;
             for (var r = 0; r<rots.length; r++)    {
                 var zero_seen = false;
