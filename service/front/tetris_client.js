@@ -596,9 +596,6 @@ function pause_toggle (  )
 
 function game_over_fun (  )
 {
-
-    state.game_over = true;
-    //debugger;
     alert("game over!");
     console.log("game over");
 }
@@ -622,8 +619,6 @@ function timer (  )
 	}
 	if (state.game_over)
 	{
-	    //debugger;
-
 	    state.game_over_fun();
 	}
 	else if (!(move.name in two_step_moves))
