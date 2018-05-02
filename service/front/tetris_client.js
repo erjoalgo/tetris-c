@@ -352,22 +352,8 @@ function drop (  )
     }
 }
 
-function sum ( list )
-{
-
-    var sm = 0;
-    for (var i = 0; i<list.length;i++ )
-	{
-	    if (!(list[i]==blank_color))
-	    {
-		sm++;
-	    }
-	}
-    return sm;
-}
 function list_min ( list )
 {
-
     var min = null;
     for (var i = 0; i<list.length;i++ )
     {
@@ -376,8 +362,6 @@ function list_min ( list )
     }
     return min;
 }
-
-
 
 var cmpNum = function(a,b){return a-b}
 
@@ -760,9 +744,6 @@ clear_lines.name = "clear_lines";
 pause_toggle.name = "pause_toggle";
 plan.name = "plan";
 add_tetro.name = "add_tetro";
-
-
-
 
 // server_request(-1);
 state.move_queue.push(init_game_no);
