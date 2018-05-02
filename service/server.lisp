@@ -195,11 +195,13 @@
     (loop
        with last-recorded-state-check-multiple
          = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
+       with print-string = nil
        for i from 0
        as next-move = (tetris-ai:game-apply-next-move game)
        while (and next-move (or (null max-moves) (< i max-moves)))
-       as string = (tetris-ai:game-printable-string game string)
-       do (vom:debug string)
+       do (when (eq (cadr vom:*config*) :DEBUG4);;this should be a single (vom:debug ...) call
+            (format t "printing...~%" )
+            (vom:debug (setf print-string (tetris-ai:game-printable-string game print-string))))
        do
          (let ((native (cffi:translate-from-foreign next-move 'tetris-ai::game-move)))
            (progn
