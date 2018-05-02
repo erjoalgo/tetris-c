@@ -23,12 +23,14 @@
         for the JavaScript code in this page.
 */
 
-var retry_timeout = 500;
 var loading;
 var ui = {
     cell_size: "30",
     cell_grid: []
 }
+const RETRY_TIMEOUT = 500;
+const SERVER_TIMEOUT = 20000;
+const TIMER_DELAY = 90;
 
 function hide_show_loading ( show )
 {
@@ -88,8 +90,6 @@ function table_create (width, height) {
 }
 
 var consec_failed_mills = 0;
-var server_timeout = 20000;
-var timer_delay = 90;
 
 
 
@@ -129,15 +129,15 @@ function server_request ( requestcode, response_hanlder )
 		{
 		    console.log("failed to parse request: " + xhr.responseText);
 
-		    consec_failed_mills+=retry_timeout;
+		    state.consec_failed_mills+=RETRY_TIMEOUT;
 
-		    if (consec_failed_mills>server_timeout)
+		    if (state.consec_failed_mills>SERVER_TIMEOUT)
 		    {
 			error("server seems unresponsive. try again later")
 		    }
 		    else
 		    {
-			setTimeout(function(){server_request(requestcode, response_handler)},retry_timeout);
+			setTimeout(function(){server_request(requestcode, response_handler)},RETRY_TIMEOUT);
 		    }
 		    return;
 		}
@@ -632,7 +632,7 @@ function timer (  )
 	    else
 	    {
                 var extra = move.name=="plan"? 200*Math.random() : 0;
-		setTimeout(timer,timer_delay+extra);
+		setTimeout(timer,TIMER_DELAY+extra);
 	    }
 
 	}
