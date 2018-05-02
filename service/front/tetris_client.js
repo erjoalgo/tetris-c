@@ -296,22 +296,17 @@ function down ( undo ) {
 
 function get_drop_distance (  )
 {
-    var m = state.b.m;
-    var r = state.b.r;
-    var bot_crust = shapes[m].rotations[r].crusts["bot"];
-
-    // var height = heights[mrxy[0]][mrxy[1]];
-
+    var b = state.b;
+    var bot_crust = shapes[b.m].rotations[b.r].crusts["bot"];
 
     var dist, min_dist = grid.height;
     var x = state.b.x;
     var y = state.b.y;
 
-    // for (xy in bot_crust)
     for (var i = 0, relief_y; i<bot_crust.length; i++)
     {
 	xy = bot_crust[i];
-	relief_y = grid.relief[xy[0] +x];
+	relief_y = grid.relief[xy[0] +b.x];
 	dist = relief_y - xy[1];
 	if (dist<min_dist)
 	{
@@ -320,16 +315,15 @@ function get_drop_distance (  )
 	}
     }
 
-    var drop_dist = min_dist-1-y;
+    var drop_dist = min_dist-1-b.y;
     if (drop_dist<0)
     {
-
-	////debugger
-;
+        error("internal error");
+    }else     {
+        return drop_dist;
     }
-
-    return drop_dist;
 }
+
 function drop (  )
 {
 
