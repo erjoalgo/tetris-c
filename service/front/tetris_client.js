@@ -370,7 +370,6 @@ function clear_lines (  )
 
     var cmpNum = function(a,b){return a-b}
     // grid.last_cleared = grid.need_clear.length;
-    assert(grid.need_clear.length>0,  " assertion failed at 464 ");
     if (grid.need_clear.length>0)	{
 	// cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
 	// would be nice to make need_clear a pqueue
@@ -390,7 +389,6 @@ function clear_lines (  )
         if (nextNonFull < YMAX)
             break;
 	//nextNonFull should be non-full now
-        // assert(grid.grid.length == grid.height,  " assertion failed at 481 ");
         if (grid.rowcounts[y]==grid.width)
 	{
             assert(grid.need_clear[grid.need_clear.length-1] == y, " assertion failed at 485 ");
@@ -407,22 +405,21 @@ function clear_lines (  )
     while (grid.need_clear.length>0)
         cleared.push(grid.grid[grid.need_clear.pop ()]);
 
-    // //debugger;
-
     while (y>=YMAX)
     {
-        //assert((cleared.length>0  && sum (cleared[0])==grid.width )  || sum (grid.grid[y])==grid.width,  " assertion failed at 510 ");
-        assert(cleared.length> 0,  " assertion failed at 519 ");
+        // assert((cleared.length>0  && sum(cleared[0])==grid.width)
+            // || sum(grid.grid[y])==grid.width);
+
+        assert(cleared.length> 0,  " cleared.length assertion ");
         grid.grid[y] = cleared.pop ();
         grid.rowcounts[y] = 0;
         for (var i = 0; i<grid.width;i++)
             grid.grid[y][i] = blank_color;
         y-=1;
     }
-    //        map (partial (operator.__setitem__, a=grid.relief));
 
-    assert(grid.need_clear.length==0,  " assertion failed at 536 ");
-    assert(cleared.length==0,  " assertion failed at 537. game_no: "+state.game_no);//this is failing
+    assert(grid.need_clear.length==0,  " grid.need_clear.length==0 assertion failed");
+    assert(cleared.length==0,  "cleared.length==0 assertion failed");
 
     for (var i = 0; i<grid.width; i++)
     {
@@ -432,11 +429,10 @@ function clear_lines (  )
         grid.relief[i] = relief;
     }
 
-    // assert(grid.consistency (), "failed assertion at line 419 ");
     grid.needs_clear = false;
-    // repaint_rows(ymin, YMAX);
     repaint_rows(YMAX, YMIN+1);
 }
+
 function repaint_rows ( ymin, ymax )
 {
 
