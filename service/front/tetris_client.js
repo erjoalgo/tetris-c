@@ -23,41 +23,41 @@
         for the JavaScript code in this page.
 */
 
-var loading;
 var ui = {
     cell_size: "30",
-    cell_grid: []
+    cell_grid: [],
+    loading : (function(){
+        var elm = document.createElement("img");
+        elm.hw = ["400", "550"];
+        elm.show = function ( show ) {
+            if (show)
+            {
+	        this.height = this.hw[0];
+	        this.width = this.hw[1];
+	        this.style = "";
+            }
+            else
+            {
+	        this.height = "0";
+	        this.width = "0";
+	        this.style="visibility:hidden";
+
+            }
+        };
+        return elm;
+    })()
 }
+
 const RETRY_TIMEOUT = 500;
 const SERVER_TIMEOUT = 20000;
 const TIMER_DELAY = 90;
 
-function hide_show_loading ( show )
-{
-    // loading.style=show?"":;
-    if (show)
-    {
-	loading.height = "400";
-	loading.width = "550";
-	loading.style="";
-    }
-    else
-    {
-	loading.height = "0";
-	loading.width = "0";
-	loading.style="visibility:hidden";
-
-    }
-}
 function table_create (width, height) {
 
     var body = document.getElementsByTagName("body")[0];
 
-    loading = document.createElement("img");
-    loading.src = "/loading.gif";
-
-    hide_show_loading(false);
-    body.appendChild(loading);
+    ui.loading.show(false);
+    body.appendChild(ui.loading);
 
     var tbl     = document.createElement("table");
     tbl.class = "table";
