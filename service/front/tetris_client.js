@@ -502,7 +502,7 @@ function init ( response )
 
     var skip = false; // start from move 0`
     if (skip)    {
-        game.move_no = 0;
+        game.move_no = -1;
         game.on_cells = [];
     }
 
