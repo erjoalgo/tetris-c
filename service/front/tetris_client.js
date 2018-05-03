@@ -131,10 +131,15 @@ var ui = {
                 min: 1,
                 max: 100,
                 value: TIMER_DELAY,
+                invertValue: function(val){
+                    return parseInt(this.max)- val + parseInt(this.min);
+                },
                 onchange: function(){
-                    TIMER_DELAY = parseInt(this.value);
+                    TIMER_DELAY = this.invertValue(this.value);
                 }
             });
+
+        this.slider.value = this.slider.invertValue(TIMER_DELAY);
 
         body.appendChild(this.slider);
     },
