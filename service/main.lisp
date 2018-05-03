@@ -7,7 +7,7 @@
     (("port" #\p) :type integer :optional t :documentation "service port")
     (("shapes-file" #\s) :type boolean :optional t :documentation "path to a libtetris shapes.in")
     (("seed" #\e) :type integer :optional t :documentation "libtetris ai seed to use")
-    (("dims" #\g) :type integer :optional t :documentation
+    (("dims" #\g) :type string :optional t :documentation
      "dimensions of the grid, in the form of HxW, e.g. 19x10")
     (("ai-depth" #\d) :type integer :optional t :documentation "libtetris ai depth")
     (("default-ai-move-delay-millis" #\m) :type integer :optional t :documentation "delay between ai moves")
