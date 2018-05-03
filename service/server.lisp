@@ -26,8 +26,8 @@
    #:game-create-run-thread
    #:make-config
    #:service-config
-   #:grid-dimensions
-   #:config-grid-dimensions
+   #:grid-height-width
+   #:config-grid-height-width
    #:game-serialize-state
    )
   )
@@ -38,7 +38,7 @@
   port
   shapes-file
   seed
-  grid-dimensions
+  grid-height-width
   max-move-catchup-wait-secs
   ai-depth
   default-ai-move-delay-millis
@@ -47,7 +47,7 @@
 (defvar config-default
   (make-config :port 4242
                :shapes-file tetris-ai:default-shapes-file
-               :grid-dimensions (cons tetris-ai:default-height
+               :grid-height-width (cons tetris-ai:default-height
                                       tetris-ai:default-width)
                :ai-depth 3
                :default-ai-move-delay-millis 500
@@ -224,14 +224,14 @@
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
 
-  (with-slots (ai-depth grid-dimensions default-ai-move-delay-millis)
+  (with-slots (ai-depth grid-height-width default-ai-move-delay-millis)
       (service-config *service*)
     (let* ((moves (make-array 0 :adjustable t
                               :fill-pointer t
                               :element-type 'tetris-ai:game-move))
            (ai-move-delay-secs (or ai-move-delay-secs
                                    (/ default-ai-move-delay-millis 1000)))
-           (height-width grid-dimensions)
+           (height-width grid-height-width)
            (game (tetris-ai:game-init (car height-width)
                                       (cdr height-width)
                                       :ai-weights tetris-ai:ai-default-weights

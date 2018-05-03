@@ -28,7 +28,7 @@
        (when dims
          (ppcre:register-groups-bind ((#'parse-integer h) (#'parse-integer w))
              ("([0-9]+)x([0-9]+)" dims)
-           (setf (config-grid-dimensions config) (cons h w))))
+           (setf (config-grid-height-width config) (cons h w))))
        (service-start config))
      (loop do (game-create-run)))))
 

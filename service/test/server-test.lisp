@@ -20,7 +20,7 @@
    :port 4243
    ;; shapes-file
    ;; seed
-   :grid-dimensions (cons game-height game-width)
+   :grid-height-width (cons game-height game-width)
    :max-move-catchup-wait-secs 1))
 
 (defparameter base-url (format nil "http://localhost:~D"
@@ -108,7 +108,7 @@
 (stefil:deftest test-game-status nil
   (let* ((game-status (req (format nil "/games/~D" test-game-no)))
          (config (tetris-ai-rest:service-config *test-service*))
-         (hw (tetris-ai-rest:config-grid-dimensions config)))
+         (hw (tetris-ai-rest:config-grid-height-width config)))
     (stefil:is (>= (json-get "move_no" game-status) 0))
     (stefil:is (= (cdr hw) (json-get "width" game-status) ))
     (stefil:is (= (car hw) (json-get "height" game-status)))

@@ -12,7 +12,7 @@
   (service-stop)
   (service-start nil :port 4242
    :MAX-MOVE-CATCHUP-WAIT-SECS 10
-   :grid-dimensions (cons 10 10)
+   :grid-height-width (cons 10 10)
    ;; :shapes-file "../one-shape.in"
    )
   (game-create-run-thread 0 :ai-move-delay-secs .5))
