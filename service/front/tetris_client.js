@@ -107,9 +107,9 @@ var ui = {
 ui.colors.filled =  ui.colors.BLUE;
 ui.colors.blank =  ui.colors.WHITE;
 
-const RETRYTIMEOUT = 500;
-const SERVERTIMEOUT = 20000;
-const TIMERDELAY = 90;
+const RETRY_TIMEOUT = 500;
+const SERVER_TIMEOUT = 20000;
+const TIMER_DELAY = 90;
 
 
 
@@ -152,15 +152,15 @@ function serverRequest ( requestcode, responseHanlder )
 		{
 		    console.log("failed to parse request: " + xhr.responseText);
 
-		    state.consecFailedMills+=RETRYTIMEOUT;
+		    state.consecFailedMills+=RETRY_TIMEOUT;
 
-		    if (state.consecFailedMills>SERVERTIMEOUT)
+		    if (state.consecFailedMills>SERVER_TIMEOUT)
 		    {
 			error("server seems unresponsive. try again later")
 		    }
 		    else
 		    {
-			setTimeout(function(){serverRequest(requestcode, responseHandler)},RETRYTIMEOUT);
+			setTimeout(function(){serverRequest(requestcode, responseHandler)},RETRY_TIMEOUT);
 		    }
 		    return;
 		}
@@ -662,7 +662,7 @@ function timer (  )
 	    else
 	    {
                 var extra = move.name=="plan"? 200*Math.random() : 0;
-		setTimeout(timer,TIMERDELAY+extra);
+		setTimeout(timer,TIMER_DELAY+extra);
 	    }
 
 	}
