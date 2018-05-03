@@ -46,6 +46,7 @@ var ui = {
         };
         return elm;
     })(),
+    moveNoElm: document.createElement("label"),
     colors: {
         'BLUE':"#0000f0",
         'BLACK':"#000000",
@@ -89,6 +90,14 @@ var ui = {
         body.appendChild(tbl);
         tbl.setAttribute("border", "2");
         completed = true;
+
+        var moveLabel = document.createElement("label");
+        moveLabel.innerHTML = "Move ";
+        moveLabel.style.fontSize = "30px";
+        body.appendChild(moveLabel);
+
+        this.moveNoElm.style.fontSize = "30px";
+        body.appendChild(this.moveNoElm);
     },
     paint: function(r, c, color){
         assert(color != null);
@@ -456,6 +465,7 @@ function fetch ( response )
         state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width/2-1, state.b.y = 0;
         state.answer.r = move.rot, state.answer.x = move.col;
         state.moveNo++;
+        ui.moveNoElm.innerHTML = state.moveNo;
         timer();
     }
 }
