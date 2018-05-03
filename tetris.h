@@ -93,9 +93,11 @@ void grid_block_rotate_safe(grid* g, block* b, int amount);
 int grid_clear_lines(grid* g);
 int grid_equal(grid* a, grid* b);
 void grid_test();
+#define GRID_HEIGHT 19
+#define GRID_WIDTH 10
 
-#define GRID_HEIGHT 9
-#define GRID_WIDTH 5
+
+
 
 typedef struct{
   int max_len;
