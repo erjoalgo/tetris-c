@@ -107,9 +107,9 @@ var ui = {
 ui.colors.filled =  ui.colors.BLUE;
 ui.colors.blank =  ui.colors.WHITE;
 
-const RETRY_TIMEOUT = 500;
-const SERVER_TIMEOUT = 20000;
-const TIMER_DELAY = 90;
+var RETRY_TIMEOUT = 500;
+var SERVER_TIMEOUT = 20000;
+var TIMER_DELAY = 90;
 
 
 
