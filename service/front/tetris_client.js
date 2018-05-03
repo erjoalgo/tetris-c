@@ -23,13 +23,26 @@
         for the JavaScript code in this page.
 */
 
+function createElementWithProperties(tag, props) {
+    var elm = document.createElement(tag);
+    for(var key in props) {
+        // elm.setAttribute(key, attrs[key]);
+        var val = props[key];
+        var path = key.split(".");
+        var last = path.pop();
+        var nested = path.reduce(function(cum, a){return cum[a]}, elm)
+        nested[last] = val;
+    }
+    return elm;
+}
+
 var ui = {
     cellSize: "30",
     cellGrid: [],
-    loading : (function(){
-        var elm = document.createElement("img");
-        elm.hw = ["400", "550"];
-        elm.show = function ( show ) {
+    fontSize: "30px",
+    loading : createElementWithProperties("img", {
+        hw: ["400", "550"],
+        show: function ( show ) {
             if (show)
             {
 	        this.height = this.hw[0];
@@ -43,10 +56,9 @@ var ui = {
 	        this.style="visibility:hidden";
 
             }
-        };
-        return elm;
-    })(),
-    moveNoElm: document.createElement("label"),
+        }
+    }),
+    moveNoElm: null,
     colors: {
         'BLUE':"#0000f0",
         'BLACK':"#000000",
@@ -90,30 +102,40 @@ var ui = {
         body.appendChild(tbl);
         tbl.setAttribute("border", "2");
 
-        var moveLabel = document.createElement("label");
-        moveLabel.innerHTML = "Move ";
-        moveLabel.style.fontSize = "30px";
-        body.appendChild(moveLabel);
-
-        this.moveNoElm.style.fontSize = "30px";
+        body.appendChild(createElementWithProperties(
+            "label",
+            {
+                innerHTML: "Move ",
+                "style.fontSize": this.fontSize
+            }));
+        this.moveNoElm = (createElementWithProperties(
+            "label",
+            {
+                "style.fontSize": this.fontSize
+            }));
         body.appendChild(this.moveNoElm);
 
         body.appendChild(document.createElement("br"));
-        var speedLabel = document.createElement("label");
-        speedLabel.style.fontSize = "30px";
-        speedLabel.innerHTML = "Speed ";
-        body.appendChild(speedLabel);
 
-        this.slider = document.createElement("input");
-        this.slider.type = "range";
-        this.slider.min = 1;
-        this.slider.max = 100;
-        this.slider.step = 1;
-        // this.slider.width = this.cellSize*width*2 + "px";
-        this.slider.value = TIMER_DELAY;
-        this.slider.onchange = function(){
-            TIMER_DELAY = parseInt(this.value);
-        };
+        body.appendChild(createElementWithProperties(
+            "label",
+            {
+                innerHTML: "Speed ",
+                "style.fontSize": this.fontSize
+            }));
+
+        this.slider = createElementWithProperties(
+            "input",
+            {
+                type: "range",
+                min: 1,
+                max: 100,
+                value: TIMER_DELAY,
+                onchange: function(){
+                    TIMER_DELAY = parseInt(this.value);
+                }
+            });
+
         body.appendChild(this.slider);
     },
     paint: function(r, c, color){
