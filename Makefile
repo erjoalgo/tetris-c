@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops  --param max-unroll-times=200  -fPIC# -fno-inline -fno-inline-functions  # -g -funroll-loops -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
+CFLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops  --param max-unroll-times=200  -g -fPIC #  -fno-inline -fno-inline-functions  # -g -funroll-loops -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
 # CFLAGS=-Wall -W -Werror -Wextra -fno-inline -g -fno-inline-functions # -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
 DEPS=tetris.h tetri_ai.h
 OBJ=ai.o game.o grid.o block.o shape.o

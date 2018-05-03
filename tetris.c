@@ -36,6 +36,12 @@ int main(int argc, char** argv)
       case 'S':
 	shapes_file = optarg;
         break;
+      case 'W':
+        // GRID_WIDTH = atoi(optarg);
+        break;
+      case 'H':
+        // GRID_HEIGHT = atoi(optarg);
+        break;
       case 'v':
 	show_grid = 1;
         break;
