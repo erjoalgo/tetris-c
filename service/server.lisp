@@ -224,14 +224,14 @@
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
 
+  (with-slots (ai-depth grid-dimensions default-ai-move-delay-millis)
+      (service-config *service*)
   (let* ((moves (make-array 0 :adjustable t
                             :fill-pointer t
                             :element-type 'tetris-ai:game-move))
-         (config (service-config *service*))
-         (height-width (config-grid-dimensions config))
-         (ai-depth (config-ai-depth config))
          (ai-move-delay-secs (or ai-move-delay-secs
-                                 (/ (config-default-ai-move-delay-millis config) 1000)))
+                                   (/ default-ai-move-delay-millis 1000)))
+           (height-width grid-dimensions)
          (game (tetris-ai:game-init (car height-width)
                                     (cdr height-width)
                                     :ai-weights tetris-ai:ai-default-weights
@@ -245,7 +245,7 @@
                                :last-recorded-state (game-serialize-state game 0)
                                :ai-move-delay-secs ai-move-delay-secs
                                :last-recorded-state-check-delay-secs
-                               last-recorded-state-check-delay-secs))))
+                                 last-recorded-state-check-delay-secs)))))
 
 (defun game-create-run (&optional game-no &rest create-args)
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
