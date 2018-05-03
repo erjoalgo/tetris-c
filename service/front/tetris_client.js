@@ -97,6 +97,24 @@ var ui = {
 
         this.moveNoElm.style.fontSize = "30px";
         body.appendChild(this.moveNoElm);
+
+        body.appendChild(document.createElement("br"));
+        var speedLabel = document.createElement("label");
+        speedLabel.style.fontSize = "30px";
+        speedLabel.innerHTML = "Speed ";
+        body.appendChild(speedLabel);
+
+        this.slider = document.createElement("input");
+        this.slider.type = "range";
+        this.slider.min = 1;
+        this.slider.max = 100;
+        this.slider.step = 1;
+        // this.slider.width = this.cellSize*width*2 + "px";
+        this.slider.value = TIMER_DELAY;
+        this.slider.onchange = function(){
+            TIMER_DELAY = parseInt(this.value);
+        };
+        body.appendChild(this.slider);
     },
     paint: function(r, c, color){
         assert(color != null);
