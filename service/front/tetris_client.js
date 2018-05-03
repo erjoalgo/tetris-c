@@ -89,7 +89,6 @@ var ui = {
         tbl.appendChild(tblBody);
         body.appendChild(tbl);
         tbl.setAttribute("border", "2");
-        completed = true;
 
         var moveLabel = document.createElement("label");
         moveLabel.innerHTML = "Move ";
