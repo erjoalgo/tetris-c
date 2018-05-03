@@ -226,25 +226,25 @@
 
   (with-slots (ai-depth grid-dimensions default-ai-move-delay-millis)
       (service-config *service*)
-  (let* ((moves (make-array 0 :adjustable t
-                            :fill-pointer t
-                            :element-type 'tetris-ai:game-move))
-         (ai-move-delay-secs (or ai-move-delay-secs
+    (let* ((moves (make-array 0 :adjustable t
+                              :fill-pointer t
+                              :element-type 'tetris-ai:game-move))
+           (ai-move-delay-secs (or ai-move-delay-secs
                                    (/ default-ai-move-delay-millis 1000)))
            (height-width grid-dimensions)
-         (game (tetris-ai:game-init (car height-width)
-                                    (cdr height-width)
-                                    :ai-weights tetris-ai:ai-default-weights
-                                    :ai-depth ai-depth)))
-    (assert (> ai-move-delay-secs 0))
-    (assert (> last-recorded-state-check-delay-secs 0))
-    (setf (gethash game-no (service-game-executions *service*))
-          (make-game-execution :game game
-                               :moves moves
-                               :max-moves max-moves
-                               :last-recorded-state (game-serialize-state game 0)
-                               :ai-move-delay-secs ai-move-delay-secs
-                               :last-recorded-state-check-delay-secs
+           (game (tetris-ai:game-init (car height-width)
+                                      (cdr height-width)
+                                      :ai-weights tetris-ai:ai-default-weights
+                                      :ai-depth ai-depth)))
+      (assert (> ai-move-delay-secs 0))
+      (assert (> last-recorded-state-check-delay-secs 0))
+      (setf (gethash game-no (service-game-executions *service*))
+            (make-game-execution :game game
+                                 :moves moves
+                                 :max-moves max-moves
+                                 :last-recorded-state (game-serialize-state game 0)
+                                 :ai-move-delay-secs ai-move-delay-secs
+                                 :last-recorded-state-check-delay-secs
                                  last-recorded-state-check-delay-secs)))))
 
 (defun game-create-run (&optional game-no &rest create-args)
