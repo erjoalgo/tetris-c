@@ -163,17 +163,17 @@ function assert(condition, message) {
     }
 }
 
-function serverRequest(requestcode, responseHanlder) {
+function serverRequest(url, responseHanlder) {
 
-    assert(requestcode != null && responseHanlder != null);
+    assert(url != null && responseHanlder != null);
 
     var xhr = new XMLHttpRequest();
-    xhr.open('get', requestcode);
+    xhr.open('get', url);
     xhr.onreadystatechange = function() {
         // Ready state 4 means the request is done
         if (xhr.readyState === 4) {
             if (xhr.status != 200) {
-                error(requestcode + " returned non-200 status: " + xhr.status + ": server response: " + xhr.responseText);
+                error(url + " returned non-200 status: " + xhr.status + ": server response: " + xhr.responseText);
             } else {
                 var response = null;
                 try {
@@ -187,7 +187,7 @@ function serverRequest(requestcode, responseHanlder) {
                         error("server seems unresponsive. try again later")
                     } else {
                         setTimeout(function() {
-                            serverRequest(requestcode, responseHandler)
+                            serverRequest(url, responseHandler)
                         }, RETRY_TIMEOUT);
                     }
                     return;
