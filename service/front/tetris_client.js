@@ -151,11 +151,6 @@ var RETRY_TIMEOUT = 500;
 var SERVER_TIMEOUT = 20000;
 var TIMER_DELAY = 90;
 
-
-
-
-
-
 function assert(condition, message) {
 
     // todo: upload stack trace
@@ -330,7 +325,6 @@ function down(undo) {
     !undo ? state.b.y++ : state.b.y--;
 }
 
-
 function getDropDistance() {
     var b = state.b;
     var botCrust = state.shapes[b.m].rotations[b.r].crusts["bot"];
@@ -389,7 +383,6 @@ function listMin(list) {
     }
     return min;
 }
-
 
 function clearLines() {
     var grid = state.grid;
