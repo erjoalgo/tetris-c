@@ -279,11 +279,12 @@ function bIter (){
 function gridBlockIntersects (  )    {
     for (var itr = bIter(); itr.hasNext(); )    {
         var xy = itr.next().value;
+        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == ui.colors.blank ||
+               state.grid.g[xy[1]][xy[0]] == ui.colors.filled);
 	if (ui.cellGrid[xy[1]][xy[0]].bgColor!=ui.colors.blank)
 	{
             return true;
 	}
-
     }
     return false;
 }
