@@ -125,16 +125,16 @@ var ui = {
                 type: "range",
                 min: 1,
                 max: 100,
-                value: TIMER_DELAY,
+                value: timerDelay,
                 invertValue: function(val) {
                     return parseInt(this.max) - val + parseInt(this.min);
                 },
                 onchange: function() {
-                    TIMER_DELAY = this.invertValue(this.value);
+                    timerDelay = this.invertValue(this.value);
                 }
             });
 
-        this.slider.value = this.slider.invertValue(TIMER_DELAY);
+        this.slider.value = this.slider.invertValue(timerDelay);
 
         body.appendChild(this.slider);
     },
@@ -149,7 +149,7 @@ ui.colors.blank = ui.colors.WHITE;
 
 var RETRY_TIMEOUT = 500;
 var SERVER_TIMEOUT = 20000;
-var TIMER_DELAY = 90;
+var timerDelay = 90;
 
 function assert(condition, message) {
 
@@ -645,7 +645,7 @@ function timer() {
                 timer();
             } else {
                 var extra = move.name == "plan" ? 200 * Math.random() : 0;
-                setTimeout(timer, TIMER_DELAY + extra);
+                setTimeout(timer, timerDelay + extra);
             }
 
         }
