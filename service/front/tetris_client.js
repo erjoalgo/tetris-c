@@ -163,9 +163,9 @@ function assert(condition, message) {
     }
 }
 
-function serverRequest(url, responseHanlder) {
+function serverRequest(url, handler) {
 
-    assert(url != null && responseHanlder != null);
+    assert(url != null && handler != null);
 
     var xhr = new XMLHttpRequest();
     xhr.open('get', url);
@@ -187,14 +187,14 @@ function serverRequest(url, responseHanlder) {
                         error("server seems unresponsive. try again later")
                     } else {
                         setTimeout(function() {
-                            serverRequest(url, responseHandler)
+                            serverRequest(url, handler)
                         }, RETRY_TIMEOUT);
                     }
                     return;
                 }
                 assert(!(response == null), " error from server");
                 state.consecFailedMills = 0;
-                responseHanlder(response);
+                handler(response);
             }
         }
     }
