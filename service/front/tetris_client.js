@@ -697,6 +697,4 @@ state.moveQueue.push(fetch);
 state.moveQueue.push(addTetro);
 state.moveQueue.push(plan);
 
-console.log("hola");
-
 timer();
