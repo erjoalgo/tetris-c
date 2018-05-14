@@ -19,8 +19,6 @@ libtetris.so: $(OBJ) evolution.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-
-
 perf.data: FORCE tetris-prof
 	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
 
@@ -32,3 +30,7 @@ clean:
 	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
 
 FORCE:
+
+install: libtetris.so
+	cp -f $< /usr/local/lib/
+	ldconfig

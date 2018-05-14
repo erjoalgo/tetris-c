@@ -1,0 +1,1844 @@
+#+TITLE: The TETRIS-AI-REST package
+#+AUTHOR: Ernesto Alfonso
+#+EMAIL: erjoalgo@gmail.com
+#+LINK: hs http://www.lispworks.com/reference/HyperSpec//%s
+#+STARTUP: showall
+#+OPTIONS: toc:4 H:10 @:t tags:nil
+
+# link target 2: <<tetris-ai-rest>>
+# link target: <<package tetris-ai-rest>>
+
+
+* Internal Package: =tetris-ai-rest=                                     :package:
+
+- Uses:
+    [[package common-lisp][common-lisp]]
+- Used by:
+    None.
+
+** Description
+
+Not documented.
+
+
+** External Symbols
+
+
+
+
+*** External Functions
+
+-----
+
+# link target 2: <<config-grid-height-width>>
+# link target: <<function config-grid-height-width>>
+
+
+**** External Function: =config-grid-height-width=                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-grid-height-width instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-create-run>>
+# link target: <<function game-create-run>>
+
+
+**** External Function: =game-create-run=                                  :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-create-run &optional game-no &rest create-args)
+#+END_SRC
+
+
+***** Description
+
+create and execute a game. all arguments are proxied to `game-create'
+
+
+
+-----
+
+# link target 2: <<game-create-run-thread>>
+# link target: <<function game-create-run-thread>>
+
+
+**** External Function: =game-create-run-thread=                           :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-create-run-thread &optional game-no &rest create-args)
+#+END_SRC
+
+
+***** Description
+
+create and execute a game on a new thread. all arguments are proxied to `game-create-run'
+
+
+
+-----
+
+# link target 2: <<game-serialize-state>>
+# link target: <<function game-serialize-state>>
+
+
+**** External Function: =game-serialize-state=                             :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-serialize-state game move-no)
+#+END_SRC
+
+
+***** Description
+
+serialize the current state of the game `game' at move number `move-no'
+
+
+
+-----
+
+# link target 2: <<make-config>>
+# link target: <<function make-config>>
+
+
+**** External Function: =make-config=                                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(make-config &key ((port port) nil) ((shapes-file shapes-file) nil)
+             ((seed seed) nil) ((grid-height-width grid-height-width) nil)
+             ((max-move-catchup-wait-secs max-move-catchup-wait-secs) nil)
+             ((ai-depth ai-depth) nil)
+             ((default-ai-move-delay-millis default-ai-move-delay-millis) nil))
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-config>>
+# link target: <<function service-config>>
+
+
+**** External Function: =service-config=                                   :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-config instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-start>>
+# link target: <<function service-start>>
+
+
+**** External Function: =service-start=                                    :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-start &optional config &rest make-config-args)
+#+END_SRC
+
+
+***** Description
+
+start the service. `config' is used as the base service configuration
+any remaining arguments are interpreted as flattened key-value pairs and are proxied to
+`make-config-args'
+
+
+
+-----
+
+# link target 2: <<service-stop>>
+# link target: <<function service-stop>>
+
+
+**** External Function: =service-stop=                                     :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-stop &optional service)
+#+END_SRC
+
+
+***** Description
+
+stop the service if running. if service is nil, stop *service*
+
+
+
+
+
+
+** Internal Symbols
+
+
+
+
+*** Internal Structures
+
+-----
+
+# link target 2: <<config>>
+# link target: <<structure config>>
+
+
+**** Internal Structure: =config=                                         :structure:
+
+
+***** Description
+
+Not documented.
+
+
+***** Slots
+
+# link target 2: <<port>>
+# link target: <<slot port>>
+
+
+****** Internal Slot: =port=                                                     :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<shapes-file>>
+# link target: <<slot shapes-file>>
+
+
+****** Internal Slot: =shapes-file=                                              :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<seed>>
+# link target: <<slot seed>>
+
+
+****** Internal Slot: =seed=                                                     :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<grid-height-width>>
+# link target: <<slot grid-height-width>>
+
+
+****** External Slot: =grid-height-width=                                        :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<max-move-catchup-wait-secs>>
+# link target: <<slot max-move-catchup-wait-secs>>
+
+
+****** Internal Slot: =max-move-catchup-wait-secs=                               :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<ai-depth>>
+# link target: <<slot ai-depth>>
+
+
+****** Internal Slot: =ai-depth=                                                 :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<default-ai-move-delay-millis>>
+# link target: <<slot default-ai-move-delay-millis>>
+
+
+****** Internal Slot: =default-ai-move-delay-millis=                             :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+
+
+
+-----
+
+# link target 2: <<game-execution>>
+# link target: <<structure game-execution>>
+
+
+**** Internal Structure: =game-execution=                                 :structure:
+
+
+***** Description
+
+Not documented.
+
+
+***** Slots
+
+# link target 2: <<game>>
+# link target: <<slot game>>
+
+
+****** Internal Slot: =game=                                                     :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<moves>>
+# link target: <<slot moves>>
+
+
+****** Internal Slot: =moves=                                                    :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<last-recorded-state>>
+# link target: <<slot last-recorded-state>>
+
+
+****** Internal Slot: =last-recorded-state=                                      :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<final-state>>
+# link target: <<slot final-state>>
+
+
+****** Internal Slot: =final-state=                                              :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<running-p>>
+# link target: <<slot running-p>>
+
+
+****** Internal Slot: =running-p=                                                :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<max-moves>>
+# link target: <<slot max-moves>>
+
+
+****** Internal Slot: =max-moves=                                                :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<ai-move-delay-secs>>
+# link target: <<slot ai-move-delay-secs>>
+
+
+****** Internal Slot: =ai-move-delay-secs=                                       :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<last-recorded-state-check-delay-secs>>
+# link target: <<slot last-recorded-state-check-delay-secs>>
+
+
+****** Internal Slot: =last-recorded-state-check-delay-secs=                     :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+
+
+
+-----
+
+# link target 2: <<last-recorded-state>>
+# link target: <<structure last-recorded-state>>
+
+
+**** Internal Structure: =last-recorded-state=                            :structure:
+
+
+***** Description
+
+Not documented.
+
+
+***** Slots
+
+# link target 2: <<timestamp>>
+# link target: <<slot timestamp>>
+
+
+****** Internal Slot: =timestamp=                                                :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<on-cells>>
+# link target: <<slot on-cells>>
+
+
+****** Internal Slot: =on-cells=                                                 :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<move-no>>
+# link target: <<slot move-no>>
+
+
+****** Internal Slot: =move-no=                                                  :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+
+
+
+-----
+
+# link target 2: <<service>>
+# link target: <<structure service>>
+
+
+**** Internal Structure: =service=                                        :structure:
+
+
+***** Description
+
+Not documented.
+
+
+***** Slots
+
+# link target 2: <<config>>
+# link target: <<slot config>>
+
+
+****** Internal Slot: =config=                                                   :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<acceptor>>
+# link target: <<slot acceptor>>
+
+
+****** Internal Slot: =acceptor=                                                 :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<curr-game-no>>
+# link target: <<slot curr-game-no>>
+
+
+****** Internal Slot: =curr-game-no=                                             :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+# link target 2: <<game-executions>>
+# link target: <<slot game-executions>>
+
+
+****** Internal Slot: =game-executions=                                          :slot:
+
+- Value type: =t=
+- Initial value: =NIL=
+- Initargs: none
+- Allocation: instance
+
+
+
+
+
+
+
+*** Internal Global Variables
+
+-----
+
+# link target 2: <<*service*>>
+# link target: <<variable *service*>>
+
+
+**** Internal Variable: =*service*=                                        :variable:
+
+
+***** Value
+
+: #S(SERVICE    :CONFIG #S(CONFIG               :PORT 4242              
+: :SHAPES-FILE "shapes.in"               :SEED NIL               :GRID-HEIGHT
+: WIDTH (10 . 10)               :MAX-MOVE-CATCHUP-WAIT-SECS 10              
+: :AI-DEPTH 3               :DEFAULT-AI-MOVE-DELAY-MILLIS 500)    :ACCEPTOR
+: #<HUNCHENTOOT:EASY-ACCEPTOR (host *, port 4242)>    :CURR-GAME-NO 0    :GAME
+: EXECUTIONS #<HASH-TABLE :TEST EQL :COUNT 1 {10065F9B63}>)
+
+Type: =service=
+
+
+***** Description
+
+the default currently active service
+
+
+
+-----
+
+# link target 2: <<*version*>>
+# link target: <<variable *version*>>
+
+
+**** Internal Variable: =*version*=                                        :variable:
+
+
+***** Value
+
+: "SNAPSHOT"
+
+Type: =simple-array=
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<..2b..service-option-spec..2b..>>
+# link target: <<variable ..2b..service-option-spec..2b..>>
+
+
+**** Internal Variable: =+service-option-spec+=                            :variable:
+
+
+***** Value
+
+: ((("port" #\p) :TYPE INTEGER :OPTIONAL T :DOCUMENTATION "service port") 
+: (("shapes-file" #\s) :TYPE BOOLEAN :OPTIONAL T :DOCUMENTATION   "path to a
+: libtetris shapes.in")  (("seed" #\e) :TYPE INTEGER :OPTIONAL T :DOCUMENTATION
+:   "libtetris ai seed to use")  (("dims" #\g) :TYPE STRING :OPTIONAL T
+: :DOCUMENTATION   "dimensions of the grid, in the form of HxW, e.g. 19x10") 
+: (("ai-depth" #\d) :TYPE INTEGER :OPTIONAL T :DOCUMENTATION   "libtetris ai
+: depth")  (("default-ai-move-delay-millis" #\m) :TYPE INTEGER :OPTIONAL T
+: :DOCUMENTATION   "delay between ai moves")  (("verbose" #\v) :TYPE BOOLEAN
+: :OPTIONAL T :DOCUMENTATION "verbose logging")  (("help" #\h) :TYPE BOOLEAN
+: :OPTIONAL T :DOCUMENTATION "display help")  (("version" #\V) :TYPE BOOLEAN
+: :OPTIONAL T :DOCUMENTATION "display version"))
+
+Type: =cons=
+
+
+***** Description
+
+a spec for the tetris-ai-rest service cli
+
+
+
+-----
+
+# link target 2: <<config-default>>
+# link target: <<variable config-default>>
+
+
+**** Internal Variable: =config-default=                                   :variable:
+
+
+***** Value
+
+: #S(CONFIG    :PORT 4242    :SHAPES-FILE "shapes.in"    :SEED NIL    :GRID
+: HEIGHT-WIDTH (19 . 10)    :MAX-MOVE-CATCHUP-WAIT-SECS 10    :AI-DEPTH 3   
+: :DEFAULT-AI-MOVE-DELAY-MILLIS 500)
+
+Type: =config=
+
+
+***** Description
+
+fallback service configuration to fill in any mising (nil) values
+
+
+
+-----
+
+# link target 2: <<thread-name-prefix>>
+# link target: <<variable thread-name-prefix>>
+
+
+**** Internal Variable: =thread-name-prefix=                               :variable:
+
+
+***** Value
+
+: "tetris-game-thread"
+
+Type: =simple-array=
+
+
+***** Description
+
+prefix for name of tetris worker threads
+
+
+
+
+
+*** Internal Macros
+
+-----
+
+# link target 2: <<define-regexp-route>>
+# link target: <<macro define-regexp-route>>
+
+
+**** Internal Macro: =define-regexp-route=                                    :macro:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(define-regexp-route name
+    (url-regexp &rest capture-names)
+    docstring
+  &body
+  body)
+#+END_SRC
+
+
+***** Description
+
+a macro to define a handler `name' matching requests for `url-regexp'.
+An optional list `capture-names' can be provided to capture path variables.
+The capturing behavior is based on wrapping `ppcre:register-groups-bind'
+
+
+
+
+
+*** Internal Functions
+
+-----
+
+# link target 2: <<config-ai-depth>>
+# link target: <<function config-ai-depth>>
+
+
+**** Internal Function: =config-ai-depth=                                  :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-ai-depth instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-default-ai-move-delay-millis>>
+# link target: <<function config-default-ai-move-delay-millis>>
+
+
+**** Internal Function: =config-default-ai-move-delay-millis=              :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-default-ai-move-delay-millis instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-max-move-catchup-wait-secs>>
+# link target: <<function config-max-move-catchup-wait-secs>>
+
+
+**** Internal Function: =config-max-move-catchup-wait-secs=                :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-max-move-catchup-wait-secs instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-p>>
+# link target: <<function config-p>>
+
+
+**** Internal Function: =config-p=                                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-p object)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-port>>
+# link target: <<function config-port>>
+
+
+**** Internal Function: =config-port=                                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-port instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-seed>>
+# link target: <<function config-seed>>
+
+
+**** Internal Function: =config-seed=                                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-seed instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<config-shapes-file>>
+# link target: <<function config-shapes-file>>
+
+
+**** Internal Function: =config-shapes-file=                               :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(config-shapes-file instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<copy-config>>
+# link target: <<function copy-config>>
+
+
+**** Internal Function: =copy-config=                                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(copy-config instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<copy-game-execution>>
+# link target: <<function copy-game-execution>>
+
+
+**** Internal Function: =copy-game-execution=                              :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(copy-game-execution instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<copy-last-recorded-state>>
+# link target: <<function copy-last-recorded-state>>
+
+
+**** Internal Function: =copy-last-recorded-state=                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(copy-last-recorded-state instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<copy-service>>
+# link target: <<function copy-service>>
+
+
+**** Internal Function: =copy-service=                                     :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(copy-service instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<current-game-state-handler>>
+# link target: <<function current-game-state-handler>>
+
+
+**** Internal Function: =current-game-state-handler=                       :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(current-game-state-handler)
+#+END_SRC
+
+
+***** Description
+
+return the current state of the game `game-no'
+
+
+
+-----
+
+# link target 2: <<game-create>>
+# link target: <<function game-create>>
+
+
+**** Internal Function: =game-create=                                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-create game-no &key max-moves ai-move-delay-secs
+             (last-recorded-state-check-delay-secs 2))
+#+END_SRC
+
+
+***** Description
+
+create a game `game-no' with the specified `max-moves', `ai-move-delay-secs',
+`last-recorded-state-check-delay-secs'. service-global configs are drawn from
+(service-config *service*)
+
+
+
+-----
+
+# link target 2: <<game-execution-ai-move-delay-secs>>
+# link target: <<function game-execution-ai-move-delay-secs>>
+
+
+**** Internal Function: =game-execution-ai-move-delay-secs=                :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-ai-move-delay-secs instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-final-state>>
+# link target: <<function game-execution-final-state>>
+
+
+**** Internal Function: =game-execution-final-state=                       :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-final-state instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-game>>
+# link target: <<function game-execution-game>>
+
+
+**** Internal Function: =game-execution-game=                              :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-game instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-last-recorded-state>>
+# link target: <<function game-execution-last-recorded-state>>
+
+
+**** Internal Function: =game-execution-last-recorded-state=               :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-last-recorded-state instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-last-recorded-state-check-delay-secs>>
+# link target: <<function game-execution-last-recorded-state-check-delay-secs>>
+
+
+**** Internal Function: =game-execution-last-recorded-state-check-delay-secs=:function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-last-recorded-state-check-delay-secs instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-max-moves>>
+# link target: <<function game-execution-max-moves>>
+
+
+**** Internal Function: =game-execution-max-moves=                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-max-moves instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-moves>>
+# link target: <<function game-execution-moves>>
+
+
+**** Internal Function: =game-execution-moves=                             :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-moves instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-p>>
+# link target: <<function game-execution-p>>
+
+
+**** Internal Function: =game-execution-p=                                 :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-p object)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-execution-running-p>>
+# link target: <<function game-execution-running-p>>
+
+
+**** Internal Function: =game-execution-running-p=                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-execution-running-p instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<game-list-handler>>
+# link target: <<function game-list-handler>>
+
+
+**** Internal Function: =game-list-handler=                                :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-list-handler)
+#+END_SRC
+
+
+***** Description
+
+return a list of all existing games
+
+
+
+-----
+
+# link target 2: <<game-move-handler>>
+# link target: <<function game-move-handler>>
+
+
+**** Internal Function: =game-move-handler=                                :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-move-handler)
+#+END_SRC
+
+
+***** Description
+
+return the move number `move-no' of the game number `game-no'
+
+
+
+-----
+
+# link target 2: <<game-run>>
+# link target: <<function game-run>>
+
+
+**** Internal Function: =game-run=                                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(game-run game-exc)
+#+END_SRC
+
+
+***** Description
+
+evaluate a game excution spec `game-exc'
+until either the game is lost, or `max-moves' is reached
+
+
+
+-----
+
+# link target 2: <<json-resp>>
+# link target: <<function json-resp>>
+
+
+**** Internal Function: =json-resp=                                        :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(json-resp return-code body)
+#+END_SRC
+
+
+***** Description
+
+convert a lisp object into a json response with the appropriate content type
+to be called within a hunchentoot handler.
+
+
+
+-----
+
+# link target 2: <<last-recorded-state-move-no>>
+# link target: <<function last-recorded-state-move-no>>
+
+
+**** Internal Function: =last-recorded-state-move-no=                      :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(last-recorded-state-move-no instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<last-recorded-state-on-cells>>
+# link target: <<function last-recorded-state-on-cells>>
+
+
+**** Internal Function: =last-recorded-state-on-cells=                     :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(last-recorded-state-on-cells instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<last-recorded-state-p>>
+# link target: <<function last-recorded-state-p>>
+
+
+**** Internal Function: =last-recorded-state-p=                            :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(last-recorded-state-p object)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<last-recorded-state-timestamp>>
+# link target: <<function last-recorded-state-timestamp>>
+
+
+**** Internal Function: =last-recorded-state-timestamp=                    :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(last-recorded-state-timestamp instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<main>>
+# link target: <<function main>>
+
+
+**** Internal Function: =main=                                             :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(main args)
+#+END_SRC
+
+
+***** Description
+
+main entry point
+
+
+
+-----
+
+# link target 2: <<main-parse-args>>
+# link target: <<function main-parse-args>>
+
+
+**** Internal Function: =main-parse-args=                                  :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(main-parse-args &rest args &key positional verbose dims help version
+                 &allow-other-keys)
+#+END_SRC
+
+
+***** Description
+
+parse command-line arguments and start the service if applicable
+
+
+
+-----
+
+# link target 2: <<make-game-execution>>
+# link target: <<function make-game-execution>>
+
+
+**** Internal Function: =make-game-execution=                              :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(make-game-execution &key ((game game) nil) ((moves moves) nil)
+                     ((last-recorded-state last-recorded-state) nil)
+                     ((final-state final-state) nil)
+                     ((running-p running-p) nil) ((max-moves max-moves) nil)
+                     ((ai-move-delay-secs ai-move-delay-secs) nil)
+                     ((last-recorded-state-check-delay-secs
+                       last-recorded-state-check-delay-secs)
+                      nil))
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<make-last-recorded-state>>
+# link target: <<function make-last-recorded-state>>
+
+
+**** Internal Function: =make-last-recorded-state=                         :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(make-last-recorded-state &key ((timestamp timestamp) nil)
+                          ((on-cells on-cells) nil) ((move-no move-no) nil))
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<make-service>>
+# link target: <<function make-service>>
+
+
+**** Internal Function: =make-service=                                     :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(make-service &key ((config config) nil) ((acceptor acceptor) nil)
+              ((curr-game-no curr-game-no) nil)
+              ((game-executions game-executions) nil))
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<merge-structs>>
+# link target: <<function merge-structs>>
+
+
+**** Internal Function: =merge-structs=                                    :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(merge-structs type &rest objs)
+#+END_SRC
+
+
+***** Description
+
+merge several structs.
+values appearing earlier have higher precedence. nil interpreted as undefined
+
+
+
+-----
+
+# link target 2: <<s-starts-with>>
+# link target: <<function s-starts-with>>
+
+
+**** Internal Function: =s-starts-with=                                    :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(s-starts-with prefix string)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-acceptor>>
+# link target: <<function service-acceptor>>
+
+
+**** Internal Function: =service-acceptor=                                 :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-acceptor instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-curr-game-no>>
+# link target: <<function service-curr-game-no>>
+
+
+**** Internal Function: =service-curr-game-no=                             :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-curr-game-no instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-game-executions>>
+# link target: <<function service-game-executions>>
+
+
+**** Internal Function: =service-game-executions=                          :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-game-executions instance)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-p>>
+# link target: <<function service-p>>
+
+
+**** Internal Function: =service-p=                                        :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-p object)
+#+END_SRC
+
+
+***** Description
+
+Not documented.
+
+
+
+-----
+
+# link target 2: <<service-running-p>>
+# link target: <<function service-running-p>>
+
+
+**** Internal Function: =service-running-p=                                :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(service-running-p &optional service)
+#+END_SRC
+
+
+***** Description
+
+return whether service is currently running
+
+
+
+-----
+
+# link target 2: <<shapes>>
+# link target: <<function shapes>>
+
+
+**** Internal Function: =shapes=                                           :function:
+
+
+***** Syntax
+
+#+BEGIN_SRC lisp
+(shapes &key)
+#+END_SRC
+
+
+***** Description
+
+return the shape configurations used by the service
+
+
+
+
+
+
+** Index
+
+ [[index C][C]]  [[index D][D]]  [[index G][G]]  [[index J][J]]  [[index L][L]]
+ [[index M][M]]  [[index S][S]]  [[index T][T]]  [[index
+NONALPHABETIC][NONALPHABETIC]]  
+
+
+*** Nonalphabetic
+
+
+# link target: <<index NONALPHABETIC>>
+- [[variable *service*][=*service*=]], Variable
+- [[variable *version*][=*version*=]], Variable
+- [[variable ..2b..service-option-spec..2b..][=+service-option-spec+=]],
+  Variable
+
+
+
+*** C
+
+
+# link target: <<index C>>
+- [[structure config][=config=]], Structure
+- [[function config-ai-depth][=config-ai-depth=]], Function
+- [[variable config-default][=config-default=]], Variable
+- [[function config-default-ai-move-delay-millis][=config-default-ai-move-delay
+  millis=]], Function
+- [[function config-grid-height-width][=config-grid-height-width=]], Function
+- [[function config-max-move-catchup-wait-secs][=config-max-move-catchup-wait
+  secs=]], Function
+- [[function config-p][=config-p=]], Function
+- [[function config-port][=config-port=]], Function
+- [[function config-seed][=config-seed=]], Function
+- [[function config-shapes-file][=config-shapes-file=]], Function
+- [[function copy-config][=copy-config=]], Function
+- [[function copy-game-execution][=copy-game-execution=]], Function
+- [[function copy-last-recorded-state][=copy-last-recorded-state=]], Function
+- [[function copy-service][=copy-service=]], Function
+- [[function current-game-state-handler][=current-game-state-handler=]],
+  Function
+
+
+
+*** D
+
+
+# link target: <<index D>>
+- [[macro define-regexp-route][=define-regexp-route=]], Macro
+
+
+
+*** G
+
+
+# link target: <<index G>>
+- [[function game-create][=game-create=]], Function
+- [[function game-create-run][=game-create-run=]], Function
+- [[function game-create-run-thread][=game-create-run-thread=]], Function
+- [[structure game-execution][=game-execution=]], Structure
+- [[function game-execution-ai-move-delay-secs][=game-execution-ai-move-delay
+  secs=]], Function
+- [[function game-execution-final-state][=game-execution-final-state=]],
+  Function
+- [[function game-execution-game][=game-execution-game=]], Function
+- [[function game-execution-last-recorded-state][=game-execution-last-recorded
+  state=]], Function
+- [[function game-execution-last-recorded-state-check-delay-secs][=game
+  execution-last-recorded-state-check-delay-secs=]], Function
+- [[function game-execution-max-moves][=game-execution-max-moves=]], Function
+- [[function game-execution-moves][=game-execution-moves=]], Function
+- [[function game-execution-p][=game-execution-p=]], Function
+- [[function game-execution-running-p][=game-execution-running-p=]], Function
+- [[function game-list-handler][=game-list-handler=]], Function
+- [[function game-move-handler][=game-move-handler=]], Function
+- [[function game-run][=game-run=]], Function
+- [[function game-serialize-state][=game-serialize-state=]], Function
+
+
+
+*** J
+
+
+# link target: <<index J>>
+- [[function json-resp][=json-resp=]], Function
+
+
+
+*** L
+
+
+# link target: <<index L>>
+- [[structure last-recorded-state][=last-recorded-state=]], Structure
+- [[function last-recorded-state-move-no][=last-recorded-state-move-no=]],
+  Function
+- [[function last-recorded-state-on-cells][=last-recorded-state-on-cells=]],
+  Function
+- [[function last-recorded-state-p][=last-recorded-state-p=]], Function
+- [[function last-recorded-state-timestamp][=last-recorded-state-timestamp=]],
+  Function
+
+
+
+*** M
+
+
+# link target: <<index M>>
+- [[function main][=main=]], Function
+- [[function main-parse-args][=main-parse-args=]], Function
+- [[function make-config][=make-config=]], Function
+- [[function make-game-execution][=make-game-execution=]], Function
+- [[function make-last-recorded-state][=make-last-recorded-state=]], Function
+- [[function make-service][=make-service=]], Function
+- [[function merge-structs][=merge-structs=]], Function
+
+
+
+*** S
+
+
+# link target: <<index S>>
+- [[function s-starts-with][=s-starts-with=]], Function
+- [[structure service][=service=]], Structure
+- [[function service-acceptor][=service-acceptor=]], Function
+- [[function service-config][=service-config=]], Function
+- [[function service-curr-game-no][=service-curr-game-no=]], Function
+- [[function service-game-executions][=service-game-executions=]], Function
+- [[function service-p][=service-p=]], Function
+- [[function service-running-p][=service-running-p=]], Function
+- [[function service-start][=service-start=]], Function
+- [[function service-stop][=service-stop=]], Function
+- [[function shapes][=shapes=]], Function
+
+
+
+*** T
+
+
+# link target: <<index T>>
+- [[package tetris-ai-rest][=tetris-ai-rest=]], Package
+- [[variable thread-name-prefix][=thread-name-prefix=]], Variable
+
+
+
+
+
+* Colophon
+
+This documentation was generated from Common Lisp source code using CLOD, version 1.0.
+The latest version of CLOD is available [[http://bitbucket.org/eeeickythump/clod/][here]].

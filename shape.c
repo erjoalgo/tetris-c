@@ -38,10 +38,11 @@ int max_ab ( int a, int b )	{
   return a>b?a:b;
 }
 
-shape* shape_new ( int** shape_rot, int shape_len )	{
+shape* shape_new ( int** shape_rot, int shape_len, int shape_id )	{
   // shape_rot is one rotation of the shape
   shape* s = malloc(sizeof(shape));
   s->len = shape_len;
+  s->id = shape_id;
 
   // normalize to (0, 0)
   int extreme_left = min_dim(shape_rot, shape_len, 0);
@@ -228,6 +229,7 @@ shape** shapes_read ( char* file, int* shape_count)	{
   if (!fh) return NULL;
   *shape_count = 0;
   shape** shapes = malloc(1*sizeof(shape*));
+  int id = 0;
   while (!feof (fh))	{
     int len;
     fscanf(fh, "%d", &len);
@@ -240,7 +242,7 @@ shape** shapes_read ( char* file, int* shape_count)	{
       fscanf(fh, "%d", &rot[i][1]);
     }
     shapes = realloc(shapes, (*shape_count+1)*sizeof(shape*));
-    shapes[(*shape_count)++] = shape_new(rot, len);
+    shapes[(*shape_count)++] = shape_new(rot, len, id++);
   }
   return shapes;
 }
@@ -256,3 +258,67 @@ void shape_test (  )	{
     shape_print(SHAPES[i], 0);
   }
 }
+
+void shape_new_test (  )	{
+  int shape_rot_spec[] = {1, 0 ,0, 1 ,1, 1 ,0, 2};
+  int len = sizeof(shape_rot_spec)/sizeof(*shape_rot_spec)/2;
+  int* shape_rot[len];
+  int i;
+  for ( i = 0; i < len; i++ )    {
+    shape_rot[i] = malloc(2*sizeof(*shape_rot[i]));
+    shape_rot[i][0] = shape_rot_spec[i*2];
+    shape_rot[i][1] = shape_rot_spec[i*2+1];
+  }
+  shape* s = shape_new(shape_rot, len, 0);
+  shape_print(s, 0);
+  printf( "%s\n", shape_serialize(s) );
+}
+
+char* shape_serialize ( shape* s )    {
+  char* buf = malloc(10000);
+  char* CRUST_NAMES[4];
+  CRUST_NAMES[TOP] = "top";
+  CRUST_NAMES[RIGHT] = "right";
+  CRUST_NAMES[LEFT] = "left";
+  CRUST_NAMES[BOT] = "bot";
+
+  int i = 0;
+  int r, b, d;
+  i = sprintf(buf, "{\n\t\"id\": %d,\n\t\"length\": %d,\n\t\"rot_count\": %d",
+              s->id, s->len, s->rot_count);
+
+  i+=sprintf(buf+i, ",\n\t\"rotations\": [");
+  for ( r = 0; r < s->rot_count; r++ )    {
+
+    i+=sprintf(buf+i, "%s\n\t\t{", r? ",": "");
+
+    i+=sprintf(buf+i, "\n\t\t\t\"width\": %d", s->rot_wh[r][0]);
+    i+=sprintf(buf+i, ",\n\t\t\t\"height\": %d", s->rot_wh[r][1]);
+
+    i+=sprintf(buf+i, ",\n\t\t\t\"configurations\": [");
+    for ( b = 0; b < s->len; b++ )    {
+      i+=sprintf(buf+i, "%s[%d, %d]", b? ", ": "", s->rot_flat[r][b][0], s->rot_flat[r][b][1]);
+    }
+    i+=sprintf(buf+i, "]");
+
+
+    i+=sprintf(buf+i, ",\n\t\t\t\"crusts\": {");
+    for ( d = 0; d < 4; d++ )    {
+      char* crust_name = CRUST_NAMES[d];
+      i+=sprintf(buf+i, "%s\n\t\t\t\t\"%s\": [", d? ",": "", crust_name);
+      for ( b = 0; b < s->crust_len[r][d]; b++ )    {
+        i+=sprintf(buf+i, "%s[%d, %d]", b? ", ":"",
+                   s->crust[r][d][b][0], s->crust[r][d][b][1]);
+      }
+      i+=sprintf(buf+i, "]");
+    }
+    i+=sprintf(buf+i, "\n\t\t\t}");
+    i+=sprintf(buf+i, "\n\t\t}");
+  }
+  i+=sprintf(buf+i, "\n\t]");
+  i+=sprintf(buf+i, "\n}");
+  buf[i++] = 0;
+
+  return buf;
+}
+

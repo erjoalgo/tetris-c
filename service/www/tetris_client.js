@@ -1,0 +1,1 @@
+../front/tetris_client.js
