@@ -1,4 +1,4 @@
- /*
+/*
         @licstart  The following is the entire license notice for the
         JavaScript code in this page.
 
@@ -21,682 +21,559 @@
 
         @licend  The above is the entire license notice
         for the JavaScript code in this page.
-        */
+*/
 
-// var SERVER = "http://root.erjoalgo.com/"
-// var SERVER = "http://www.andrew.cmu.edu/user/ealfonso/";
-// var SERVER = "http://45.55.140.195/";
-// var SERVER = "http://erjoalgo.com/"
-var SERVER = ""
-var square = "30";
-var cell_grid = [];
-var retry_timeout = 500;
-// function hola{return 1;}
-var loading;
-
-function hide_show_loading ( show )
-{
-    // loading.style=show?"":;
-    if (show)
-    {
-	loading.height = "400";
-	loading.width = "550";
-	loading.style="";
+function createElementWithProperties(tag, props) {
+    var elm = document.createElement(tag);
+    for (var key in props) {
+        // elm.setAttribute(key, attrs[key]);
+        var val = props[key];
+        var path = key.split(".");
+        var last = path.pop();
+        var nested = path.reduce(function(cum, a) {
+            return cum[a]
+        }, elm)
+        nested[last] = val;
     }
-    else
-    {
-	loading.height = "0";
-	loading.width = "0";
-	loading.style="visibility:hidden";
-
-    }
+    return elm;
 }
-function table_create (width, height) {
 
-    //body reference
-    // debugger;
-    var body = document.getElementsByTagName("body")[0];
+var ui = {
+    cellSize: "30",
+    cellGrid: [],
+    fontSize: "30px",
+    loading: createElementWithProperties("img", {
+        hw: ["400", "550"],
+        show: function(show) {
+            if (show) {
+                this.height = this.hw[0];
+                this.width = this.hw[1];
+                this.style = "";
+            } else {
+                this.height = "0";
+                this.width = "0";
+                this.style = "visibility:hidden";
 
-    loading = document.createElement("img");
-    // loading.src = "http://root.erjoalgo.com/loading.gif";
-    loading.src = SERVER+"/loading.gif";
-
-    hide_show_loading(false);
-    body.appendChild(loading);
-
-
-    // create elements <table> and a <tbody>
-    var tbl     = document.createElement("table");
-    tbl.class = "table";
-    // tbl.style.border = "1px solid red"
-    var tblBody = document.createElement("tbody");
-    // tblBody.border = "1";
-    // tblBody.style.border="1px solid red";
-    // tblBody.style.borderWidth="1px";
-
-    // var tblBody = tbl;
-    // cells creation
-    for (var j = 0; j < height; j++) {
-        // table row creation
-	cell_row = [];
-	cell_grid.push(cell_row);
-        var row = document.createElement("tr");
-        for (var i = 0; i < width; i++) {
-            // create element <td> and text node
-            //Make text node the contents of <td> element
-            // put <td> at end of the table row
-            var cell = document.createElement("td");
-	    cell_row.push(cell);
-
-	    cell.width = square;
-	    cell.height = square;
-	    cell.bgColor = blank;
-	    cell.style.border = "1px solid #000"
-
-            // var cellText = document.createTextNode("cell is row "+j+", column "+i);
-            var cellText = document.createTextNode("");
-            cell.appendChild(cellText);
-            row.appendChild(cell);
+            }
         }
+    }),
+    moveNoElm: null,
+    colors: {
+        'BLUE': "#0000f0",
+        'BLACK': "#000000",
+        'WHITE': "#ffffff",
+        'GREEN': 3,
+        filled: this.BLUE,
+        blank: this.WHITE
+    },
+    tableCreate: function(width, height) {
 
-        //row added to end of table body
-        // tblBody.appendChild(row);
-        tblBody.appendChild(row);
+        var body = document.getElementsByTagName("body")[0];
+
+        this.loading.show(false);
+        body.appendChild(this.loading);
+
+        var tbl = document.createElement("table");
+        tbl.class = "table";
+        var tblBody = document.createElement("tbody");
+
+        for (var j = 0; j < height; j++) {
+            cellRow = [];
+            this.cellGrid.push(cellRow);
+            var row = document.createElement("tr");
+            for (var i = 0; i < width; i++) {
+                var cell = document.createElement("td");
+                cellRow.push(cell);
+
+                cell.width = this.cellSize;
+                cell.height = this.cellSize;
+                cell.bgColor = this.colors.blank;
+                cell.style.border = "1px solid #000"
+
+                var cellText = document.createTextNode("");
+                cell.appendChild(cellText);
+                row.appendChild(cell);
+            }
+
+            tblBody.appendChild(row);
+        }
+        tbl.appendChild(tblBody);
+        body.appendChild(tbl);
+        tbl.setAttribute("border", "2");
+
+        body.appendChild(createElementWithProperties(
+            "label", {
+                innerHTML: "Move ",
+                "style.fontSize": this.fontSize
+            }));
+        this.moveNoElm = (createElementWithProperties(
+            "label", {
+                "style.fontSize": this.fontSize
+            }));
+        body.appendChild(this.moveNoElm);
+
+        body.appendChild(document.createElement("br"));
+
+        body.appendChild(createElementWithProperties(
+            "label", {
+                innerHTML: "Speed ",
+                "style.fontSize": this.fontSize
+            }));
+
+        this.slider = createElementWithProperties(
+            "input", {
+                type: "range",
+                min: 1,
+                max: 100,
+                value: timerDelay,
+                invertValue: function(val) {
+                    return parseInt(this.max) - val + parseInt(this.min);
+                },
+                onchange: function() {
+                    timerDelay = this.invertValue(this.value);
+                }
+            });
+
+        this.slider.value = this.slider.invertValue(timerDelay);
+
+        body.appendChild(this.slider);
+    },
+    paint: function(r, c, color) {
+        assert(color != null);
+        this.cellGrid[r][c].bgColor = color;
     }
-    // append the <tbody> inside the <table>
-    tbl.appendChild(tblBody);
-    // put <table> in the <body>
-    body.appendChild(tbl);
-    // tbl border attribute to
-    tbl.setAttribute("border", "2");
-    completed = true;
-
 }
-var consec_failed_mills = 0;
-var server_timeout = 20000;
-// var timer_delay = 200;
-var timer_delay = 90;
 
+ui.colors.filled = ui.colors.BLUE;
+ui.colors.blank = ui.colors.WHITE;
 
+var RETRY_TIMEOUT = 500;
+var SERVER_TIMEOUT = 20000;
+var timerDelay = 90;
 
 function assert(condition, message) {
 
     // todo: upload stack trace
 
-    if (!condition)
-    {
-	message = message || "Assertion failed"
+    if (!condition) {
+        message = message || "Assertion failed"
         alert(message);
-	debugger;
+        debugger;
         throw message;
     }
 }
-function stackTrace() {
-    var err = new Error();
-    return err.stack;
-}
 
-function min (a, b) {
+function serverRequest(url, handler) {
 
-
-    return a<b?a:b;
-}
-
-function server_request ( requestcode, response_hanlder )
-{
-
-    assert(requestcode!=null && response_hanlder != null);
+    assert(url != null && handler != null);
 
     var xhr = new XMLHttpRequest();
-    // xhr.open('get', 'http://root.erjoalgo.com/tetris_updater/send_ajax_data.php');
-    // xhr.open('get', "http://root.erjoalgo.com/tetris_updater/send_ajax_data.php?tcode="+requestcode);
-    // xhr.open('get', "http://root.erjoalgo.com/tetris.uwsgi?"+requestcode);
-    //console.log( "making server request" );
-    xhr.open('get', SERVER+requestcode);
-    // Track the state changes of the request
-    xhr.onreadystatechange = function(){
-	// Ready state 4 means the request is done
-	if(xhr.readyState === 4){
-            // 200 is a successful return
-            if(xhr.status === 200)
-	    {
-		var response = null;
-		// alert(xhr.responseText); // 'This is the returned text.'
-		// var array = new JSONArray(xhr.responseText);
-		try{
-		    response = JSON.parse(xhr.responseText);
-		}
-		catch (err)
-		{
-		    if (xhr.responseText=="game over :(")
-			{
-			    game_over_fun();
-			    return ;
-			}
-		    console.log("failed to parse request: "+xhr.responseText);
-		    // alert("error parsing response from server");
-		    consec_failed_mills+=retry_timeout;
+    xhr.open('get', url);
+    xhr.onreadystatechange = function() {
+        // Ready state 4 means the request is done
+        if (xhr.readyState === 4) {
+            if (xhr.status != 200) {
+                error(url + " returned non-200 status: " + xhr.status + ": server response: " + xhr.responseText);
+            } else {
+                var response = null;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch (err) {
+                    console.log("failed to parse request: " + xhr.responseText);
 
-		    if (consec_failed_mills>server_timeout)
-		    {
-			alert("server seems unresponsive. try again later")
-		    }
-		    else
-		    {
-			setTimeout(function(){server_request(requestcode, response_handler)},retry_timeout);
-		    }
-		    return ;
-		}
-		assert(! (response==null), " error from server");
-		consec_failed_mills = 0;
-		response_hanlder(response);
-		// alert(array);
-		// return array;
-            }
-	    else{
-		error(xhr.status+": "+xhr.responseText);
-            }
+                    state.consecFailedMills += RETRY_TIMEOUT;
 
-	}
+                    if (state.consecFailedMills > SERVER_TIMEOUT) {
+                        error("server seems unresponsive. try again later")
+                    } else {
+                        setTimeout(function() {
+                            serverRequest(url, handler)
+                        }, RETRY_TIMEOUT);
+                    }
+                    return;
+                }
+                assert(!(response == null), " error from server");
+                state.consecFailedMills = 0;
+                handler(response);
+            }
+        }
     }
-    // Send the request to send-ajax-data.php
     xhr.send(null);
 }
 
+var state = {
+    moveQueue: [],
+    b: { //active block
+        m: null, //model number
+        r: null, //rotation state
+        x: null, //x distance from left
+        y: null //y from top
+    },
+    answer: { //server game move response
+        r: null,
+        x: null
+    },
+    pausedP: false,
+    gameOver: false,
+    moveNo: null,
+    gameNo: null,
+    shapes: null,
+    consecFailedMills: 0,
 
-//y inverted
-
-
-
-/*        def invert_y (model):
-             maxy=max(map(lambda xy:xy[1], model))
-             return [ [xy[0],maxy-xy[1]] for xy in model]*/
-
-//var heights = [[4, 1], [3, 2, 3, 2], [2, 3, 2, 3], [3, 2], [3, 2], [2], [2, 3, 2, 3]];
-// [[max(defaultShapeSet[i].topCrust[r], key = lambda xy:xy[1])[1]+1 for r in xrange(len(defaultShapeSet[i].topCrust))] for i in xrange(len(defaultShapeSet))]
-
-//no need to recreate rotation code I have on the server
-
-var colors = function(){return {
-    'BLUE':"#0000f0",
-    'BLACK':"#000000",
-    'WHITE':"#ffffff",
-    'GREEN':3
-    }}();
-
-var shape_color = [colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE, colors.BLUE];
-var blank = colors.WHITE;
-
-var move_queue = [];
-
-
-var mrxy = [null, null, null, null];//model, rotate state, x distance from left, y from top
-var answer_rx = null;
-var paused_p = false;
-var game_over = false;
-var move_no = null;
-var game_no = null;
-
-var grid = {
-    relief:null,
-    width:null,
-    height:null,
-    need_clear:[],
-    needs_clear:false,
-    rowcounts:null,
-    grid:null
-};
-
-/*function virtual_iterate ()
-{
-    // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = mrxy[0], r = mrxy[1], x = mrxy[2], y = mrxy[3];
-    var shape = shapes[m][r];
-    var xy = [];
-    for (var coord in shape)
-	{
-	    xy[0] = coord[0]+x;
-	    xy[1] = coord[1]+y;
-	    yield xy;
-	}
-}*/
-
-function virtual_iterate ()
-{
-
-    // var m, r, x, y, w, h = mrxy[0], mrxy[1], mrxy[2], mrxy[3], grid.wh[0], grid.wh[1];
-    var m = mrxy[0], r = mrxy[1], x = mrxy[2], y = mrxy[3];
-    ////debugger;
-    // assert(!(m==null), " assertion failed at 244 ");
-    var shape = shapes[m];
-    var rot = shape.rotations[r];
-    var rot_coords = rot.configurations;
-    var xy = [];
-    // for (var coord in shape)
-    var coords = [];
-    for (var i = 0; i<rot_coords.length;i++)
-    {
-	// xy[0] = shape[i][0]+x;
-	// xy[1] = shape[i][1]+y;
-	coords.push([rot_coords[i][0]+x, rot_coords[i][1]+y]);
-	// yield xy;
-    }
-
-    return coords;
-}
-function paint_to (color, no_overwrite)
-{
-
-
-    // for (var xy in virtual_iterate())
-    var coords = virtual_iterate();
-    var xy;
-    if (no_overwrite)
-    {
-	for (var i = 0;i< coords.length; i++)
-	{
-	    xy = coords[i];
-	    if (cell_grid[xy[1]][xy[0]].bgColor!=blank)
-	    {
-		//debugger;
-		game_over = true;
-
-		return false;
-	    }
-
-	}
-    }
-
-
-    for (var i = 0;i< coords.length; i++)
-    {
-	xy = coords[i];
-	cell_grid[xy[1]][xy[0]].bgColor = color;
-	cell_grid[xy[1]][xy[0]].bgColor = color;
-    }
-
-    return true;
-}
-
-function move_tetro ( move_fun )
-{
-
-
-    paint_to(blank);
-    move_fun();
-    var succ = paint_to(colors.BLUE, true);//undo last move and repaint if this doesn't succeed
-    if (!succ)
-    {
-	move_fun(true);//undo
-	paint_to(colors.BLUE);
-    }
-
-}
-function add_tetro (  )
-{
-    //console.log( "adding tetro" );
-
-    paint_to(colors.BLUE);
-}
-
-
-function left ( undo ) {
-
-
-    !undo?mrxy[2]--:mrxy[2]++;
-}
-function right ( undo ) {
-
-
-    !undo?mrxy[2]++:mrxy[2]--;
-}
-function rotcw ( undo ) {
-
-
-    !undo?mrxy[1]++:mrxy[1]--;
-    mrxy[1]%=4;
-}
-function rotccw ( undo ) {
-
-
-    !undo?mrxy[1]--:mrxy[1]++;
-}
-function down ( undo ) {
-
-
-    !undo?mrxy[3]++:mrxy[3]--;
-}
-
-
-function get_drop_distance (  )
-{
-    var m = mrxy[0];
-    var r = mrxy[1];
-    var bot_crust = shapes[m].rotations[r].crusts["bot"];
-
-    // var height = heights[mrxy[0]][mrxy[1]];
-
-
-    var dist, min_dist = grid.height;
-    var x = mrxy[2];
-    var y = mrxy[3];
-
-    // for (xy in bot_crust)
-    for (var i = 0, relief_y; i<bot_crust.length; i++)
-    {
-	xy = bot_crust[i];
-	relief_y = grid.relief[xy[0] +x];
-	dist = relief_y - xy[1];
-	if (dist<min_dist)
-	{
-	    min_dist = dist;
-	    new_y = relief_y;
-	}
-    }
-
-    var drop_dist = min_dist-1-y;
-    if (drop_dist<0)
-    {
-
-	////debugger
-;
-    }
-
-    return drop_dist;
-}
-function drop (  )
-{
-
-
-    //assert(answer_rx[0]==mrxy[1] && answer_rx[1]==mrxy[2], " assertion failed at 380 ");
-
-
-    var drop_distance  = get_drop_distance();
-    if (drop_distance<0)
-	{
-	    //debugger;
-	    game_over = true;
-	    return ;
-	}
-
-    mrxy[3] += drop_distance;
-    var y = mrxy[3];
-    var x = mrxy[2];
-
-    var m = mrxy[0];
-    var r = mrxy[1];
-    var top_crust = shapes[m].rotations[r].crusts["top"];
-    for (var i = 0, xy = null; i<top_crust.length; i++)
-    {
-	xy = top_crust[i];
-	grid.relief[xy[0] + x] = xy[1]+y;
-    }
-
-    var coords = virtual_iterate();
-    for (var i = 0;i< coords.length; i++)
-	{
-	    xy = coords[i];
-
-	    if (++grid.rowcounts[xy[1]]==grid.width)
-		{
-		    grid.needs_clear = true;
-		    grid.need_clear.push(xy[1]);
-		}
-	    grid.grid[xy[1]][xy[0]] = colors.BLUE;
-	}
-}
-
-function maybe_clear (  )
-{
-    //console.log( "maybe clearing..." );
-    if (move_no>=5)
-    {
-	// //debugger;
-    }
-
-    if (grid.needs_clear)
-    {
-	clear_lines();
+    grid: {
+        relief: null,
+        width: null,
+        height: null,
+        needClear: [],
+        needsClear: false,
+        rowcounts: null,
+        g: null
     }
 }
 
-function sum ( list )
-{
+function bIter() {
+    return (function() {
+        var i = 0;
 
-    var sm = 0;
-    for (var i = 0; i<list.length;i++ )
-	{
-	    if (!(list[i]==blank))
-	    {
-		sm++;
-	    }
-	}
-    return sm;
+        var x = state.b.x;
+        var y = state.b.y;
+        var rotCoords = state.shapes[state.b.m].rotations[state.b.r].configurations;
+
+        var cont = {
+            value: [null, null],
+            done: false
+        };
+        var done = {
+            done: true
+        };
+        return {
+            next: function() {
+                if (i < rotCoords.length) {
+                    cont.value[0] = rotCoords[i][0] + x;
+                    cont.value[1] = rotCoords[i][1] + y;
+                    i++;
+                    return cont;
+                } else {
+                    return done;
+                }
+            },
+            hasNext: function() {
+                return i < rotCoords.length;
+            }
+        }
+    })();
 }
-function list_min ( list )
-{
 
+function gridBlockIntersects() {
+    for (var itr = bIter(); itr.hasNext();) {
+        var xy = itr.next().value;
+        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == ui.colors.blank ||
+            state.grid.g[xy[1]][xy[0]] == ui.colors.filled);
+        if (ui.cellGrid[xy[1]][xy[0]].bgColor != ui.colors.blank) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function paintTo(color, checkIntersects) {
+    if (checkIntersects && gridBlockIntersects()) {
+        return true;
+    } else {
+        for (var itr = bIter(); itr.hasNext();) {
+            var xy = itr.next().value;
+            ui.paint(xy[1], xy[0], color);
+        }
+        return true;
+    }
+}
+
+function moveTetro(moveFun) {
+    paintTo(ui.colors.blank);
+    moveFun();
+    var succ = paintTo(ui.colors.filled, true); //undo last move and repaint if this doesn't succeed
+    if (!succ) {
+        state.gameOver = true;
+        moveFun(true); //undo
+        paintTo(ui.colors.filled);
+    }
+}
+
+function addTetro() {
+    paintTo(ui.colors.filled);
+}
+
+
+function left(undo) {
+    !undo ? state.b.x-- : state.b.x++;
+}
+
+function right(undo) {
+    !undo ? state.b.x++ : state.b.x--;
+}
+
+function rotcw(undo) {
+    !undo ? state.b.r++ : state.b.r--;
+    state.b.r %= 4;
+}
+
+function rotccw(undo) {
+    !undo ? state.b.r-- : state.b.r++;
+}
+
+function down(undo) {
+    !undo ? state.b.y++ : state.b.y--;
+}
+
+function getDropDistance() {
+    var b = state.b;
+    var botCrust = state.shapes[b.m].rotations[b.r].crusts["bot"];
+
+    var grid = state.grid;
+    var dist, minDist = grid.height;
+    var x = state.b.x;
+    var y = state.b.y;
+
+    for (var i = 0, reliefY; i < botCrust.length; i++) {
+        xy = botCrust[i];
+        reliefY = grid.relief[xy[0] + b.x];
+        dist = reliefY - xy[1];
+        if (dist < minDist) {
+            minDist = dist;
+            newY = reliefY;
+        }
+    }
+
+    var dropDist = minDist - 1 - b.y;
+    return dropDist;
+}
+
+function drop() {
+    var grid = state.grid;
+    var dropDistance = getDropDistance();
+    if (dropDistance < 0) {
+        state.gameOver = true;
+    } else {
+
+        var b = state.b;
+        b.y += dropDistance;
+
+        var topCrust = state.shapes[b.m].rotations[b.r].crusts["top"];
+        for (var i = 0, xy = null; i < topCrust.length; i++) {
+            xy = topCrust[i];
+            grid.relief[xy[0] + b.x] = xy[1] + b.y;
+        }
+
+        for (var itr = bIter(); itr.hasNext();) {
+            var xy = itr.next().value;
+            if (++grid.rowcounts[xy[1]] == grid.width) {
+                grid.needsClear = true;
+                grid.needClear.push(xy[1]);
+            }
+            grid.g[xy[1]][xy[0]] = ui.colors.filled;
+        }
+    }
+}
+
+function listMin(list) {
     var min = null;
-    for (var i = 0; i<list.length;i++ )
-    {
-	if (min==null || list[i]<min)
-	    min = list[i];
+    for (var i = 0; i < list.length; i++) {
+        if (min == null || list[i] < min)
+            min = list[i];
     }
     return min;
 }
 
+function clearLines() {
+    var grid = state.grid;
+    if (!grid.needsClear) return;
 
-
-var cmpNum = function(a,b){return a-b}
-
-function clear_lines (  )
-{
-
-    // grid.last_cleared = grid.need_clear.length;
-    assert(grid.need_clear.length>0,  " assertion failed at 464 ");
-    if (grid.need_clear.length>0)	{
-	// cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
-	// would be nice to make need_clear a pqueue
-	grid.need_clear.sort (cmpNum);//smallest to largest
+    var cmpNum = function(a, b) {
+        return a - b
     }
-    const YMIN = grid.need_clear[grid.need_clear.length-1];
-    const YMAX = list_min(grid.relief);//the tallest row is 0. ymax should be as small as possible
+    // grid.lastCleared = grid.needClear.length;
+    if (grid.needClear.length > 0) {
+        // cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
+        // would be nice to make needClear a pqueue
+        grid.needClear.sort(cmpNum); //smallest to largest
+    }
+    const YMIN = grid.needClear[grid.needClear.length - 1];
+    const YMAX = listMin(grid.relief); //the tallest row is 0. ymax should be as small as possible
     var y = YMIN;
-    // grid.need_clear.reverse ();
-    var nextNonFull = y-1;//not necessarily non-full here
+    // grid.needClear.reverse ();
+    var nextNonFull = y - 1; //not necessarily non-full here
     var cleared = [];
 
-    while (nextNonFull >= YMAX)
-    {
-	while (grid.rowcounts[nextNonFull] == grid.width)
-	    nextNonFull-=1;
+    while (nextNonFull >= YMAX) {
+        while (grid.rowcounts[nextNonFull] == grid.width)
+            nextNonFull -= 1;
         if (nextNonFull < YMAX)
             break;
-	//nextNonFull should be non-full now
-        // assert(grid.grid.length == grid.height,  " assertion failed at 481 ");
-        if (grid.rowcounts[y]==grid.width)
-	{
-            assert(grid.need_clear[grid.need_clear.length-1] == y, " assertion failed at 485 ");
-            grid.need_clear.pop ();
-            cleared.push(grid.grid[y]);
-	}
-	//copy nextNonFull row into y-th row
-        grid.grid[y] = grid.grid[nextNonFull];
+        //nextNonFull should be non-full now
+        if (grid.rowcounts[y] == grid.width) {
+            assert(grid.needClear[grid.needClear.length - 1] == y, " assertion failed at 485 ");
+            grid.needClear.pop();
+            cleared.push(grid.g[y]);
+        }
+        //copy nextNonFull row into y-th row
+        grid.g[y] = grid.g[nextNonFull];
         grid.rowcounts[y] = grid.rowcounts[nextNonFull];
-        y-=1;
-        nextNonFull -=1;
-	}
-
-    while (grid.need_clear.length>0)
-        cleared.push(grid.grid[grid.need_clear.pop ()]);
-
-    // //debugger;
-
-    while (y>=YMAX)
-    {
-        //assert((cleared.length>0  && sum (cleared[0])==grid.width )  || sum (grid.grid[y])==grid.width,  " assertion failed at 510 ");
-        assert(cleared.length> 0,  " assertion failed at 519 ");
-        grid.grid[y] = cleared.pop ();
-        grid.rowcounts[y] = 0;
-        for (var i = 0; i<grid.width;i++)
-            grid.grid[y][i] = blank;
-        y-=1;
+        y -= 1;
+        nextNonFull -= 1;
     }
-    //        map (partial (operator.__setitem__, a=grid.relief));
 
-    assert(grid.need_clear.length==0,  " assertion failed at 536 ");
-    assert(cleared.length==0,  " assertion failed at 537. game_no: "+game_no);//this is failing
+    while (grid.needClear.length > 0)
+        cleared.push(grid.g[grid.needClear.pop()]);
 
-    for (var i = 0; i<grid.width; i++)
-    {
+    while (y >= YMAX) {
+        // assert((cleared.length>0  && sum(cleared[0])==grid.width)
+        // || sum(grid.g[y])==grid.width);
+
+        assert(cleared.length > 0, " cleared.length assertion ");
+        grid.g[y] = cleared.pop();
+        grid.rowcounts[y] = 0;
+        for (var i = 0; i < grid.width; i++)
+            grid.g[y][i] = ui.colors.blank;
+        y -= 1;
+    }
+
+    assert(grid.needClear.length == 0, " grid.needClear.length==0 assertion failed");
+    assert(cleared.length == 0, "cleared.length==0 assertion failed");
+
+    for (var i = 0; i < grid.width; i++) {
         var relief = grid.relief[i];
-        while (relief<grid.height && grid.grid[relief][i] ==blank)
-	    relief+=1;
+        while (relief < grid.height && grid.g[relief][i] == ui.colors.blank)
+            relief += 1;
         grid.relief[i] = relief;
     }
 
-    // assert(grid.consistency (), "failed assertion at line 419 ");
-    grid.needs_clear = false;
-    // repaint_rows(ymin, YMAX);
-    repaint_rows(YMAX, YMIN+1);
-}
-function repaint_rows ( ymin, ymax )
-{
-
-    for (;ymin<ymax;ymin++)
-	{
-	    for (var x = 0; x<grid.width; x++)
-		{
-		    cell_grid[ymin][x].bgColor = grid.grid[ymin][x];
-		}
-	}
+    grid.needsClear = false;
+    repaintRows(YMAX, YMIN + 1);
 }
 
+function repaintRows(ymin, ymax) {
+    var grid = state.grid;
+    for (; ymin < ymax; ymin++) {
+        for (var x = 0; x < grid.width; x++) {
+            ui.paint(ymin, x, grid.g[ymin][x] || ui.colors.blank);
+        }
+    }
+}
 
+function fetch(response) {
+    assert(state.gameNo != null && state.moveNo != null);
 
-function fetch ( response )
-{
-
-    assert(game_no != null && move_no !=  null);
-
-    //console.log( "fetching..." );
-    if (response==null)
-    {
-        var uri = "/games/"+game_no+"/moves/"+move_no;
-        server_request(uri, fetch);
-	return;
-    }else
-    {
+    if (response == null) {
+        var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
+        serverRequest(uri, fetch);
+        return;
+    } else {
         move = response;
 
-        mrxy[0] = move.shape, mrxy[1] = 0, mrxy[2] = grid.width/2-1, mrxy[3] = 0;
-        answer_rx[0] = move.rot, answer_rx[1] = move.col;
-        move_no++;
+        state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
+        state.answer.r = move.rot, state.answer.x = move.col;
+        state.moveNo++;
+        ui.moveNoElm.innerHTML = state.moveNo;
         timer();
     }
 }
 
-function init ( response )
-{
-    if (response==null)
-    {
-	    server_request("/games/"+game_no, init);
-	    return;
-	}
+function init(response) {
+    if (response == null) {
+        serverRequest("/games/" + state.gameNo, init);
+        return;
+    }
+    var grid = state.grid;
 
-    // response = [[0, 18], [0, 17], [1, 18], [1,17], [1,16], 10, 19, 0];
-    // response = [];
     var miny = grid.height;
 
     game = response;
 
-    move_no = game.move_no;
+    var skip = false; // start from move 0`
+    if (skip) {
+        game.move_no = -1;
+        game.on_cells = [];
+    }
 
-    // game.move_no is for current move.
-    move_no++;
+    state.moveNo = game.move_no;
 
-    console.log("move no is: " +move_no);
+    // game.moveNo is for current move.
+    state.moveNo++;
+
+    console.log("move no is: " + state.moveNo);
     grid.width = game.width;
     grid.height = game.height;
 
     grid.rowcounts = []
-    grid.grid = [];
+    grid.g = [];
     grid.relief = [];
-    answer_rx = [null, null];
+    state.answerRx = [null, null];
 
-    table_create(grid.width, grid.height);//delete previous table
+    ui.tableCreate(grid.width, grid.height); //delete previous table
 
-    for (var i = 0; i<grid.height;i++)
-    {
-	grid.rowcounts.push(0);
-	var row = [];
-	grid.grid.push(row);
-	for (var ii = 0; ii<grid.height;ii++)
-	    row.push(blank);
+    for (var i = 0; i < grid.height; i++) {
+        grid.rowcounts.push(0);
+        var row = [];
+        grid.g.push(row);
+        for (var ii = 0; ii < grid.height; ii++)
+            row.push(ui.colors.blank);
     }
-    for (var i = 0; i<grid.width;i++)
-    {
-	grid.relief.push(grid.height);
+    for (var i = 0; i < grid.width; i++) {
+        grid.relief.push(grid.height);
     }
 
-    // for (var xy in response)
-    for (var i = 0;i<game.on_cells.length;i++)
-    {
+    for (var i = 0; i < game.on_cells.length; i++) {
         xy = game.on_cells[i];
-        x = xy%grid.width;
-        y = Math.floor(xy/grid.width);
-        y = grid.height-1-y;
+        x = xy % grid.width;
+        y = Math.floor(xy / grid.width);
+        y = grid.height - 1 - y;
 
-	grid.grid[y][x] = colors.BLUE;
-	cell_grid[y][x].bgColor = colors.BLUE;
-	if (y<miny)
-	    miny = y;
-	if (y<grid.relief[x])
-	{
-	    grid.relief[x] = y;
-	}
-	grid.rowcounts[y]++;
+        grid.g[y][x] = ui.colors.filled;
+        ui.paint(y, x, ui.colors.filled);
+        if (y < miny)
+            miny = y;
+        if (y < grid.relief[x]) {
+            grid.relief[x] = y;
+        }
+        grid.rowcounts[y]++;
     }
-    repaint_rows(0, miny);
+    repaintRows(0, miny);
     timer();
 }
 
-var shapes = [];
-
-function init_shapes ( response )
-{
-    if (response == null)    {
-        server_request("shapes", init_shapes)
-    }else     {
-        shapes = response;
-        if (shapes.length == 0)    {
+function initShapes(response) {
+    if (response == null) {
+        serverRequest("shapes", initShapes)
+    } else {
+        state.shapes = response;
+        if (state.shapes.length == 0) {
             error("0 shapes received from server!");
         }
-        for (var i = 0; i<shapes.length; i++)    {
-            var shape = shapes[i];
+        for (var i = 0; i < state.shapes.length; i++) {
+            var shape = state.shapes[i];
             var rots = shape.rotations;
-            for (var r = 0; r<rots.length; r++)    {
-                var zero_seen = false;
+            for (var r = 0; r < rots.length; r++) {
+                var zeroSeen = false;
                 var rot = rots[r];
-                var rot_h = rot.height;
-                var rot_coords = rot.configurations;
-                for (var b = 0; b<rot_coords.length; b++)    {
-                    var cr = rot_coords[b];
+                var rotH = rot.height;
+                var rotCoords = rot.configurations;
+                for (var b = 0; b < rotCoords.length; b++) {
+                    var cr = rotCoords[b];
                     cr[1] *= -1;
-                    cr[1] += rot_h-1;
-                    assert(cr[1]>=0);
-                    zero_seen = zero_seen || cr[1] == 0;
+                    cr[1] += rotH - 1;
+                    assert(cr[1] >= 0);
+                    zeroSeen = zeroSeen || cr[1] == 0;
                 }
-                assert(zero_seen);
+                assert(zeroSeen);
 
-                CRUST_NAMES = ["top", "bot", "left", "right"];
-                for (var c = 0; c<CRUST_NAMES.length; c++)    {
-                    var crust = rot.crusts[CRUST_NAMES[c]];
-                    for (var b = 0; b<crust.length; b++)    {
+                CRUSTNAMES = ["top", "bot", "left", "right"];
+                for (var c = 0; c < CRUSTNAMES.length; c++) {
+                    var crust = rot.crusts[CRUSTNAMES[c]];
+                    for (var b = 0; b < crust.length; b++) {
                         var cr = crust[b];
-                        cr[1]*=-1;
-                        cr[1]+=rot_h-1;
-                        assert(cr[1]>=0);
+                        cr[1] *= -1;
+                        cr[1] += rotH - 1;
+                        assert(cr[1] >= 0);
                     }
                 }
             }
@@ -705,153 +582,98 @@ function init_shapes ( response )
     }
 }
 
-function error ( message )    {
-    var msg = "error: "+message;
+function error(message) {
+    console.log(new Error().stack);
+    var msg = "error: " + message;
     console.log(msg);
     alert(msg);
 }
 
-function init_game_no ( response )
-{
-    if (response == null)    {
-        server_request("/games", init_game_no);
-    }else     {
-        gameno_list = response;
-        if (gameno_list.length == 0)    {
+function initGameNo(response) {
+    if (response == null) {
+        serverRequest("/games", initGameNo);
+    } else {
+        gamenoList = response;
+        if (gamenoList.length == 0) {
             error("no current games on server");
-        }else     {
-            // game_no = gameno_list.pop();
-            game_no = gameno_list[gameno_list.length-1];
-            console.log( "init game_no is "+game_no );
+        } else {
+            state.gameNo = gamenoList[gamenoList.length - 1];
+            console.log("init gameNo is " + state.gameNo);
             timer();
         }
     }
 }
 
-function plan (  )
-{
-    //console.log( "planning..." );
-    for (var r  = mrxy[1], direc = mrxy[1]<answer_rx[0]?1:-1; r!=answer_rx[0]; r+=direc)
-	{
-	    move_queue.push(direc>0?rotcw:rotcw);
-	}
-    // move_queue.push(direc>0?moves.ROTCW:moves.ROTCW);
-    for (var x  = mrxy[2], direc = mrxy[2]<answer_rx[1]?1:-1; x!=answer_rx[1]; x+=direc)
-	{
-	    move_queue.push(direc>0?right:left);
-	}
-    move_queue.push(drop);
-    move_queue.push(maybe_clear);
-    move_queue.push(fetch);
-    move_queue.push(add_tetro);
-    move_queue.push(plan);
+function plan() {
+    for (var r = state.b.r, direc = state.b.r < state.answer.r ? 1 : -1; r != state.answer.r; r += direc) {
+        state.moveQueue.push(direc > 0 ? rotcw : rotcw);
+    }
+    for (var x = state.b.x, direc = state.b.x < state.answer.x ? 1 : -1; x != state.answer.x; x += direc) {
+        state.moveQueue.push(direc > 0 ? right : left);
+    }
+    state.moveQueue.push(drop);
+    state.moveQueue.push(clearLines);
+    state.moveQueue.push(fetch);
+    state.moveQueue.push(addTetro);
+    state.moveQueue.push(plan);
 }
 
-function pause_toggle (  )
-{
-console.log("calling pause_toggle");//autogen function logger
-
-
-    paused_p = !pause_p;
+function pauseToggle() {
+    state.pausedP = !pauseP;
 }
 
-function game_over_fun (  )
-{
-
-    game_over = true;
-    //debugger;
+function gameOverFun() {
     alert("game over!");
     console.log("game over");
 }
 
-function timer (  )
-{
-    ////debugger;
-
-    if (paused_p)
-    {
-	//unpause must bring timer back to life
-	return ;
+function timer() {
+    if (state.pausedP) {
+        return;
     }
-    // alert("timer executing");
-    if (move_queue.length>0)
-    {
-	var move = move_queue.shift();
-	//debugger;
+    if (state.moveQueue.length > 0) {
+        var move = state.moveQueue.shift();
+        if (move.name in paintMoves) {
+            moveTetro(move);
+        } else {
+            move();
+        }
+        if (state.gameOver) {
+            gameOverFun();
+        } else if (!(move.name in twoStepMoves)) {
+            if ((move.name in noDelayMoves)) {
+                timer();
+            } else {
+                var extra = move.name == "plan" ? 200 * Math.random() : 0;
+                setTimeout(timer, timerDelay + extra);
+            }
 
-	if (move.name in paint_moves)
-	{
-	    move_tetro(move);
-	    if (move==drop && grid.needs_clear)
-	    {
-		;//con
-	    }
+        }
+        //otherwise two-step-move must bring timer back to life
 
-	}
-	else
-	{
-	    move();
-	}
-	if (game_over)
-	{
-	    //debugger;
-
-	    game_over_fun();
-	}
-	else if (!(move.name in two_step_moves))
-	{
-	    if ((move.name in no_delay_moves ))
-		{
-		    timer();
-		}
-
-	    else
-	    {
-                var extra = move.name=="plan"? 200*Math.random() : 0;
-		setTimeout(timer,timer_delay+extra);
-	    }
-
-	}
-	//otherwise two-step-move must bring timer back to life
-
-    }
-    else
-    {
-	alert("no more pending moves");
+    } else {
+        alert("no more pending moves");
     }
 }
 
-/*moves = function() {return {
-    'INIT' : init,
-    'FETCH' : fetch,
-    'ROTCW'	: rotcw,
-    'ROTCCW'	: rotccw,
-    'LEFT'	: left,
-    'RIGHT'	: right,
-    'DROP'	: drop,
-    'DOWN'	: down,
-    'CLEARLINES'	: clear_lines,
-    'MAYBECLEAR'	: maybe_clear,
-    'PAUSE'	: pause_toggle,
-    'PLAN'	: plan,
-    'ADD_TETRO'	: add_tetro,
-}} ();*/
-
-
-/*paint_moves = function() {return {
-    'ROTCW'	: rotcw,
-    'ROTCCW'	: rotccw,
-    'LEFT'	: left,
-    'RIGHT'	: right,
-    'DROP'	: drop,
-    'DOWN'	: down,
-}} ();*/
-/*paint_moves = {"rotcw":true, "rotccw":true, "drop":true, "left":true, "right":true, "down":true};
-two_step_moves = {"fetch":true, "init":true};*/
-
-paint_moves = {rotcw:true, rotccw:true, drop:true, left:true, right:true, down:true};
-two_step_moves = {fetch:true, init:true, init_shapes:true, init_game_no:true};
-no_delay_moves = {fetch:true, init:true};
+paintMoves = {
+    rotcw: true,
+    rotccw: true,
+    drop: true,
+    left: true,
+    right: true,
+    down: true
+};
+twoStepMoves = {
+    fetch: true,
+    init: true,
+    initShapes: true,
+    initGameNo: true
+};
+noDelayMoves = {
+    fetch: true,
+    init: true
+};
 
 /*unfortunate hack for IE, in which function.name doesn't work:*/
 init.name = "init";
@@ -862,28 +684,17 @@ left.name = "left";
 right.name = "right";
 drop.name = "drop";
 down.name = "down";
-init_shapes.name = "init_shapes";
-clear_lines.name = "clear_lines";
-maybe_clear.name = "maybe_clear";
-pause_toggle.name = "pause_toggle";
+initShapes.name = "initShapes";
+clearLines.name = "clearLines";
+pauseToggle.name = "pauseToggle";
 plan.name = "plan";
-add_tetro.name = "add_tetro";
+addTetro.name = "addTetro";
 
-
-
-
-// server_request(-1);
-move_queue.push(init_game_no);
-move_queue.push(init);
-move_queue.push(init_shapes);
-move_queue.push(fetch);
-move_queue.push(add_tetro);
-move_queue.push(plan);
-
-// alert("hola");
-console.log("hola");
-
-// debugger;
+state.moveQueue.push(initGameNo);
+state.moveQueue.push(init);
+state.moveQueue.push(initShapes);
+state.moveQueue.push(fetch);
+state.moveQueue.push(addTetro);
+state.moveQueue.push(plan);
 
 timer();
-// init([19, 10, 0]);
