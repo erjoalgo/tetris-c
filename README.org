@@ -1,10 +1,19 @@
-* demo
+* About
+  - An AI implementation in C
+    - DFS to a certain depth
+    - Heuristic used to evaluate leaves
+      - features determined manually
+      - feature weights discovered through genetic programming iteration
+    - tested for at least 222 million moves!
 
-  #+CAPTION: ai, human, back to ai
-  #+ATTR_HTML: :alt tetris ai-human-ai demo :title Action! :align right
-  [[https://raw.githubusercontent.com/erjoalgo/tetris-c/demo/tetris.gif]]
+  - REST service front-end in Common Lisp
+    - CFFI to interface with C libtetris
+    - hunchentoot web service
+    - javascript client
+  - Also available via ncurses front-end
+    - ncurses interface allows on-demand switching between human and AI
 
-* installation
+* Installation
 
 #+BEGIN_SRC sh
 git clone https://github.com/erjoalgo/tetris-c
@@ -12,12 +21,20 @@ make
 ./tetris play
 #+END_SRC
 
-* usage
-  | *key(s)*             | *action*                    |
-  | SPACE             | drop block                  |
-  | LEFT/RIGHT        | move left/right             |
-  | UP                | rotate clockwise            |
-  | 1234qwersd        | move to ith column and drop |
-  | Ctrl+C (any key)  | switch human/ai player      |
-  | Ctrl+C Ctrl+C     | exit                        |
-  
+* Demo
+** web
+     - http://tetris.erjoalgo.com
+** ncurses
+
+    #+CAPTION: ai, human, back to ai
+    #+ATTR_HTML: :alt tetris ai-human-ai demo :title Action! :align right
+    [[https://raw.githubusercontent.com/erjoalgo/tetris-c/demo/tetris.gif]]
+
+   - Key bindings
+    | *key(s)*         | *action*                    |
+    | SPACE            | drop block                  |
+    | LEFT/RIGHT       | move left/right             |
+    | UP               | rotate clockwise            |
+    | 1234qwersd       | move to ith column and drop |
+    | Ctrl+C (any key) | switch human/ai player      |
+    | Ctrl+C Ctrl+C    | exit                        |
