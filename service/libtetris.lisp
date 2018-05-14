@@ -33,6 +33,7 @@
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
 (defun init-tetris (&key (seed default-seed) (shapes-file default-shapes-file))
+  "initialize the tetris foreign library with the given `seed' and `shapes-file'"
   (vom:debug "reading shapes...~%" )
   (setf shapes
         (cffi:foreign-funcall "shapes_read"
@@ -56,6 +57,7 @@
   )
 
 (defun game-init (height width &key ai-weights (ai-depth 3))
+  "initialize a game with the given `height' and `width'"
   (make-game :g (cffi:foreign-funcall "grid_new" :int height :int width :pointer)
              :b (cffi:foreign-funcall "block_new" :pointer)
              :ss (cffi:foreign-funcall "shape_stream_new" :int ai-depth :pointer)
@@ -64,6 +66,8 @@
              :ai-weights ai-weights))
 
 (defun game-cycle-next-shape (game)
+  "pop the next shape in the shape stream, and position it at the top.
+return a block with the newly-popped shape, or nil if the block intersects the grid"
   (with-slots (g b ss) game
     (let (next-shape)
       (setf next-shape (cffi:foreign-funcall "shape_stream_pop"
@@ -83,6 +87,7 @@
         b))))
 
 (defun game-apply-move (game move &optional no-add)
+  "apply the specified `move' to `game'"
   (cffi:foreign-funcall "grid_block_apply_move"
                         :pointer (game-g game)
                         :pointer (game-b game)
@@ -97,6 +102,8 @@
                             (condition nil)
                             body
                             )
+  "a loop-wrapper to iterate over every cell in the grid of `game'. the coordinate (r,c)
+will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will be boud to `val'"
   (let ((if-cond (when condition `(if ,condition)))
         (rows (gensym "rows"))
         (row (gensym "row")))
@@ -113,13 +120,16 @@
 
 
 (defun cell-pack (r c width)
+  "pack an (r,c) into a single number according to a given `width'"
   (+ (* r width) c))
 
 (defun cell-unpack (rc width)
+  "unpack a value packed by `cell-pack' back  into a (r, c), returned as multiple values"
   (values (floor rc width)
           (mod rc width)))
 
 (defun game-on-cells-packed (game &aux width)
+  "return a list of those cells whose value is non-zero, packed by `cell-pack'"
   (setf width (game-width game))
   (game-grid-loop game r c val
                   :outer-action nconc
@@ -128,6 +138,7 @@
                   :body (cell-pack r c width)))
 
 (defun game-printable-string (game &optional string)
+  "write a printable representation of the game into `string', or, if nil, into a new string"
   (let* ((swidth (1+ (game-width game)))
          (height (game-height game)))
     (unless nil
@@ -144,6 +155,7 @@
 (cffi:defcvar ("default_weights" ai-default-weights) :pointer)
 
 (defun ai-best-move (game weights)
+  "return the best move according to the ai"
   (cffi:foreign-funcall "ai_best_move"
                         :pointer (game-g game)
                         :pointer (game-ss game)
@@ -159,12 +171,14 @@
   (col :int))
 
 (defmethod translate-from-foreign (pointer game-move)
+  "translate a C foreign move into a `game-move'"
   (declare (ignore game-move))
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move-foreign))
     (let ((shape-id (mem-ref shape :int)))
       (make-game-move :shape-code shape-id :rot rot :col col))))
 
 (defun game-apply-next-move (game &optional game-move)
+  "sequence of game-cycle-next-shape, ai-best-move, and game-apply-move"
   (unless game-move
     ;; TODO allow specifying move
     ;; ensure shapes match
@@ -174,11 +188,13 @@
     (when (game-apply-move game next-move) next-move)))
 
 (defun serialize-shape (shape-ptr)
+  "serialize shape into a json format"
   (cffi:foreign-funcall "shape_serialize"
                         :pointer shape-ptr
                         :string))
 
 (defun serialize-shapes ()
+  "serialize all the shapes currently in use"
   (format nil "[~%~{~a~^,~%~}~%]~%"
           (loop for id below SHAPE-COUNT
              collect (serialize-shape (mem-aref SHAPES :pointer id)))))

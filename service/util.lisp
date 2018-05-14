@@ -1,7 +1,8 @@
 (in-package #:tetris-ai-rest)
 
 (defun merge-structs (type &rest objs)
-  "values appearing earlier have higher precedence. nil interpreted as undefined"
+  "merge several structs.
+values appearing earlier have higher precedence. nil interpreted as undefined"
   (loop with ret = (make-instance type)
      with slots = (loop for slot in (sb-mop:class-direct-slots (find-class type))
                      collect (slot-value slot 'SB-PCL::NAME))
@@ -18,6 +19,9 @@
        (string= prefix (subseq string 0 (length prefix)))))
 
 (defun json-resp (return-code body)
+  "convert a lisp object into a json response with the appropriate content type
+to be called within a hunchentoot handler.
+"
   (when return-code
     (setf (hunchentoot:return-code*) return-code))
   (setf (hunchentoot:content-type*) "application/json")
@@ -25,6 +29,7 @@
 
 
 (defmethod jonathan:%to-json ((game-exc game-execution))
+  "define the serialization of a `game-execution'"
   (with-slots (game running-p last-recorded-state
                     ai-move-delay-secs)
       game-exc
@@ -38,6 +43,7 @@
         (jonathan:write-key-value "on_cells" on-cells)))))
 
 (defmethod jonathan:%to-json ((game-move tetris-ai:game-move))
+  "define the serialization of a `game-move'"
   (with-slots (tetris-ai::shape-code tetris-ai::rot tetris-ai::col) game-move
     (jonathan:with-object
       (jonathan:write-key-value "shape" tetris-ai::shape-code)

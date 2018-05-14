@@ -13,10 +13,12 @@
     (("default-ai-move-delay-millis" #\m) :type integer :optional t :documentation "delay between ai moves")
     (("verbose" #\v) :type boolean :optional t :documentation "verbose logging")
     (("help" #\h) :type boolean :optional t :documentation "display help")
-    (("version" #\V) :type boolean :optional t :documentation "display version")))
+    (("version" #\V) :type boolean :optional t :documentation "display version"))
+  "a spec for the tetris-ai-rest service cli")
 
 
 (defun main-parse-args (&rest args &key positional verbose dims help version &allow-other-keys)
+  "parse command-line arguments and start the service if applicable"
   (declare (ignore positional))
   ;; destructure any argument that need to be handled before proxying to make-config
   (cond
@@ -33,6 +35,7 @@
      (loop do (game-create-run)))))
 
 (defun main (args)
+  "main entry point"
   (command-line-arguments:handle-command-line
    +service-option-spec+ 'main-parse-args
    :command-line (cdr args) ;;first is executable path

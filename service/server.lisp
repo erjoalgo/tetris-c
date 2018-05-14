@@ -51,7 +51,9 @@
                                       tetris-ai:default-width)
                :ai-depth 3
                :default-ai-move-delay-millis 500
-               :max-move-catchup-wait-secs 10))
+               :max-move-catchup-wait-secs 10)
+  "fallback service configuration to fill in any mising (nil) values"
+  )
 
 (defstruct service
   config
@@ -79,11 +81,15 @@
   move-no
   )
 
-(defvar thread-name-prefix "tetris-game-thread")
+(defvar thread-name-prefix "tetris-game-thread" "prefix for name of tetris worker threads")
 
-(defvar *service* nil)
+(defvar *service* nil "the default currently active service")
 
 (defun service-start (&optional config &rest make-config-args)
+  "start the service. `config' is used as the base service configuration
+any remaining arguments are interpreted as flattened key-value pairs and are proxied to
+`make-config-args'
+"
   (when (service-running-p *service*)
     (error "service is running"))
   (setf config (merge-structs 'config
@@ -110,6 +116,7 @@
                         :curr-game-no 0))))
 
 (defun service-stop (&optional service)
+  "stop the service if running. if service is nil, stop *service*"
   (when (setf service (or service *service*))
     (let* (;; (acceptor (service-acceptor service))
            (acceptor (slot-value service 'acceptor)))
@@ -121,13 +128,19 @@
          (sb-thread:terminate-thread thread))))
 
 (defun service-running-p (&optional service)
+  "return whether service is currently running"
   (unless service (setf service *service*))
   (and service (slot-value service 'acceptor)
        (hunchentoot:started-p (slot-value service 'acceptor))))
 
-(defmacro define-regexp-route (name (url-regexp &rest capture-names) &body body)
+(defmacro define-regexp-route (name (url-regexp &rest capture-names) docstring &body body)
+  "a macro to define a handler `name' matching requests for `url-regexp'.
+An optional list `capture-names' can be provided to capture path variables.
+The capturing behavior is based on wrapping `ppcre:register-groups-bind'
+"
   `(progn
      (defun ,name ()
+       ,docstring
        (ppcre:register-groups-bind ,capture-names
            (,url-regexp (hunchentoot:script-name*))
          ,@body))
@@ -140,6 +153,7 @@
 
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)/?$"
                                                  (#'parse-integer game-no))
+  "return the current state of the game `game-no'"
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
@@ -148,6 +162,7 @@
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
+  "return the move number `move-no' of the game number `game-no'"
   (let* ((game-exc (gethash game-no (service-game-executions *service*)))
          (moves (and game-exc (game-execution-moves game-exc))))
     (if (null game-exc)
@@ -174,20 +189,25 @@
                         (json-resp nil (aref moves move-no))))))))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
+  "return a list of all existing games"
   (json-resp nil
              (loop for game-no being the hash-keys of (service-game-executions *service*)
                 collect game-no)))
 
 (hunchentoot:define-easy-handler (shapes :uri "/shapes") ()
+  "return the shape configurations used by the service"
   (tetris-ai:serialize-shapes))
 
 (defun game-serialize-state (game move-no)
+  "serialize the current state of the game `game' at move number `move-no'"
   (make-last-recorded-state
    :timestamp (get-universal-time)
    :move-no move-no
    :on-cells (tetris-ai:game-on-cells-packed game)))
 
 (defun game-run (game-exc)
+  "evaluate a game excution spec `game-exc'
+until either the game is lost, or `max-moves' is reached"
   (setf (game-execution-running-p game-exc) t)
   (with-slots (game moves max-moves ai-move-delay-secs
                     last-recorded-state-check-delay-secs)
@@ -218,6 +238,9 @@
 
 (defun game-create (game-no &key max-moves ai-move-delay-secs
                               (last-recorded-state-check-delay-secs 2))
+  "create a game `game-no' with the specified `max-moves', `ai-move-delay-secs',
+`last-recorded-state-check-delay-secs'. service-global configs are drawn from
+(service-config *service*)"
   (unless (service-running-p *service*)
     (error "service not running"))
   (assert (numberp game-no))
@@ -248,10 +271,12 @@
                                  last-recorded-state-check-delay-secs)))))
 
 (defun game-create-run (&optional game-no &rest create-args)
+  "create and execute a game. all arguments are proxied to `game-create'"
   (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
     (game-run (apply 'game-create game-no create-args))))
 
 (defun game-create-run-thread (&optional game-no &rest create-args)
+  "create and execute a game on a new thread. all arguments are proxied to `game-create-run'"
   (let* ((game-exc (apply 'game-create game-no create-args)))
     (values
      (sb-thread:make-thread 'game-run :arguments (list game-exc)
