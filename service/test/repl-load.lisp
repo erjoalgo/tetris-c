@@ -16,3 +16,11 @@
    ;; :shapes-file "../one-shape.in"
    )
   (game-create-run-thread 0 :ai-move-delay-secs .5))
+
+'(let ((out "./doc/README.org"))
+  (ql:quickload "clod")
+  (when (probe-file out) (delete-file out))
+  (document-package 'tetris-ai-rest out
+   :author "Ernesto Alfonso"
+   :email  "erjoalgo@gmail.com"
+   ))
