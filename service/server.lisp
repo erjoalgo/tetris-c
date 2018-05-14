@@ -220,7 +220,6 @@ until either the game is lost, or `max-moves' is reached"
        as next-move = (tetris-ai:game-apply-next-move game)
        while (and next-move (or (null max-moves) (< i max-moves)))
        do (when (eq (cadr vom:*config*) :DEBUG4);;this should be a single (vom:debug ...) call
-            (format t "printing...~%" )
             (vom:debug (setf print-string (tetris-ai:game-printable-string game print-string))))
        do
          (let ((native (cffi:translate-from-foreign next-move 'tetris-ai::game-move)))
