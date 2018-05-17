@@ -523,6 +523,17 @@ function init(response) {
             move.col = (packed>>0) &0xff;
             fetch(move);
         });
+
+        var evts = ["close", "error", "open",
+                    // "message"
+                   ];
+        for (var i = 0; i<evts.length; i++)    {
+            var evt = evts[i];
+            state.ws.addEventListener(evt, (function () {
+                var _evt = evt;
+                return function(){console.log( "event " + _evt );};
+            })());
+        }
     }
 
     grid.width = game.width;
