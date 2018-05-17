@@ -36,6 +36,7 @@
 
 (defstruct config
   port
+  ws-port
   shapes-file
   seed
   grid-height-width
@@ -46,6 +47,7 @@
 
 (defvar config-default
   (make-config :port 4242
+               :ws-port 4243
                :shapes-file tetris-ai:default-shapes-file
                :grid-height-width (cons tetris-ai:default-height
                                       tetris-ai:default-width)
@@ -58,6 +60,7 @@
 (defstruct service
   config
   acceptor
+  ws-acceptor
   curr-game-no
   game-executions
   )
@@ -106,13 +109,20 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
   (let ((acceptor (make-instance 'hunchentoot:easy-acceptor
                                  :port (config-port config)
                                  :document-root (truename "./www")
-                                 :access-log-destination nil)))
+                                 :access-log-destination nil))
+        (ws-acceptor (make-instance 'hunchensocket:websocket-acceptor
+                                    :port (config-ws-port config))))
+    ;; TODO use the same port
+    ;; https://github.com/joaotavora/hunchensocket/issues/14
     (hunchentoot:start acceptor)
-    (vom:warn "started on port ~D" (config-port config))
+    (hunchentoot:start ws-acceptor)
+
+    (vom:warn "started on port ~D (ws ~D)" (config-port config) (config-ws-port config))
     (setf *service*
           (make-service :config (or config config-default)
                         :acceptor acceptor
                         :game-executions (make-hash-table)
+                        :ws-acceptor ws-acceptor
                         :curr-game-no 0))))
 
 (defun service-stop (&optional service)
