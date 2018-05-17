@@ -464,8 +464,12 @@ function fetch(response) {
     assert(state.gameNo != null && state.moveNo != null);
 
     if (response == null) {
-        var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
-        serverRequest(uri, fetch);
+        if (state.ws != null)    {
+            state.ws.send(state.moveNo);
+        }else     {
+            var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
+            serverRequest(uri, fetch);
+        }
         return;
     } else {
         move = response;
@@ -501,6 +505,18 @@ function init(response) {
     state.moveNo++;
 
     console.log("move no is: " + state.moveNo);
+
+    if (game.ws_port)    {
+        var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
+            + "/games/" + state.gameNo;
+        console.log( "using ws url: " + ws_url );
+        state.ws = new WebSocket(ws_url);
+        state.ws.addEventListener('message', function (event) {
+            move = JSON.parse(event.data); // TODO unpack
+            fetch(move);
+        });
+    }
+
     grid.width = game.width;
     grid.height = game.height;
 
@@ -538,7 +554,14 @@ function init(response) {
         grid.rowcounts[y]++;
     }
     repaintRows(0, miny);
-    timer();
+    if (state.ws)    {
+        state.ws.addEventListener('open', function (event) {
+            console.log( "ws connection opened.." );
+            timer();
+        });
+    }else     {
+        timer();
+    }
 }
 
 function initShapes(response) {
