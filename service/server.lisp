@@ -184,25 +184,30 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 (defun game-exc-move (game-exc move-no &aux moves)
   (setf moves (game-execution-moves game-exc))
   (cond
-    ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
+    ((< move-no (length moves)) ;; test this first, even if redundant
+     (values hunchentoot:+HTTP-OK+ (aref moves move-no)))
+
+    ((not (game-execution-running-p game-exc))
      (values hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
              '(:error "requested move outside of range of completed game")))
-    (t (loop with
-          max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                        (service-config *service*))
-          for i below max-move-catchup-wait-secs
-          as behind = (>= move-no (length moves))
-          while behind
-          do (progn
-               (vom:debug "catching up from ~D to ~D (~D secs left)~%"
-                          (length moves) move-no (- max-move-catchup-wait-secs i))
-               (sleep 1))
-          finally
-            (return
-              (if behind
-                  (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                          '(:error "reached timeout catching up to requested move" ))
-                  (values hunchentoot:+HTTP-OK+ (aref moves move-no))))))))
+
+    (t
+     (loop with
+        max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                      (service-config *service*))
+        for i below max-move-catchup-wait-secs
+        as behind = (>= move-no (length moves))
+        while behind
+        do (progn
+             (vom:debug "catching up from ~D to ~D (~D secs left)~%"
+                        (length moves) move-no (- max-move-catchup-wait-secs i))
+             (sleep 1))
+        finally
+          (return
+            (if behind
+                (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                        '(:error "reached timeout catching up to requested move" ))
+                (values hunchentoot:+HTTP-OK+ (aref moves move-no))))))))
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
