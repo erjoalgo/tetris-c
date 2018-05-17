@@ -506,7 +506,9 @@ function init(response) {
 
     console.log("move no is: " + state.moveNo);
 
-    if (game.ws_port)    {
+    var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
+
+    if (supportsWebSockets && game.ws_port)    {
         var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
             + "/games/" + state.gameNo;
         console.log( "using ws url: " + ws_url );
