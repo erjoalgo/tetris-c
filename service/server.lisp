@@ -47,7 +47,7 @@
 
 (defvar config-default
   (make-config :port 4242
-               :ws-port 4243
+               ;; :ws-port 4243
                :shapes-file tetris-ai:default-shapes-file
                :grid-height-width (cons tetris-ai:default-height
                                       tetris-ai:default-width)
@@ -100,6 +100,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                               (apply 'make-config make-config-args)
                               config-default
                               ))
+  (setf (config-ws-port config) (1+ (config-port config)))
   (apply 'tetris-ai:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
