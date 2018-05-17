@@ -675,7 +675,7 @@ function timer() {
             if ((move.name in noDelayMoves)) {
                 timer();
             } else {
-                var extra = move.name == "plan" ? 200 * Math.random() : 0;
+                var extra = 0;
                 setTimeout(timer, timerDelay + extra);
             }
 
