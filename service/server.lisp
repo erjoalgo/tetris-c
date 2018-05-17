@@ -51,7 +51,7 @@
                ;; :ws-port 4243
                :shapes-file tetris-ai:default-shapes-file
                :grid-height-width (cons tetris-ai:default-height
-                                      tetris-ai:default-width)
+                                        tetris-ai:default-width)
                :ai-depth 3
                :default-ai-move-delay-millis 500
                :log-filename "tetris-ai-rest.log"
@@ -174,7 +174,7 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)/?$"
                                                  (#'parse-integer game-no))
-  "return the current state of the game `game-no'"
+    "return the current state of the game `game-no'"
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
@@ -206,7 +206,7 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
-  "return the move number `move-no' of the game number `game-no'"
+    "return the move number `move-no' of the game number `game-no'"
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
@@ -214,7 +214,7 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
           (json-resp ret-code data)))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
-  "return a list of all existing games"
+    "return a list of all existing games"
   (json-resp nil
              (loop for game-no being the hash-keys of (service-game-executions *service*)
                 collect game-no)))
