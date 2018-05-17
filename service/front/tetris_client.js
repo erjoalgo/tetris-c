@@ -516,7 +516,11 @@ function init(response) {
         console.log( "using ws url: " + state.ws_url );
         state.ws = new WebSocket(state.ws_url);
         state.ws.addEventListener('message', function (event) {
-            move = JSON.parse(event.data); // TODO unpack
+            var packed = event.data;
+            var move = new Object();
+            move.shape = (packed>>16)&0xff;
+            move.rot = (packed>>8)&0xff;
+            move.col = (packed>>0) &0xff;
             fetch(move);
         });
     }

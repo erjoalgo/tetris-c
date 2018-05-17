@@ -29,7 +29,7 @@
     (cond ((null clients)
            (vom:warn "No recipient of message"))
           ((null (cdr clients))
-           (hunchensocket:send-text-message (car clients) (jonathan:to-json data)))
+           (hunchensocket:send-text-message (car clients) data))
           (t
            (vom:error "More than one client: ~s" clients)
            ;;TODO close connection
@@ -47,6 +47,6 @@
     (multiple-value-bind (ret-code data) (game-exc-move game-exc move-no)
       (if (not (= 200 ret-code))
           (send-hunchensocket-message conn (format nil "error ~D: ~A" ret-code data))
-          (let ((encoded-move data))
-            (send-hunchensocket-message conn encoded-move)
-            (json-resp ret-code data))))))
+          (let* ((game-move data)
+                 (packed (tetris-ai:game-move-pack game-move)))
+            (send-hunchensocket-message conn (write-to-string packed)))))))
