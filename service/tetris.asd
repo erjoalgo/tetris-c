@@ -17,7 +17,7 @@
                (:file "ws")
                (:file "util")
                (:file "main"))
-  :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments :hunchensocket))
+  :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments :clws))
 
 (asdf:defsystem :tetris-ai-rest-test
   :description "tetris-ai-rest tests package"
