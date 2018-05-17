@@ -46,7 +46,7 @@
   log-filename
   )
 
-(defvar config-default
+(defparameter config-default
   (make-config :port 4242
                ;; :ws-port 4243
                :shapes-file tetris-ai:default-shapes-file
