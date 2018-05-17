@@ -71,7 +71,6 @@
   game
   moves
   last-recorded-state
-  final-state
   running-p
 
   max-moves
@@ -261,7 +260,7 @@ until either the game is lost, or `max-moves' is reached"
                (game-serialize-state game i))
        finally
          (setf (game-execution-running-p game-exc) nil
-               (game-execution-final-state game-exc) (game-serialize-state game i)))))
+               (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &key max-moves ai-move-delay-secs
                               (last-recorded-state-check-delay-secs 2))
