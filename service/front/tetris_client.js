@@ -725,3 +725,33 @@ state.moveQueue.push(addTetro);
 state.moveQueue.push(plan);
 
 timer();
+
+function precisionRound(number, precision) {
+  var factor = Math.pow(10, precision);
+  return Math.round(number * factor) / factor;
+}
+
+function wsPerf ( max )    {
+    if (max == null)    {
+        max = 10000;
+    }
+    state.gameOver=true;
+    ws = new WebSocket(state.ws_url);
+    var moveNo = 0;
+    var start;
+    ws.addEventListener('message', function (event) {
+        if (moveNo == max)    {
+            var elapsed = (window.performance.now() - start)/1000;
+            console.log( "finished. total secs: " + precisionRound(elapsed, 2)
+                         + " moves/sec: " + precisionRound(max/elapsed, 2));
+        }else     {
+            ws.send(moveNo++);
+        }
+    });
+
+    ws.addEventListener('open', function (event) {
+        console.log( "starting perf test..." );
+        start = window.performance.now();
+        ws.send(0);
+    });
+}
