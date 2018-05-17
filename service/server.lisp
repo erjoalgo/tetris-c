@@ -124,15 +124,18 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                         :acceptor acceptor
                         :game-executions (make-hash-table)
                         :ws-acceptor ws-acceptor
+                        :log-fh log-fh
                         :curr-game-no 0))))
 
 (defun service-stop (&optional service)
   "stop the service if running. if service is nil, stop *service*"
   (when (setf service (or service *service*))
     (let* (;; (acceptor (service-acceptor service))
-           (acceptor (slot-value service 'acceptor)))
+           (acceptor (slot-value service 'acceptor))
+           (ws-acceptor (slot-value service 'ws-acceptor)))
       (when (and acceptor (hunchentoot:started-p acceptor))
-        (hunchentoot:stop acceptor)))
+        (hunchentoot:stop acceptor)
+        (hunchentoot:stop ws-acceptor)))
     (loop for thread in (sb-thread:list-all-threads)
        if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
        do
