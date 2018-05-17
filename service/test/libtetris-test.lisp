@@ -11,8 +11,19 @@
            (vom:warn string)
            (sleep .5)))))
 
+(defun test-game-moves ()
+  (loop for shape-code below 10
+     do (loop for rot below 4 do
+             (loop for col below 100
+                as original = (make-game-move :shape-code shape-code
+                                              :rot rot
+                                              :col col)
+                as back = (game-move-unpack (game-move-pack original))
+                do (assert (equalp original back))))))
+
 (defun run-tests ()
   (init-tetris)
+  (test-game-moves)
   (cffi:foreign-funcall "grid_test")
   (test-game))
 
