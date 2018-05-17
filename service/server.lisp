@@ -287,14 +287,15 @@ until either the game is lost, or `max-moves' is reached"
                                       :ai-weights tetris-ai:ai-default-weights
                                       :ai-depth ai-depth)))
       (assert (> last-recorded-state-check-delay-secs 0))
-      (setf (gethash game-no (service-game-executions *service*))
-            (make-game-execution :game game
-                                 :moves moves
-                                 :max-moves max-moves
-                                 :last-recorded-state (game-serialize-state game 0)
-                                 :ai-move-delay-secs ai-move-delay-secs
-                                 :last-recorded-state-check-delay-secs
-                                 last-recorded-state-check-delay-secs)))))
+      (prog1 (setf (gethash game-no (service-game-executions *service*))
+                          (make-game-execution :game game
+                                               :moves moves
+                                               :max-moves max-moves
+                                               :last-recorded-state (game-serialize-state game 0)
+                                               :ai-move-delay-secs ai-move-delay-secs
+                                               :last-recorded-state-check-delay-secs
+                                               last-recorded-state-check-delay-secs))
+                  (ws-register-game game-no (service-ws-service *service*))))))
 
 (defun game-create-run (&optional game-no &rest create-args)
   "create and execute a game. all arguments are proxied to `game-create'"
