@@ -43,6 +43,7 @@
   max-move-catchup-wait-secs
   ai-depth
   default-ai-move-delay-millis
+  log-filename
   )
 
 (defvar config-default
@@ -53,6 +54,7 @@
                                       tetris-ai:default-width)
                :ai-depth 3
                :default-ai-move-delay-millis 500
+               :log-filename "tetris-ai-rest.log"
                :max-move-catchup-wait-secs 10)
   "fallback service configuration to fill in any mising (nil) values"
   )
@@ -63,7 +65,7 @@
   ws-acceptor
   curr-game-no
   game-executions
-  )
+  log-fh)
 
 (defstruct game-execution
   game
@@ -112,7 +114,12 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                                  :document-root (truename "./www")
                                  :access-log-destination nil))
         (ws-acceptor (make-instance 'hunchensocket:websocket-acceptor
-                                    :port (config-ws-port config))))
+                                    :port (config-ws-port config)))
+        (log-fh (when (config-log-filename config)
+                  (open (config-log-filename config)
+                        :direction :output
+                        :if-exists :append
+                        :if-does-not-exist :create))))
     ;; TODO use the same port
     ;; https://github.com/joaotavora/hunchensocket/issues/14
     (hunchentoot:start acceptor)

@@ -5,6 +5,17 @@
 
 (defun init-session (request)
   (vom:debug "initializing new session... ~A" request)
+
+  (let ((log-fh (service-log-fh *service*) ))
+    (when log-fh
+      (let ((ip (hunchentoot:remote-addr*))
+            (date (hunchentoot:rfc-1123-date))
+            (user-agent (hunchentoot:user-agent))
+            (path (hunchentoot:script-name*)))
+        (format log-fh "~A~A~A~A~A~A~A~%"
+                ip #\tab date #\tab user-agent #\tab path)
+        (force-output log-fh))))
+
   (ppcre:register-groups-bind ((#'parse-integer game-no))
       ("/games/([0-9]+)" (hunchentoot:script-name*))
     (let* ((game-exc (gethash game-no (service-game-executions *service*))))
