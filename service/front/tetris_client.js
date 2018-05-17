@@ -511,10 +511,10 @@ function init(response) {
     var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
 
     if (supportsWebSockets && game.ws_port)    {
-        var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
+        state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
             + "/games/" + state.gameNo;
-        console.log( "using ws url: " + ws_url );
-        state.ws = new WebSocket(ws_url);
+        console.log( "using ws url: " + state.ws_url );
+        state.ws = new WebSocket(state.ws_url);
         state.ws.addEventListener('message', function (event) {
             move = JSON.parse(event.data); // TODO unpack
             fetch(move);
