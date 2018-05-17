@@ -1,7 +1,7 @@
 (in-package #:tetris-ai)
 
 (defun test-game ()
-  (let ((game (game-init HEIGHT WIDTH ai-default-weights)))
+  (let ((game (game-init default-height default-width :ai-weights ai-default-weights)))
     (loop
        for i below 10
        as string = (game-printable-string game string)
