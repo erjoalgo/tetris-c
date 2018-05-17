@@ -12,8 +12,8 @@
             (date (hunchentoot:rfc-1123-date))
             (user-agent (hunchentoot:user-agent))
             (path (hunchentoot:script-name*)))
-        (format log-fh "~A~A~A~A~A~A~A~%"
-                ip #\tab date #\tab user-agent #\tab path)
+        (format log-fh (format nil "~~{~~A~~^~C~~}~%" #\tab)
+                (list ip date user-agent path))
         (force-output log-fh))))
 
   (ppcre:register-groups-bind ((#'parse-integer game-no))
