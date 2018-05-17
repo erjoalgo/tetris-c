@@ -15,6 +15,8 @@
    #:game-grid-loop
    #:game-printable-string
    #:game-move
+   #:game-move-pack
+   #:game-move-unpack
    )
   )
 
@@ -148,6 +150,24 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
                     :body (setf (aref string (cell-pack (- height 1 r) c swidth))
                                 (if (zerop val) #\Space #\*)))
     string))
+
+(defun game-move-pack (game-move)
+  ;; TODO switch to bit ops
+  (with-slots (shape-code rot col) game-move
+    (+ (ash shape-code 16)
+       (ash rot 8)
+       (ash col 0))))
+
+(defun game-move-unpack (packed &optional game-move)
+  (unless game-move (setf game-move (make-game-move)))
+  (let* ((MASK #xff)
+         (shape-code (logand MASK (ash packed -16)))
+         (rot (logand MASK (ash packed -8)))
+         (col (logand MASK (ash packed 0))))
+    (setf (game-move-shape-code game-move) shape-code
+          (game-move-rot game-move) rot
+          (game-move-col game-move) col)
+    game-move))
 
 (defvar default-height 19)
 (defvar default-width 10)
