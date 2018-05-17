@@ -160,33 +160,37 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
                    '(:error "no such game"))
         (json-resp nil game-exc))))
 
+(defun game-exc-move (game-exc move-no &aux moves)
+  (setf moves (game-execution-moves game-exc))
+  (cond
+    ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
+     (values hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+             '(:error "requested move outside of range of completed game")))
+    (t (loop with
+          max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                        (service-config *service*))
+          for i below max-move-catchup-wait-secs
+          as behind = (>= move-no (length moves))
+          while behind
+          do (progn
+               (vom:debug "catching up from ~D to ~D (~D secs left)~%"
+                          (length moves) move-no (- max-move-catchup-wait-secs i))
+               (sleep 1))
+          finally
+            (return
+              (if behind
+                  (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                          '(:error "reached timeout catching up to requested move" ))
+                  (values hunchentoot:+HTTP-OK+ (aref moves move-no))))))))
+
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
   "return the move number `move-no' of the game number `game-no'"
-  (let* ((game-exc (gethash game-no (service-game-executions *service*)))
-         (moves (and game-exc (game-execution-moves game-exc))))
+  (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
-        (cond
-          ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
-           (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
-                      '(:error "requested move outside of range of completed game")))
-          (t (loop with
-                max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                              (service-config *service*))
-                for i below max-move-catchup-wait-secs
-                as behind = (>= move-no (length moves))
-                while behind
-                do (progn
-                     (vom:debug "catching up from ~D to ~D on game ~D (~D secs left)~%"
-                                (length moves) move-no game-no (- max-move-catchup-wait-secs i))
-                     (sleep 1))
-                finally
-                  (return
-                    (if behind
-                        (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                                   '(:error "reached timeout catching up to requested move" ))
-                        (json-resp nil (aref moves move-no))))))))))
+        (multiple-value-bind (ret-code data) (game-exc-move game-exc move-no)
+          (json-resp ret-code data)))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
   "return a list of all existing games"
