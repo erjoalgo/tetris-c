@@ -239,7 +239,7 @@ until either the game is lost, or `max-moves' is reached"
       game-exc
     (loop
        with last-recorded-state-check-multiple
-         = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
+         = (max 1 (floor last-recorded-state-check-delay-secs (max .001 ai-move-delay-secs)))
        with print-string = nil
        for i from 0
        as next-move = (tetris-ai:game-apply-next-move game)
@@ -283,7 +283,6 @@ until either the game is lost, or `max-moves' is reached"
                                       (cdr height-width)
                                       :ai-weights tetris-ai:ai-default-weights
                                       :ai-depth ai-depth)))
-      (assert (> ai-move-delay-secs 0))
       (assert (> last-recorded-state-check-delay-secs 0))
       (setf (gethash game-no (service-game-executions *service*))
             (make-game-execution :game game
