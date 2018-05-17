@@ -742,6 +742,8 @@ function wsPerf ( max, tries )    {
     if (tries == null)    {
         tries = 1;
     }
+    console.log( "starting perf test: " + tries );
+
     state.gameOver=true;
     ws = new WebSocket(state.ws_url);
     var moveNo = 0;
@@ -760,7 +762,6 @@ function wsPerf ( max, tries )    {
     });
 
     ws.addEventListener('open', function (event) {
-        console.log( "starting perf test..." );
         start = window.performance.now();
         ws.send(0);
     });
