@@ -1,5 +1,12 @@
 (in-package :tetris-ai-rest)
 
+(defun ws-start (port)
+  (make-instance 'hunchensocket:websocket-acceptor
+                 :port port))
+
+(defun ws-stop (service)
+  (hunchentoot:stop service))
+
 (defclass session (hunchensocket:websocket-resource)
   ((game-exc :initarg :game-exc :initform (error "no gameexc") :reader session/game-exc)))
 

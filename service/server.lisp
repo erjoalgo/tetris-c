@@ -113,8 +113,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                                  :port (config-port config)
                                  :document-root (truename "./www")
                                  :access-log-destination nil))
-        (ws-acceptor (make-instance 'hunchensocket:websocket-acceptor
-                                    :port (config-ws-port config)))
+        (ws-acceptor (ws-start (config-ws-port config)))
         (log-fh (when (config-log-filename config)
                   (open (config-log-filename config)
                         :direction :output
@@ -142,7 +141,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
            (ws-acceptor (slot-value service 'ws-acceptor)))
       (when (and acceptor (hunchentoot:started-p acceptor))
         (hunchentoot:stop acceptor)
-        (hunchentoot:stop ws-acceptor)))
+        (ws-stop ws-acceptor)))
     (loop for thread in (sb-thread:list-all-threads)
        if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
        do
