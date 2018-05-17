@@ -62,7 +62,7 @@
 (defstruct service
   config
   acceptor
-  ws-acceptor
+  ws-service
   curr-game-no
   game-executions
   log-fh)
@@ -113,7 +113,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                                  :port (config-port config)
                                  :document-root (truename "./www")
                                  :access-log-destination nil))
-        (ws-acceptor (ws-start (config-ws-port config)))
+        (ws-service (ws-start (config-ws-port config)))
         (log-fh (when (config-log-filename config)
                   (open (config-log-filename config)
                         :direction :output
@@ -122,14 +122,13 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
     ;; TODO use the same port
     ;; https://github.com/joaotavora/hunchensocket/issues/14
     (hunchentoot:start acceptor)
-    (hunchentoot:start ws-acceptor)
 
     (vom:warn "started on port ~D (ws ~D)" (config-port config) (config-ws-port config))
     (setf *service*
           (make-service :config (or config config-default)
                         :acceptor acceptor
                         :game-executions (make-hash-table)
-                        :ws-acceptor ws-acceptor
+                        :ws-service ws-service
                         :log-fh log-fh
                         :curr-game-no 0))))
 
@@ -138,10 +137,10 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
   (when (setf service (or service *service*))
     (let* (;; (acceptor (service-acceptor service))
            (acceptor (slot-value service 'acceptor))
-           (ws-acceptor (slot-value service 'ws-acceptor)))
+           (ws-service (slot-value service 'ws-service)))
       (when (and acceptor (hunchentoot:started-p acceptor))
         (hunchentoot:stop acceptor)
-        (ws-stop ws-acceptor)))
+        (ws-stop ws-service)))
     (loop for thread in (sb-thread:list-all-threads)
        if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
        do
