@@ -41,7 +41,7 @@
           (ws-service-resource-threads ws-service))))
 
 
-(defmethod resource-client-connected ((res exc-resource) client)
+(defmethod clws:resource-client-connected ((res exc-resource) client)
   (vom:debug "ws client connected")
 
   (let ((log-fh (service-log-fh *service*) ))
