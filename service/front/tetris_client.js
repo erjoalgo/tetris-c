@@ -167,7 +167,7 @@ function serverRequest(url) {
 
     assert(url != null);
 
-    return new Promise(function(resolve, reject){
+    return new Promise(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
         xhr.open('get', url);
         xhr.onreadystatechange = function() {
@@ -175,7 +175,7 @@ function serverRequest(url) {
             if (xhr.readyState === 4) {
                 if (xhr.status != 200) {
                     error(url + " returned non-200 status: " + xhr.status +
-                          ", server response: " + xhr.responseText);
+                        ", server response: " + xhr.responseText);
                 } else {
                     var response = null;
                     try {
@@ -431,19 +431,19 @@ function repaintRows(ymin, ymax) {
     }
 }
 
-function logPerformance ( state )    {
+function logPerformance(state) {
     const MOD = 100;
-    if (state.moveNo%MOD == 0)    {
+    if (state.moveNo % MOD == 0) {
         var now = window.performance.now();
-        if (state.last != null)    {
-            var elapsed = (now-state.last)/1000;
-            console.log("moves/sec: "+ precisionRound(MOD/elapsed, 2));
+        if (state.last != null) {
+            var elapsed = (now - state.last) / 1000;
+            console.log("moves/sec: " + precisionRound(MOD / elapsed, 2));
         }
         state.last = now;
     }
 }
 
-function fetchCallback ( move )    {
+function fetchCallback(move) {
 
     assert(state.gameNo != null && state.moveNo != null);
     state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
@@ -454,14 +454,13 @@ function fetchCallback ( move )    {
 }
 
 function fetch() {
-    if (state.ws != null)    {
-        return new Promise(function(resolve, reject){
+    if (state.ws != null) {
+        return new Promise(function(resolve, reject) {
             state.ws.resolve = resolve;
             state.ws.reject = reject;
             state.ws.send(state.moveNo);
         });
-    }
-    else     {
+    } else {
         var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
         return serverRequest(uri).then(fetchCallback, gameOver);
     }
@@ -469,142 +468,142 @@ function fetch() {
 
 function init() {
     return serverRequest("/games/" + state.gameNo, init)
-        .then(function(response){
-            var game = response;
+        .then(function(response) {
+                var game = response;
 
-            var grid = state.grid;
+                var grid = state.grid;
 
-            var miny = grid.height;
+                var miny = grid.height;
 
-            var skip = false; // start from move 0`
-            if (skip) {
-                game.move_no = -1;
-                game.on_cells = [];
-            }
-
-            state.moveNo = game.move_no;
-
-            // game.moveNo is for current move.
-            state.moveNo++;
-
-            console.log("move no is: " + state.moveNo);
-
-            var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
-
-            if (supportsWebSockets && game.ws_port)    {
-                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
-                    + "/games/" + state.gameNo;
-                console.log( "using ws url: " + state.ws_url );
-                state.ws = new WebSocket(state.ws_url);
-                state.ws.addEventListener('message', function (event) {
-                    var packed = event.data;
-                    // if (packed<0)    {state.ws.reject();}
-                    var move = state.move;
-                    move.shape = (packed>>16)&0xff;
-                    move.rot = (packed>>8)&0xff;
-                    move.col = (packed>>0) &0xff;
-                    fetchCallback(move);
-                    state.ws.resolve();
-                });
-            }
-
-            grid.width = game.width;
-            grid.height = game.height;
-
-            grid.rowcounts = []
-            grid.g = [];
-            grid.relief = [];
-            state.answerRx = [null, null];
-
-            ui.tableCreate(grid.width, grid.height); //delete previous table
-
-            for (var i = 0; i < grid.height; i++) {
-                grid.rowcounts.push(0);
-                var row = [];
-                grid.g.push(row);
-                for (var ii = 0; ii < grid.height; ii++)
-                    row.push(ui.colors.blank);
-            }
-            for (var i = 0; i < grid.width; i++) {
-                grid.relief.push(grid.height);
-            }
-
-            for (var i = 0; i < game.on_cells.length; i++) {
-                xy = game.on_cells[i];
-                x = xy % grid.width;
-                y = Math.floor(xy / grid.width);
-                y = grid.height - 1 - y;
-
-                grid.g[y][x] = ui.colors.filled;
-                ui.paint(y, x, ui.colors.filled);
-                if (y < miny)
-                    miny = y;
-                if (y < grid.relief[x]) {
-                    grid.relief[x] = y;
+                var skip = false; // start from move 0`
+                if (skip) {
+                    game.move_no = -1;
+                    game.on_cells = [];
                 }
-                grid.rowcounts[y]++;
-            }
-            repaintRows(0, miny);
-            if (state.ws)    {
-                return new Promise(function(resolve, reject){
-                    state.ws.addEventListener('open', function (event) {
-                        console.log( "ws connection opened.." );
-                        resolve();
-                    });
 
-                    state.ws.addEventListener('error', function (event) {
-                        console.log( "ws connection error.." );
-                        reject();
-                    });
+                state.moveNo = game.move_no;
 
-                    state.ws.addEventListener('close', function (event) {
-                        console.log( "ws connection closed.." );
-                        reject();
+                // game.moveNo is for current move.
+                state.moveNo++;
+
+                console.log("move no is: " + state.moveNo);
+
+                var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
+
+                if (supportsWebSockets && game.ws_port) {
+                    state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
+                        "/games/" + state.gameNo;
+                    console.log("using ws url: " + state.ws_url);
+                    state.ws = new WebSocket(state.ws_url);
+                    state.ws.addEventListener('message', function(event) {
+                        var packed = event.data;
+                        // if (packed<0)    {state.ws.reject();}
+                        var move = state.move;
+                        move.shape = (packed >> 16) & 0xff;
+                        move.rot = (packed >> 8) & 0xff;
+                        move.col = (packed >> 0) & 0xff;
+                        fetchCallback(move);
+                        state.ws.resolve();
                     });
-                });
-            }
-        },
-              gameOver);
+                }
+
+                grid.width = game.width;
+                grid.height = game.height;
+
+                grid.rowcounts = []
+                grid.g = [];
+                grid.relief = [];
+                state.answerRx = [null, null];
+
+                ui.tableCreate(grid.width, grid.height); //delete previous table
+
+                for (var i = 0; i < grid.height; i++) {
+                    grid.rowcounts.push(0);
+                    var row = [];
+                    grid.g.push(row);
+                    for (var ii = 0; ii < grid.height; ii++)
+                        row.push(ui.colors.blank);
+                }
+                for (var i = 0; i < grid.width; i++) {
+                    grid.relief.push(grid.height);
+                }
+
+                for (var i = 0; i < game.on_cells.length; i++) {
+                    xy = game.on_cells[i];
+                    x = xy % grid.width;
+                    y = Math.floor(xy / grid.width);
+                    y = grid.height - 1 - y;
+
+                    grid.g[y][x] = ui.colors.filled;
+                    ui.paint(y, x, ui.colors.filled);
+                    if (y < miny)
+                        miny = y;
+                    if (y < grid.relief[x]) {
+                        grid.relief[x] = y;
+                    }
+                    grid.rowcounts[y]++;
+                }
+                repaintRows(0, miny);
+                if (state.ws) {
+                    return new Promise(function(resolve, reject) {
+                        state.ws.addEventListener('open', function(event) {
+                            console.log("ws connection opened..");
+                            resolve();
+                        });
+
+                        state.ws.addEventListener('error', function(event) {
+                            console.log("ws connection error..");
+                            reject();
+                        });
+
+                        state.ws.addEventListener('close', function(event) {
+                            console.log("ws connection closed..");
+                            reject();
+                        });
+                    });
+                }
+            },
+            gameOver);
 }
 
 function initShapes() {
     return serverRequest("shapes", initShapes)
-        .then(function(response){
-            state.shapes = response;
-            if (state.shapes.length == 0) {
-                error("0 shapes received from server!");
-            }
-            for (var i = 0; i < state.shapes.length; i++) {
-                var shape = state.shapes[i];
-                var rots = shape.rotations;
-                for (var r = 0; r < rots.length; r++) {
-                    var zeroSeen = false;
-                    var rot = rots[r];
-                    var rotH = rot.height;
-                    var rotCoords = rot.configurations;
-                    for (var b = 0; b < rotCoords.length; b++) {
-                        var cr = rotCoords[b];
-                        cr[1] *= -1;
-                        cr[1] += rotH - 1;
-                        assert(cr[1] >= 0);
-                        zeroSeen = zeroSeen || cr[1] == 0;
-                    }
-                    assert(zeroSeen);
-
-                    CRUSTNAMES = ["top", "bot", "left", "right"];
-                    for (var c = 0; c < CRUSTNAMES.length; c++) {
-                        var crust = rot.crusts[CRUSTNAMES[c]];
-                        for (var b = 0; b < crust.length; b++) {
-                            var cr = crust[b];
+        .then(function(response) {
+                state.shapes = response;
+                if (state.shapes.length == 0) {
+                    error("0 shapes received from server!");
+                }
+                for (var i = 0; i < state.shapes.length; i++) {
+                    var shape = state.shapes[i];
+                    var rots = shape.rotations;
+                    for (var r = 0; r < rots.length; r++) {
+                        var zeroSeen = false;
+                        var rot = rots[r];
+                        var rotH = rot.height;
+                        var rotCoords = rot.configurations;
+                        for (var b = 0; b < rotCoords.length; b++) {
+                            var cr = rotCoords[b];
                             cr[1] *= -1;
                             cr[1] += rotH - 1;
                             assert(cr[1] >= 0);
+                            zeroSeen = zeroSeen || cr[1] == 0;
+                        }
+                        assert(zeroSeen);
+
+                        CRUSTNAMES = ["top", "bot", "left", "right"];
+                        for (var c = 0; c < CRUSTNAMES.length; c++) {
+                            var crust = rot.crusts[CRUSTNAMES[c]];
+                            for (var b = 0; b < crust.length; b++) {
+                                var cr = crust[b];
+                                cr[1] *= -1;
+                                cr[1] += rotH - 1;
+                                assert(cr[1] >= 0);
+                            }
                         }
                     }
                 }
-            }
-        },
-              gameOver);
+            },
+            gameOver);
 }
 
 function error(message) {
@@ -615,7 +614,7 @@ function error(message) {
 }
 
 function initGameNo() {
-    return serverRequest("/games", initGameNo).then(function(response){
+    return serverRequest("/games", initGameNo).then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
             error("no current games on server");
@@ -627,9 +626,9 @@ function initGameNo() {
     }, error);
 }
 
-function planExecute (  )    {
-    return new Promise(function(resolve, reject){
-        planExecuteCallback(function(){
+function planExecute() {
+    return new Promise(function(resolve, reject) {
+        planExecuteCallback(function() {
             resolve();
         }, reject);
     });
@@ -640,14 +639,14 @@ function planExecuteCallback(resolve, reject) {
     var origR = state.b.r;
     var origX = state.b.x;
 
-    if (state.b.r != state.answer.r)    {
+    if (state.b.r != state.answer.r) {
         state.b.r++;
-        state.b.r%=4;
-    }else if (state.b.x < state.answer.x)    {
+        state.b.r %= 4;
+    } else if (state.b.x < state.answer.x) {
         state.b.x++;
-    }else if (state.b.x > state.answer.x)    {
+    } else if (state.b.x > state.answer.x) {
         state.b.x--;
-    }else     {
+    } else {
         drop();
         paintTo(ui.colors.filled);
         clearLines();
@@ -663,7 +662,7 @@ function planExecuteCallback(resolve, reject) {
         paintTo(ui.colors.filled);
         state.gameOver = true;
         reject();
-    }else     {
+    } else {
         paintTo(ui.colors.filled);
         setTimeout(planExecuteCallback.bind(null, resolve, reject), timerDelay);
     }
@@ -678,12 +677,12 @@ function gameOver() {
 }
 
 
-function fetchPlanExecuteLoop (  )    {
+function fetchPlanExecuteLoop() {
     fetch().then(addTetro).then(planExecute)
         .then(fetchPlanExecuteLoop).catch(error);
 }
 
-function start (  )    {
+function start() {
     // TODO pass state around callbacks/promises, no global state
     initGameNo().then(init).then(initShapes).then(fetchPlanExecuteLoop);
 }
@@ -691,37 +690,37 @@ function start (  )    {
 start();
 
 function precisionRound(number, precision) {
-  var factor = Math.pow(10, precision);
-  return Math.round(number * factor) / factor;
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
 }
 
-function wsPerf ( max, tries )    {
-    if (max == null)    {
+function wsPerf(max, tries) {
+    if (max == null) {
         max = 10000;
     }
-    if (tries == null)    {
+    if (tries == null) {
         tries = 1;
     }
-    console.log( "starting perf test: " + tries );
+    console.log("starting perf test: " + tries);
 
-    state.gameOver=true;
+    state.gameOver = true;
     ws = new WebSocket(state.ws_url);
     var moveNo = 0;
     var start;
-    ws.addEventListener('message', function (event) {
-        if (moveNo == max)    {
-            var elapsed = (window.performance.now() - start)/1000;
-            console.log( "finished. total secs: " + precisionRound(elapsed, 2)
-                         + " moves/sec: " + precisionRound(max/elapsed, 2));
-            if (--tries!=0)    {// allow infinite testing with input tries = 0
+    ws.addEventListener('message', function(event) {
+        if (moveNo == max) {
+            var elapsed = (window.performance.now() - start) / 1000;
+            console.log("finished. total secs: " + precisionRound(elapsed, 2) +
+                " moves/sec: " + precisionRound(max / elapsed, 2));
+            if (--tries != 0) { // allow infinite testing with input tries = 0
                 wsPerf(max, tries);
             }
-        }else     {
+        } else {
             ws.send(moveNo++);
         }
     });
 
-    ws.addEventListener('open', function (event) {
+    ws.addEventListener('open', function(event) {
         start = window.performance.now();
         ws.send(0);
     });
