@@ -672,12 +672,6 @@ function planExecuteCallback(resolve, reject) {
     }
 }
 
-    // state.moveQueue.push(drop);
-    // state.moveQueue.push(clearLines);
-    // state.moveQueue.push(fetch);
-    // state.moveQueue.push(addTetro);
-    // state.moveQueue.push(plan);
-
 function pauseToggle() {
     state.pausedP = !pauseP;
 }
