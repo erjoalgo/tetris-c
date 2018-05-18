@@ -30,8 +30,7 @@
      path
      (make-instance 'exc-resource :game-exc game-exc)
 
-     ;; TODO do I need this?
-     (clws:origin-prefix "http://127.0.0.1" "http://localhost"))
+     (lambda (&rest args) t))
 
     (push (bordeaux-threads:make-thread
            (lambda ()
