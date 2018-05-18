@@ -165,42 +165,45 @@ function assert(condition, message) {
     }
 }
 
-function serverRequest(url, handler) {
+function serverRequest(url) {
 
-    assert(url != null && handler != null);
+    assert(url != null);
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('get', url);
-    xhr.onreadystatechange = function() {
-        // Ready state 4 means the request is done
-        if (xhr.readyState === 4) {
-            if (xhr.status != 200) {
-                error(url + " returned non-200 status: " + xhr.status + ": server response: " + xhr.responseText);
-            } else {
-                var response = null;
-                try {
-                    response = JSON.parse(xhr.responseText);
-                } catch (err) {
-                    console.log("failed to parse request: " + xhr.responseText);
+    return new Promise(function(resolve, reject){
+        var xhr = new XMLHttpRequest();
+        xhr.open('get', url);
+        xhr.onreadystatechange = function() {
+            // Ready state 4 means the request is done
+            if (xhr.readyState === 4) {
+                if (xhr.status != 200) {
+                    error(url + " returned non-200 status: " + xhr.status +
+                          ", server response: " + xhr.responseText);
+                } else {
+                    var response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (err) {
+                        console.log("failed to parse request: " + xhr.responseText);
 
-                    state.consecFailedMills += RETRY_TIMEOUT;
+                        state.consecFailedMills += RETRY_TIMEOUT;
 
-                    if (state.consecFailedMills > SERVER_TIMEOUT) {
-                        error("server seems unresponsive. try again later")
-                    } else {
-                        setTimeout(function() {
-                            serverRequest(url, handler)
-                        }, RETRY_TIMEOUT);
+                        if (state.consecFailedMills > SERVER_TIMEOUT) {
+                            reject("server seems unresponsive. try again later");
+                        } else {
+                            setTimeout(function() {
+                                serverRequest(url).then(resolve, reject);
+                            }, RETRY_TIMEOUT);
+                        }
+                        return;
                     }
-                    return;
+                    assert(!(response == null), " error from server");
+                    state.consecFailedMills = 0;
+                    resolve(response);
                 }
-                assert(!(response == null), " error from server");
-                state.consecFailedMills = 0;
-                handler(response);
             }
         }
-    }
-    xhr.send(null);
+        xhr.send(null);
+    });
 }
 
 var state = {
@@ -230,7 +233,8 @@ var state = {
         needsClear: false,
         rowcounts: null,
         g: null
-    }
+    },
+    move: new Object()
 }
 
 function bIter() {
@@ -290,41 +294,8 @@ function paintTo(color, checkIntersects) {
     }
 }
 
-function moveTetro(moveFun) {
-    paintTo(ui.colors.blank);
-    moveFun();
-    var succ = paintTo(ui.colors.filled, true); //undo last move and repaint if this doesn't succeed
-    if (!succ) {
-        state.gameOver = true;
-        moveFun(true); //undo
-        paintTo(ui.colors.filled);
-    }
-}
-
 function addTetro() {
     paintTo(ui.colors.filled);
-}
-
-
-function left(undo) {
-    !undo ? state.b.x-- : state.b.x++;
-}
-
-function right(undo) {
-    !undo ? state.b.x++ : state.b.x--;
-}
-
-function rotcw(undo) {
-    !undo ? state.b.r++ : state.b.r--;
-    state.b.r %= 4;
-}
-
-function rotccw(undo) {
-    !undo ? state.b.r-- : state.b.r++;
-}
-
-function down(undo) {
-    !undo ? state.b.y++ : state.b.y--;
 }
 
 function getDropDistance() {
@@ -474,158 +445,168 @@ function logPerformance ( state )    {
     }
 }
 
-function fetch(response) {
+function fetchCallback ( move )    {
+
     assert(state.gameNo != null && state.moveNo != null);
-
-    if (response == null) {
-        if (state.ws != null)    {
-            state.ws.send(state.moveNo);
-        }else     {
-            var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
-            serverRequest(uri, fetch);
-        }
-        return;
-    } else {
-        move = response;
-
-        state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
-        state.answer.r = move.rot, state.answer.x = move.col;
-        state.moveNo++;
-
-        logPerformance(state);
-
-        ui.moveNoElm.innerHTML = state.moveNo;
-        timer();
-    }
-}
-
-function init(response) {
-    if (response == null) {
-        serverRequest("/games/" + state.gameNo, init);
-        return;
-    }
-    var grid = state.grid;
-
-    var miny = grid.height;
-
-    game = response;
-
-    var skip = false; // start from move 0`
-    if (skip) {
-        game.move_no = -1;
-        game.on_cells = [];
-    }
-
-    state.moveNo = game.move_no;
-
-    // game.moveNo is for current move.
+    state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
+    state.answer.r = move.rot, state.answer.x = move.col;
     state.moveNo++;
+    logPerformance(state);
+    ui.moveNoElm.innerHTML = state.moveNo;
+}
 
-    console.log("move no is: " + state.moveNo);
-
-    var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
-
-    if (supportsWebSockets && game.ws_port)    {
-        state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
-            + "/games/" + state.gameNo;
-        console.log( "using ws url: " + state.ws_url );
-        state.ws = new WebSocket(state.ws_url);
-        state.ws.addEventListener('message', function (event) {
-            var packed = event.data;
-            var move = new Object();
-            move.shape = (packed>>16)&0xff;
-            move.rot = (packed>>8)&0xff;
-            move.col = (packed>>0) &0xff;
-            fetch(move);
+function fetch() {
+    if (state.ws != null)    {
+        return new Promise(function(resolve, reject){
+            state.ws.resolve = resolve;
+            state.ws.reject = reject;
+            state.ws.send(state.moveNo);
         });
     }
-
-    grid.width = game.width;
-    grid.height = game.height;
-
-    grid.rowcounts = []
-    grid.g = [];
-    grid.relief = [];
-    state.answerRx = [null, null];
-
-    ui.tableCreate(grid.width, grid.height); //delete previous table
-
-    for (var i = 0; i < grid.height; i++) {
-        grid.rowcounts.push(0);
-        var row = [];
-        grid.g.push(row);
-        for (var ii = 0; ii < grid.height; ii++)
-            row.push(ui.colors.blank);
-    }
-    for (var i = 0; i < grid.width; i++) {
-        grid.relief.push(grid.height);
-    }
-
-    for (var i = 0; i < game.on_cells.length; i++) {
-        xy = game.on_cells[i];
-        x = xy % grid.width;
-        y = Math.floor(xy / grid.width);
-        y = grid.height - 1 - y;
-
-        grid.g[y][x] = ui.colors.filled;
-        ui.paint(y, x, ui.colors.filled);
-        if (y < miny)
-            miny = y;
-        if (y < grid.relief[x]) {
-            grid.relief[x] = y;
-        }
-        grid.rowcounts[y]++;
-    }
-    repaintRows(0, miny);
-    if (state.ws)    {
-        state.ws.addEventListener('open', function (event) {
-            console.log( "ws connection opened.." );
-            timer();
-        });
-    }else     {
-        timer();
+    else     {
+        var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
+        return serverRequest(uri).then(fetchCallback, gameOver);
     }
 }
 
-function initShapes(response) {
-    if (response == null) {
-        serverRequest("shapes", initShapes)
-    } else {
-        state.shapes = response;
-        if (state.shapes.length == 0) {
-            error("0 shapes received from server!");
-        }
-        for (var i = 0; i < state.shapes.length; i++) {
-            var shape = state.shapes[i];
-            var rots = shape.rotations;
-            for (var r = 0; r < rots.length; r++) {
-                var zeroSeen = false;
-                var rot = rots[r];
-                var rotH = rot.height;
-                var rotCoords = rot.configurations;
-                for (var b = 0; b < rotCoords.length; b++) {
-                    var cr = rotCoords[b];
-                    cr[1] *= -1;
-                    cr[1] += rotH - 1;
-                    assert(cr[1] >= 0);
-                    zeroSeen = zeroSeen || cr[1] == 0;
-                }
-                assert(zeroSeen);
+function init() {
+    return serverRequest("/games/" + state.gameNo, init)
+        .then(function(response){
+            var game = response;
 
-                CRUSTNAMES = ["top", "bot", "left", "right"];
-                for (var c = 0; c < CRUSTNAMES.length; c++) {
-                    var crust = rot.crusts[CRUSTNAMES[c]];
-                    for (var b = 0; b < crust.length; b++) {
-                        var cr = crust[b];
+            var grid = state.grid;
+
+            var miny = grid.height;
+
+            var skip = false; // start from move 0`
+            if (skip) {
+                game.move_no = -1;
+                game.on_cells = [];
+            }
+
+            state.moveNo = game.move_no;
+
+            // game.moveNo is for current move.
+            state.moveNo++;
+
+            console.log("move no is: " + state.moveNo);
+
+            var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
+
+            if (supportsWebSockets && game.ws_port)    {
+                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port
+                    + "/games/" + state.gameNo;
+                console.log( "using ws url: " + state.ws_url );
+                state.ws = new WebSocket(state.ws_url);
+                state.ws.addEventListener('message', function (event) {
+                    var packed = event.data;
+                    // if (packed<0)    {state.ws.reject();}
+                    var move = state.move;
+                    move.shape = (packed>>16)&0xff;
+                    move.rot = (packed>>8)&0xff;
+                    move.col = (packed>>0) &0xff;
+                    fetchCallback(move);
+                    state.ws.resolve();
+                });
+            }
+
+            grid.width = game.width;
+            grid.height = game.height;
+
+            grid.rowcounts = []
+            grid.g = [];
+            grid.relief = [];
+            state.answerRx = [null, null];
+
+            ui.tableCreate(grid.width, grid.height); //delete previous table
+
+            for (var i = 0; i < grid.height; i++) {
+                grid.rowcounts.push(0);
+                var row = [];
+                grid.g.push(row);
+                for (var ii = 0; ii < grid.height; ii++)
+                    row.push(ui.colors.blank);
+            }
+            for (var i = 0; i < grid.width; i++) {
+                grid.relief.push(grid.height);
+            }
+
+            for (var i = 0; i < game.on_cells.length; i++) {
+                xy = game.on_cells[i];
+                x = xy % grid.width;
+                y = Math.floor(xy / grid.width);
+                y = grid.height - 1 - y;
+
+                grid.g[y][x] = ui.colors.filled;
+                ui.paint(y, x, ui.colors.filled);
+                if (y < miny)
+                    miny = y;
+                if (y < grid.relief[x]) {
+                    grid.relief[x] = y;
+                }
+                grid.rowcounts[y]++;
+            }
+            repaintRows(0, miny);
+            if (state.ws)    {
+                return new Promise(function(resolve, reject){
+                    state.ws.addEventListener('open', function (event) {
+                        console.log( "ws connection opened.." );
+                        resolve();
+                    });
+
+                    state.ws.addEventListener('error', function (event) {
+                        console.log( "ws connection error.." );
+                        reject();
+                    });
+
+                    state.ws.addEventListener('close', function (event) {
+                        console.log( "ws connection closed.." );
+                        reject();
+                    });
+                });
+            }
+        },
+              gameOver);
+}
+
+function initShapes() {
+    return serverRequest("shapes", initShapes)
+        .then(function(response){
+            state.shapes = response;
+            if (state.shapes.length == 0) {
+                error("0 shapes received from server!");
+            }
+            for (var i = 0; i < state.shapes.length; i++) {
+                var shape = state.shapes[i];
+                var rots = shape.rotations;
+                for (var r = 0; r < rots.length; r++) {
+                    var zeroSeen = false;
+                    var rot = rots[r];
+                    var rotH = rot.height;
+                    var rotCoords = rot.configurations;
+                    for (var b = 0; b < rotCoords.length; b++) {
+                        var cr = rotCoords[b];
                         cr[1] *= -1;
                         cr[1] += rotH - 1;
                         assert(cr[1] >= 0);
+                        zeroSeen = zeroSeen || cr[1] == 0;
+                    }
+                    assert(zeroSeen);
+
+                    CRUSTNAMES = ["top", "bot", "left", "right"];
+                    for (var c = 0; c < CRUSTNAMES.length; c++) {
+                        var crust = rot.crusts[CRUSTNAMES[c]];
+                        for (var b = 0; b < crust.length; b++) {
+                            var cr = crust[b];
+                            cr[1] *= -1;
+                            cr[1] += rotH - 1;
+                            assert(cr[1] >= 0);
+                        }
                     }
                 }
             }
-        }
-        timer();
-    }
+        },
+              gameOver);
 }
 
 function error(message) {
@@ -635,115 +616,87 @@ function error(message) {
     alert(msg);
 }
 
-function initGameNo(response) {
-    if (response == null) {
-        serverRequest("/games", initGameNo);
-    } else {
-        gamenoList = response;
+function initGameNo() {
+    return serverRequest("/games", initGameNo).then(function(response){
+        var gamenoList = response;
         if (gamenoList.length == 0) {
             error("no current games on server");
         } else {
             state.gameNo = gamenoList[gamenoList.length - 1];
             console.log("init gameNo is " + state.gameNo);
-            timer();
         }
+        // TODO use either error or gameover
+    }, error);
+}
+
+function planExecute (  )    {
+    return new Promise(function(resolve, reject){
+        planExecuteCallback(function(){
+            resolve();
+        }, reject);
+    });
+}
+
+function planExecuteCallback(resolve, reject) {
+    paintTo(ui.colors.blank); // delete
+    var origR = state.b.r;
+    var origX = state.b.x;
+
+    if (state.b.r != state.answer.r)    {
+        state.b.r++;
+        state.b.r%=4;
+    }else if (state.b.x < state.answer.x)    {
+        state.b.x++;
+    }else if (state.b.x > state.answer.x)    {
+        state.b.x--;
+    }else     {
+        drop();
+        clearLines();
+        paintTo(ui.colors.filled);
+        setTimeout(resolve, timerDelay);
+        return;
+    }
+
+    // check if move is possible
+    if (gridBlockIntersects()) {
+        // undo last move and repaint
+        state.b.r = origR;
+        state.b.x = origX;
+        paintTo(ui.colors.filled);
+        state.gameOver = true;
+        reject();
+    }else     {
+        paintTo(ui.colors.filled);
+        setTimeout(planExecuteCallback.bind(null, resolve, reject), timerDelay);
     }
 }
 
-function plan() {
-    for (var r = state.b.r, direc = state.b.r < state.answer.r ? 1 : -1; r != state.answer.r; r += direc) {
-        state.moveQueue.push(direc > 0 ? rotcw : rotcw);
-    }
-    for (var x = state.b.x, direc = state.b.x < state.answer.x ? 1 : -1; x != state.answer.x; x += direc) {
-        state.moveQueue.push(direc > 0 ? right : left);
-    }
-    state.moveQueue.push(drop);
-    state.moveQueue.push(clearLines);
-    state.moveQueue.push(fetch);
-    state.moveQueue.push(addTetro);
-    state.moveQueue.push(plan);
-}
+    // state.moveQueue.push(drop);
+    // state.moveQueue.push(clearLines);
+    // state.moveQueue.push(fetch);
+    // state.moveQueue.push(addTetro);
+    // state.moveQueue.push(plan);
 
 function pauseToggle() {
     state.pausedP = !pauseP;
 }
 
-function gameOverFun() {
+function gameOver() {
     alert("game over!");
-    console.log("game over");
 }
 
-function timer() {
-    if (state.pausedP) {
-        return;
-    }
-    if (state.moveQueue.length > 0) {
-        var move = state.moveQueue.shift();
-        if (move.name in paintMoves) {
-            moveTetro(move);
-        } else {
-            move();
-        }
-        if (state.gameOver) {
-            gameOverFun();
-        } else if (!(move.name in twoStepMoves)) {
-            if ((move.name in noDelayMoves)) {
-                timer();
-            } else {
-                var extra = 0;
-                setTimeout(timer, timerDelay + extra);
-            }
 
-        }
-        //otherwise two-step-move must bring timer back to life
-
-    } else {
-        alert("no more pending moves");
-    }
+function fetchPlanExecuteLoop (  )    {
+    fetch().then(addTetro).then(planExecute)
+        .then(fetchPlanExecuteLoop).catch(error);
 }
 
-paintMoves = {
-    rotcw: true,
-    rotccw: true,
-    drop: true,
-    left: true,
-    right: true,
-    down: true
-};
-twoStepMoves = {
-    fetch: true,
-    init: true,
-    initShapes: true,
-    initGameNo: true
-};
-noDelayMoves = {
-    fetch: true,
-    init: true
-};
+function start (  )    {
+    // TODO pass state around callbacks/promises, no global state
+    initGameNo().then(init).then(initShapes).then(fetchPlanExecuteLoop);
+}
 
-/*unfortunate hack for IE, in which function.name doesn't work:*/
-init.name = "init";
-fetch.name = "fetch";
-rotcw.name = "rotcw";
-rotccw.name = "rotccw";
-left.name = "left";
-right.name = "right";
-drop.name = "drop";
-down.name = "down";
-initShapes.name = "initShapes";
-clearLines.name = "clearLines";
-pauseToggle.name = "pauseToggle";
-plan.name = "plan";
-addTetro.name = "addTetro";
-
-state.moveQueue.push(initGameNo);
-state.moveQueue.push(init);
-state.moveQueue.push(initShapes);
-state.moveQueue.push(fetch);
-state.moveQueue.push(addTetro);
-state.moveQueue.push(plan);
-
-timer();
+start();
 
 function precisionRound(number, precision) {
   var factor = Math.pow(10, precision);
