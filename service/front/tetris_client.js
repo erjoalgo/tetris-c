@@ -458,6 +458,7 @@ function fetch() {
         return new Promise(function(resolve, reject){
             state.ws.resolve = resolve;
             state.ws.reject = reject;
+            state.ws.before = window.performance.now();
             state.ws.send(state.moveNo);
         });
     }
@@ -496,7 +497,9 @@ function init() {
                     + "/games/" + state.gameNo;
                 console.log( "using ws url: " + state.ws_url );
                 state.ws = new WebSocket(state.ws_url);
+                state.ws.times = [];
                 state.ws.addEventListener('message', function (event) {
+                    state.ws.times.push(window.performance.now()-state.ws.before);
                     var packed = event.data;
                     // if (packed<0)    {state.ws.reject();}
                     var move = state.move;
