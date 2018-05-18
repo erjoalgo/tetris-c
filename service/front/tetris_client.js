@@ -124,7 +124,7 @@ var ui = {
             "input", {
                 type: "range",
                 min: 1,
-                max: 100,
+                max: 200,
                 value: timerDelay,
                 invertValue: function(val) {
                     return parseInt(this.max) - val + parseInt(this.min);
