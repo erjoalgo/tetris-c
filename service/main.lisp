@@ -26,7 +26,9 @@
     (help (command-line-arguments:show-option-help +service-option-spec+ :sort-names t))
     (version (format t "~A~%" *version*))
     (t
-     (when verbose (vom:config t :debug))
+     (when verbose
+       (vom:config t :debug)
+       (vom:debug "verbose enabled"))
      (let ((config (apply 'make-config (append args '(:allow-other-keys t)))))
        (when dims
          (ppcre:register-groups-bind ((#'parse-integer h) (#'parse-integer w))
