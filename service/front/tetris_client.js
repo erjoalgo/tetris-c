@@ -651,8 +651,8 @@ function planExecuteCallback(resolve, reject) {
         state.b.x--;
     }else     {
         drop();
-        clearLines();
         paintTo(ui.colors.filled);
+        clearLines();
         setTimeout(resolve, timerDelay);
         return;
     }
