@@ -28,6 +28,7 @@
     (t
      (when verbose
        (vom:config t :debug)
+       (setf clws:*log-level* t)
        (vom:debug "verbose enabled"))
      (let ((config (apply 'make-config (append args '(:allow-other-keys t)))))
        (when dims
