@@ -462,6 +462,18 @@ function repaintRows(ymin, ymax) {
     }
 }
 
+function logPerformance ( state )    {
+    const MOD = 100;
+    if (state.moveNo%MOD == 0)    {
+        var now = window.performance.now();
+        if (state.last != null)    {
+            var elapsed = (now-state.last)/1000;
+            console.log("moves/sec: "+ precisionRound(MOD/elapsed, 2));
+        }
+        state.last = now;
+    }
+}
+
 function fetch(response) {
     assert(state.gameNo != null && state.moveNo != null);
 
@@ -479,6 +491,9 @@ function fetch(response) {
         state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
         state.answer.r = move.rot, state.answer.x = move.col;
         state.moveNo++;
+
+        logPerformance(state);
+
         ui.moveNoElm.innerHTML = state.moveNo;
         timer();
     }
