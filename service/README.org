@@ -10,6 +10,8 @@
   - build service
     - obtain buildapp
       : sudo apt-get install buildapp
+    - obtain libfixposix-dev dep
+      : sudo apt-get install libfixposix-dev
     - obtain quicklisp
       #+BEGIN_SRC sh
       cd /tmp
