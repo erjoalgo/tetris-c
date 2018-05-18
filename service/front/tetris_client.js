@@ -23,8 +23,6 @@
         for the JavaScript code in this page.
 */
 
-// TODO refactor
-
 function createElementWithProperties(tag, props) {
     var elm = document.createElement(tag);
     for (var key in props) {
