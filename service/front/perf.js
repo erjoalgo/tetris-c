@@ -1,4 +1,4 @@
-function wsPerf(game, max, tries) {
+function wsPerf(ws_url, max, tries) {
     if (max == null) {
         max = 10000;
     }
@@ -7,8 +7,7 @@ function wsPerf(game, max, tries) {
     }
     console.log("starting perf test: " + tries);
 
-    game.gameOver = true;
-    ws = new WebSocket(game.ws_url);
+    var ws = new WebSocket(ws_url);
     var moveNo = 0;
     var start;
     ws.addEventListener('message', function(event) {
@@ -17,7 +16,7 @@ function wsPerf(game, max, tries) {
             console.log("finished. total secs: " + precisionRound(elapsed, 2) +
                 " moves/sec: " + precisionRound(max / elapsed, 2));
             if (--tries != 0) { // allow infinite testing with input tries = 0
-                wsPerf(max, tries);
+                wsPerf(ws_url, max, tries);
             }
         } else {
             ws.send(moveNo++);
