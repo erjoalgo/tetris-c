@@ -182,7 +182,6 @@ var Game = function(parentElt) {
     this.shapes = null;
 
     this.grid = null;
-    this.move = {};
     this.timerDelay = INITIAL_TIMER_DELAY;
 };
 
@@ -397,14 +396,11 @@ Game.prototype.fetchCallback = function(move) {
     assert(this.gameNo != null && this.moveNo != null);
 
     // todo wrap
-    this.b.m = move.shape;
+    this.b.m = move.m;
     this.b.r = 0;
     this.b.x = this.grid.width / 2 - 1;
     this.b.y = 0;
     this.b.shape = this.shapes[this.b.m];
-
-    this.answer.r = move.rot;
-    this.answer.x = move.col;
 
     this.moveNo+=1;
     this.logPerformance();
@@ -464,11 +460,11 @@ Game.prototype.init = function(gameNo) {
                 state.ws.addEventListener('message', function(event) {
                     var packed = event.data;
                     // if (packed<0)    {state.ws.reject();}
-                    var move = state.move;
-                    move.shape = (packed >> 16) & 0xff;
-                    move.rot = (packed >> 8) & 0xff;
-                    move.col = (packed >> 0) & 0xff;
-                    state.fetchCallback(move);
+                    var answer = state.answer;
+                    answer.m = (packed >> 16) & 0xff;
+                    answer.r = (packed >> 8) & 0xff;
+                    answer.x = (packed >> 0) & 0xff;
+                    state.fetchCallback(answer);
                     state.ws.resolve();
                 });
             }
