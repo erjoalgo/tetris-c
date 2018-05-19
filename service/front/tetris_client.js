@@ -493,7 +493,7 @@ Game.prototype.init = function(gameNo) {
             state.ui.initSlider(this.timerDelay,
                 (function(newVal) {
                     state.timerDelay = newVal;
-                }).bind(this));
+                }));
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
