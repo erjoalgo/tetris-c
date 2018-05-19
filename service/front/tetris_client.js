@@ -393,10 +393,17 @@ Game.prototype.logPerformance = function() {
 
 Game.prototype.fetchCallback = function(move) {
     assert(this.gameNo != null && this.moveNo != null);
+
     // todo wrap
-    this.b.m = move.shape, this.b.r = 0, this.b.x = this.grid.width / 2 - 1, this.b.y = 0;
+    this.b.m = move.shape;
+    this.b.r = 0;
+    this.b.x = this.grid.width / 2 - 1;
+    this.b.y = 0;
     this.b.shape = this.shapes[this.b.m];
-    this.answer.r = move.rot, this.answer.x = move.col;
+
+    this.answer.r = move.rot;
+    this.answer.x = move.col;
+
     this.moveNo++;
     this.logPerformance();
     this.ui.moveNoElm.innerHTML = this.moveNo;
