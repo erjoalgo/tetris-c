@@ -23,12 +23,12 @@
         for the JavaScript code in this page.
 */
 
+var UI = function(parentElt){
 
-var ui = {
-    cellSize: "30",
-    cellGrid: [],
-    fontSize: "30px",
-    loading: createElementWithProperties("img", {
+    this.cellSize = "30";
+    this.cellGrid = [];
+    this.fontSize = "30px";
+    this.loading = createElementWithProperties("img", {
         hw: ["400", "550"],
         show: function(show) {
             if (show) {
@@ -42,137 +42,318 @@ var ui = {
 
             }
         }
-    }),
-    moveNoElm: null,
-    colors: {
-        'BLUE': "#0000f0",
-        'BLACK': "#000000",
-        'WHITE': "#ffffff",
-        'GREEN': 3,
-        filled: this.BLUE,
-        blank: this.WHITE
-    },
-    tableCreate: function(width, height) {
+                                                      });
+    this.moveNoElm = null;
+    this.parentElt = parentElt;
 
-        var body = document.getElementsByTagName("body")[0];
+    this.init();
+}
 
-        this.loading.show(false);
-        body.appendChild(this.loading);
+UI.prototype.paint = function(r, c, color) {
+    assert(color != null);
+    this.cellGrid[r][c].bgColor = color;
+}
 
-        var tbl = document.createElement("table");
-        tbl.class = "table";
-        var tblBody = document.createElement("tbody");
+UI.prototype.tableCreate = function(parentElt, width, height) {
+    var body = parentElt;
 
-        for (var j = 0; j < height; j++) {
-            cellRow = [];
-            this.cellGrid.push(cellRow);
-            var row = document.createElement("tr");
-            for (var i = 0; i < width; i++) {
-                var cell = document.createElement("td");
-                cellRow.push(cell);
+    this.loading.show(false);
+    body.appendChild(this.loading);
 
-                cell.width = this.cellSize;
-                cell.height = this.cellSize;
-                cell.bgColor = this.colors.blank;
-                cell.style.border = "1px solid #000"
+    var tbl = document.createElement("table");
+    tbl.class = "table";
+    var tblBody = document.createElement("tbody");
 
-                var cellText = document.createTextNode("");
-                cell.appendChild(cellText);
-                row.appendChild(cell);
-            }
+    for (var j = 0; j < height; j++) {
+        cellRow = [];
+        this.cellGrid.push(cellRow);
+        var row = document.createElement("tr");
+        for (var i = 0; i < width; i++) {
+            var cell = document.createElement("td");
+            cellRow.push(cell);
 
-            tblBody.appendChild(row);
+            cell.width = this.cellSize;
+            cell.height = this.cellSize;
+            cell.bgColor = this.colors.blank;
+            cell.style.border = "1px solid #000"
+
+            var cellText = document.createTextNode("");
+            cell.appendChild(cellText);
+            row.appendChild(cell);
         }
-        tbl.appendChild(tblBody);
-        body.appendChild(tbl);
-        tbl.setAttribute("border", "2");
 
-        body.appendChild(createElementWithProperties(
-            "label", {
-                innerHTML: "Move ",
-                "style.fontSize": this.fontSize
-            }));
-        this.moveNoElm = (createElementWithProperties(
-            "label", {
-                "style.fontSize": this.fontSize
-            }));
-        body.appendChild(this.moveNoElm);
+        tblBody.appendChild(row);
+    }
+    tbl.appendChild(tblBody);
+    body.appendChild(tbl);
+    tbl.setAttribute("border", "2");
+}
 
-        body.appendChild(document.createElement("br"));
+UI.prototype.init = function(){
 
-        body.appendChild(createElementWithProperties(
-            "label", {
-                innerHTML: "Speed ",
-                "style.fontSize": this.fontSize
-            }));
+    var body = this.parentElt;
+    body.appendChild(createElementWithProperties(
+        "label", {
+            innerHTML: "Move ",
+            "style.fontSize": this.fontSize
+        }));
+    this.moveNoElm = (createElementWithProperties(
+        "label", {
+            "style.fontSize": this.fontSize
+        }));
+    body.appendChild(this.moveNoElm);
 
-        this.slider = createElementWithProperties(
-            "input", {
-                type: "range",
-                min: 1,
-                max: 200,
-                value: timerDelay,
-                invertValue: function(val) {
-                    return parseInt(this.max) - val + parseInt(this.min);
-                },
-                onchange: function() {
-                    timerDelay = this.invertValue(this.value);
-                }
-            });
+    body.appendChild(document.createElement("br"));
 
-        this.slider.value = this.slider.invertValue(timerDelay);
+    body.appendChild(createElementWithProperties(
+        "label", {
+            innerHTML: "Speed ",
+            "style.fontSize": this.fontSize
+        }));
 
-        body.appendChild(this.slider);
-    },
-    paint: function(r, c, color) {
-        assert(color != null);
-        this.cellGrid[r][c].bgColor = color;
+    this.slider = createElementWithProperties(
+        "input", {
+            type: "range",
+            min: 1,
+            max: 100,
+            value: timerDelay,
+            invertValue: function(val) {
+                return parseInt(this.max) - val + parseInt(this.min);
+            },
+            onchange: function() {
+                timerDelay = this.invertValue(this.value);
+            }
+        });
+
+    this.slider.value = this.slider.invertValue(timerDelay);
+
+    body.appendChild(this.slider);
+}
+
+UI.prototype.colors = {
+    'BLUE': "#0000f0",
+    'BLACK': "#000000",
+    'WHITE': "#ffffff",
+    'GREEN': 3,
+    filled: this.BLUE,
+    blank: this.WHITE
+}
+
+UI.prototype.colors.filled = UI.prototype.colors.BLUE;
+UI.prototype.colors.blank = UI.prototype.colors.WHITE;
+
+UI.prototype.paintTo = function(b, color){
+    for (var itr = b.iter(); itr.hasNext();) {
+        var xy = itr.next().value;
+        this.paint(xy[1], xy[0], color);
+    }
+    return true;
+}
+
+UI.prototype.repaintRows = function(ymin, ymax, grid) {
+    for (; ymin < ymax; ymin++) {
+        for (var x = 0; x < grid.width; x++) {
+            // TODO
+            this.paint(ymin, x, grid.g[ymin][x] || this.colors.blank);
+        }
     }
 }
 
-ui.colors.filled = ui.colors.BLUE;
-ui.colors.blank = ui.colors.WHITE;
-
 var timerDelay = 90;
 
-var state = {
-    moveQueue: [],
-    b: { //active block
-        m: null, //model number
-        r: null, //rotation state
-        x: null, //x distance from left
-        y: null //y from top
-    },
-    answer: { //server game move response
-        r: null,
-        x: null
-    },
-    pausedP: false,
-    gameOver: false,
-    moveNo: null,
-    gameNo: null,
-    shapes: null,
-    consecFailedMills: 0,
+var Game = function(parentElt){
+    this.b = new Block();
+    this.answer = new Block();
+    this.ui = new UI(parentElt);
 
-    grid: {
-        relief: null,
-        width: null,
-        height: null,
-        needClear: [],
-        needsClear: false,
-        rowcounts: null,
-        g: null
-    },
-    move: new Object()
+    this.pausedP = false;
+    this.gameOver = false;
+    this.moveNo = null;
+    this.gameNo = null;
+    this.shapes = null;
+    this.consecFailedMills = 0;
+
+    this.grid = null;
+    this.move = new Object();
 }
 
-function bIter() {
+var Grid = function ( height, width )    {
+    this.height = height;
+    this.width = width;
+
+    this.rowcounts = []
+    this.g = [];
+    this.relief = [];
+
+    this.needClear = [];
+    this.needsClear = false;
+
+    for (var i = 0; i < this.height; i++) {
+        this.rowcounts.push(0);
+        var row = [];
+        this.g.push(row);
+        for (var ii = 0; ii < this.height; ii++)
+            row.push(UI.prototype.colors.blank);
+    }
+    for (var i = 0; i < this.width; i++) {
+        this.relief.push(this.height);
+    }
+}
+
+Grid.prototype.getDropDistance = function(b){
+    var botCrust = b.shape.rotations[b.r].crusts.bot;
+
+    var dist, minDist = this.height;
+    var x = b.x;
+    var y = b.y;
+
+    for (var i = 0, reliefY; i < botCrust.length; i++) {
+        var xy = botCrust[i];
+        var reliefY = this.relief[xy[0] + b.x];
+        var dist = reliefY - xy[1];
+        if (dist < minDist) {
+            minDist = dist;
+        }
+    }
+
+    var dropDist = minDist - 1 - b.y;
+    return dropDist;
+}
+
+Grid.prototype.drop = function(b) {
+    var dropDistance = this.getDropDistance(b);
+    if (dropDistance < 0) {
+        return false;
+    } else {
+
+        b.y += dropDistance;
+
+        var topCrust = b.shape.rotations[b.r].crusts.top;
+        for (var i = 0, xy = null; i < topCrust.length; i++) {
+            xy = topCrust[i];
+            this.relief[xy[0] + b.x] = xy[1] + b.y;
+        }
+
+        for (var itr = b.iter(); itr.hasNext();) {
+            var xy = itr.next().value;
+            if (++this.rowcounts[xy[1]] == this.width) {
+                this.needsClear = true;
+                this.needClear.push(xy[1]);
+            }
+            this.g[xy[1]][xy[0]] = UI.prototype.colors.filled;
+        }
+        return true;
+    }
+}
+
+function listMin(list) {
+    var min = null;
+    for (var i = 0; i < list.length; i++) {
+        if (min == null || list[i] < min)
+            min = list[i];
+    }
+    return min;
+}
+
+Grid.prototype.clearLines = function(ui) {
+
+    if (!this.needsClear) return;
+
+    var cmpNum = function(a, b) {
+        return a - b
+    }
+    // this.lastCleared = this.needClear.length;
+    if (this.needClear.length > 0) {
+        // cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
+        // would be nice to make needClear a pqueue
+        this.needClear.sort(cmpNum); //smallest to largest
+    }
+    const YMIN = this.needClear[this.needClear.length - 1];
+    const YMAX = listMin(this.relief); //the tallest row is 0. ymax should be as small as possible
+    var y = YMIN;
+    // this.needClear.reverse ();
+    var nextNonFull = y - 1; //not necessarily non-full here
+    var cleared = [];
+
+    while (nextNonFull >= YMAX) {
+        while (this.rowcounts[nextNonFull] == this.width)
+            nextNonFull -= 1;
+        if (nextNonFull < YMAX)
+            break;
+        //nextNonFull should be non-full now
+        if (this.rowcounts[y] == this.width) {
+            assert(this.needClear[this.needClear.length - 1] == y, " assertion failed at 485 ");
+            this.needClear.pop();
+            cleared.push(this.g[y]);
+        }
+        //copy nextNonFull row into y-th row
+        this.g[y] = this.g[nextNonFull];
+        this.rowcounts[y] = this.rowcounts[nextNonFull];
+        y -= 1;
+        nextNonFull -= 1;
+    }
+
+    while (this.needClear.length > 0)
+        cleared.push(this.g[this.needClear.pop()]);
+
+    while (y >= YMAX) {
+        // assert((cleared.length>0  && sum(cleared[0])==this.width)
+        // || sum(this.g[y])==this.width);
+
+        assert(cleared.length > 0, " cleared.length assertion ");
+        this.g[y] = cleared.pop();
+        this.rowcounts[y] = 0;
+        for (var i = 0; i < this.width; i++)
+            // TODO use 0, 1
+            this.g[y][i] = UI.prototype.colors.blank;
+        y -= 1;
+    }
+
+    assert(this.needClear.length == 0, " this.needClear.length==0 assertion failed");
+    assert(cleared.length == 0, "cleared.length==0 assertion failed");
+
+    for (var i = 0; i < this.width; i++) {
+        var relief = this.relief[i];
+        while (relief < this.height && this.g[relief][i] == UI.prototype.colors.blank)
+            relief += 1;
+        this.relief[i] = relief;
+    }
+
+    this.needsClear = false;
+    if (ui != null)    {
+        ui.repaintRows(YMAX, YMIN + 1, this);
+    }
+}
+
+Grid.prototype.blockIntersects = function(b, ui) {
+    // TODO remove ui param
+    for (var itr = b.iter(); itr.hasNext();) {
+        var xy = itr.next().value;
+        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.prototype.colors.blank ||
+            this.grid.g[xy[1]][xy[0]] == ui.colors.filled);
+        if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.prototype.colors.blank) {
+            return true;
+        }
+    }
+    return false;
+}
+
+var Block = function(m, r, y, x, shape){
+    this.m = m;
+    this.r = r;
+    this.y = y;
+    this.x = x;
+    this.shape = shape;
+}
+
+Block.prototype.iter = function() {
+    var b = this;
     return (function() {
         var i = 0;
 
-        var x = state.b.x;
-        var y = state.b.y;
-        var rotCoords = state.shapes[state.b.m].rotations[state.b.r].configurations;
+        var x = b.x;
+        var y = b.y;
+        var rotCoords = b.shape.rotations[b.r].configurations;
 
         var cont = {
             value: [null, null],
@@ -199,313 +380,147 @@ function bIter() {
     })();
 }
 
-function gridBlockIntersects() {
-    for (var itr = bIter(); itr.hasNext();) {
-        var xy = itr.next().value;
-        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == ui.colors.blank ||
-            state.grid.g[xy[1]][xy[0]] == ui.colors.filled);
-        if (ui.cellGrid[xy[1]][xy[0]].bgColor != ui.colors.blank) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function paintTo(color, checkIntersects) {
-    if (checkIntersects && gridBlockIntersects()) {
-        return true;
-    } else {
-        for (var itr = bIter(); itr.hasNext();) {
-            var xy = itr.next().value;
-            ui.paint(xy[1], xy[0], color);
-        }
-        return true;
-    }
-}
-
-function addTetro() {
-    paintTo(ui.colors.filled);
-}
-
-function getDropDistance() {
-    var b = state.b;
-    var botCrust = state.shapes[b.m].rotations[b.r].crusts["bot"];
-
-    var grid = state.grid;
-    var dist, minDist = grid.height;
-    var x = state.b.x;
-    var y = state.b.y;
-
-    for (var i = 0, reliefY; i < botCrust.length; i++) {
-        xy = botCrust[i];
-        reliefY = grid.relief[xy[0] + b.x];
-        dist = reliefY - xy[1];
-        if (dist < minDist) {
-            minDist = dist;
-        }
-    }
-
-    var dropDist = minDist - 1 - b.y;
-    return dropDist;
-}
-
-function drop() {
-    var grid = state.grid;
-    var dropDistance = getDropDistance();
-    if (dropDistance < 0) {
-        state.gameOver = true;
-    } else {
-
-        var b = state.b;
-        b.y += dropDistance;
-
-        var topCrust = state.shapes[b.m].rotations[b.r].crusts["top"];
-        for (var i = 0, xy = null; i < topCrust.length; i++) {
-            xy = topCrust[i];
-            grid.relief[xy[0] + b.x] = xy[1] + b.y;
-        }
-
-        for (var itr = bIter(); itr.hasNext();) {
-            var xy = itr.next().value;
-            if (++grid.rowcounts[xy[1]] == grid.width) {
-                grid.needsClear = true;
-                grid.needClear.push(xy[1]);
-            }
-            grid.g[xy[1]][xy[0]] = ui.colors.filled;
-        }
-    }
-}
-
-function listMin(list) {
-    var min = null;
-    for (var i = 0; i < list.length; i++) {
-        if (min == null || list[i] < min)
-            min = list[i];
-    }
-    return min;
-}
-
-function clearLines() {
-    var grid = state.grid;
-    if (!grid.needsClear) return;
-
-    var cmpNum = function(a, b) {
-        return a - b
-    }
-    // grid.lastCleared = grid.needClear.length;
-    if (grid.needClear.length > 0) {
-        // cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
-        // would be nice to make needClear a pqueue
-        grid.needClear.sort(cmpNum); //smallest to largest
-    }
-    const YMIN = grid.needClear[grid.needClear.length - 1];
-    const YMAX = listMin(grid.relief); //the tallest row is 0. ymax should be as small as possible
-    var y = YMIN;
-    // grid.needClear.reverse ();
-    var nextNonFull = y - 1; //not necessarily non-full here
-    var cleared = [];
-
-    while (nextNonFull >= YMAX) {
-        while (grid.rowcounts[nextNonFull] == grid.width)
-            nextNonFull -= 1;
-        if (nextNonFull < YMAX)
-            break;
-        //nextNonFull should be non-full now
-        if (grid.rowcounts[y] == grid.width) {
-            assert(grid.needClear[grid.needClear.length - 1] == y, " assertion failed at 485 ");
-            grid.needClear.pop();
-            cleared.push(grid.g[y]);
-        }
-        //copy nextNonFull row into y-th row
-        grid.g[y] = grid.g[nextNonFull];
-        grid.rowcounts[y] = grid.rowcounts[nextNonFull];
-        y -= 1;
-        nextNonFull -= 1;
-    }
-
-    while (grid.needClear.length > 0)
-        cleared.push(grid.g[grid.needClear.pop()]);
-
-    while (y >= YMAX) {
-        // assert((cleared.length>0  && sum(cleared[0])==grid.width)
-        // || sum(grid.g[y])==grid.width);
-
-        assert(cleared.length > 0, " cleared.length assertion ");
-        grid.g[y] = cleared.pop();
-        grid.rowcounts[y] = 0;
-        for (var i = 0; i < grid.width; i++)
-            grid.g[y][i] = ui.colors.blank;
-        y -= 1;
-    }
-
-    assert(grid.needClear.length == 0, " grid.needClear.length==0 assertion failed");
-    assert(cleared.length == 0, "cleared.length==0 assertion failed");
-
-    for (var i = 0; i < grid.width; i++) {
-        var relief = grid.relief[i];
-        while (relief < grid.height && grid.g[relief][i] == ui.colors.blank)
-            relief += 1;
-        grid.relief[i] = relief;
-    }
-
-    grid.needsClear = false;
-    repaintRows(YMAX, YMIN + 1);
-}
-
-function repaintRows(ymin, ymax) {
-    var grid = state.grid;
-    for (; ymin < ymax; ymin++) {
-        for (var x = 0; x < grid.width; x++) {
-            ui.paint(ymin, x, grid.g[ymin][x] || ui.colors.blank);
-        }
-    }
-}
-
-function logPerformance(state) {
+Game.prototype.logPerformance = function() {
     const MOD = 1000;
-    if (state.moveNo % MOD == 0) {
+    if (this.moveNo % MOD == 0) {
         var now = window.performance.now();
-        if (state.last != null) {
-            var elapsed = (now - state.last) / 1000;
+        if (this.last != null) {
+            var elapsed = (now - this.last) / 1000;
             console.log("moves/sec: " + precisionRound(MOD / elapsed, 2));
         }
-        state.last = now;
+        this.last = now;
     }
 }
 
-function fetchCallback(move) {
-
-    assert(state.gameNo != null && state.moveNo != null);
-    state.b.m = move.shape, state.b.r = 0, state.b.x = state.grid.width / 2 - 1, state.b.y = 0;
-    state.answer.r = move.rot, state.answer.x = move.col;
-    state.moveNo++;
-    logPerformance(state);
-    ui.moveNoElm.innerHTML = state.moveNo;
+Game.prototype.fetchCallback = function(move) {
+    assert(this.gameNo != null && this.moveNo != null);
+    // todo wrap
+    this.b.m = move.shape, this.b.r = 0, this.b.x = this.grid.width / 2 - 1, this.b.y = 0;
+    this.b.shape = this.shapes[this.b.m];
+    this.answer.r = move.rot, this.answer.x = move.col;
+    this.moveNo++;
+    this.logPerformance();
+    this.ui.moveNoElm.innerHTML = this.moveNo;
 }
 
-function fetch() {
-    if (state.ws != null) {
+Game.prototype.fetch = function() {
+    var game = this;
+    if (this.ws != null) {
         return new Promise(function(resolve, reject) {
-            state.ws.resolve = resolve;
-            state.ws.reject = reject;
-            state.ws.send(state.moveNo);
+            game.ws.resolve = resolve;
+            game.ws.reject = reject;
+            game.ws.send(game.moveNo);
         });
     } else {
-        var uri = "/games/" + state.gameNo + "/moves/" + state.moveNo;
+        var uri = "/games/" + this.gameNo + "/moves/" + this.moveNo;
         return serverRequest(uri).then(fetchCallback, gameOver);
     }
 }
 
-function init() {
-    return serverRequest("/games/" + state.gameNo, init)
+Game.prototype.init = function(gameNo) {
+    this.gameNo = gameNo;
+
+    // use 'state' as 'this' to distinguish from game. TODO
+
+    var state = this;
+    return serverRequest("/games/" + gameNo)
         .then(function(response) {
-                var game = response;
+            var game = response;
 
-                var grid = state.grid;
 
-                var miny = grid.height;
+            var miny = game.height;
 
-                var skip = false; // start from move 0`
-                if (skip) {
-                    game.move_no = -1;
-                    game.on_cells = [];
+            var skip = false; // start from move 0
+            if (skip) {
+                game.move_no = -1;
+                game.on_cells = [];
+            }
+
+            state.moveNo = game.move_no;
+
+            // game.moveNo is for current move.
+            state.moveNo++;
+
+            var grid = new Grid(game.height, game.width);
+            state.grid = grid;
+
+            console.log("move no is: " + state.moveNo);
+
+            var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
+
+            if (supportsWebSockets && game.ws_port) {
+                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
+                    "/games/" + state.gameNo;
+                console.log("using ws url: " + state.ws_url);
+                state.ws = new WebSocket(state.ws_url);
+                state.ws.addEventListener('message', function(event) {
+                    var packed = event.data;
+                    // if (packed<0)    {state.ws.reject();}
+                    var move = state.move;
+                    move.shape = (packed >> 16) & 0xff;
+                    move.rot = (packed >> 8) & 0xff;
+                    move.col = (packed >> 0) & 0xff;
+                    state.fetchCallback(move);
+                    state.ws.resolve();
+                });
+            }
+
+            //delete previous table
+            state.ui.tableCreate(state.ui.parentElt, grid.width, grid.height);
+
+            for (var i = 0; i < game.on_cells.length; i++) {
+                xy = game.on_cells[i];
+                x = xy % grid.width;
+                y = Math.floor(xy / grid.width);
+                y = grid.height - 1 - y;
+
+                grid.g[y][x] = UI.prototype.colors.filled;
+                // TODO just repaint UI
+                // ui.paint(y, x, ui.colors.filled);
+                if (y < miny)
+                    miny = y;
+                if (y < grid.relief[x]) {
+                    grid.relief[x] = y;
                 }
-
-                state.moveNo = game.move_no;
-
-                // game.moveNo is for current move.
-                state.moveNo++;
-
-                console.log("move no is: " + state.moveNo);
-
-                var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
-
-                if (supportsWebSockets && game.ws_port) {
-                    state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
-                        "/games/" + state.gameNo;
-                    console.log("using ws url: " + state.ws_url);
-                    state.ws = new WebSocket(state.ws_url);
-                    state.ws.addEventListener('message', function(event) {
-                        var packed = event.data;
-                        // if (packed<0)    {state.ws.reject();}
-                        var move = state.move;
-                        move.shape = (packed >> 16) & 0xff;
-                        move.rot = (packed >> 8) & 0xff;
-                        move.col = (packed >> 0) & 0xff;
-                        fetchCallback(move);
-                        state.ws.resolve();
+                grid.rowcounts[y]++;
+            }
+            state.ui.repaintRows(0, miny, grid);
+            if (state.ws) {
+                return new Promise(function(resolve, reject) {
+                    state.ws.addEventListener('open', function(event) {
+                        console.log("ws connection opened..");
+                        resolve();
                     });
-                }
 
-                grid.width = game.width;
-                grid.height = game.height;
-
-                grid.rowcounts = []
-                grid.g = [];
-                grid.relief = [];
-                state.answerRx = [null, null];
-
-                ui.tableCreate(grid.width, grid.height); //delete previous table
-
-                for (var i = 0; i < grid.height; i++) {
-                    grid.rowcounts.push(0);
-                    var row = [];
-                    grid.g.push(row);
-                    for (var ii = 0; ii < grid.height; ii++)
-                        row.push(ui.colors.blank);
-                }
-                for (var i = 0; i < grid.width; i++) {
-                    grid.relief.push(grid.height);
-                }
-
-                for (var i = 0; i < game.on_cells.length; i++) {
-                    xy = game.on_cells[i];
-                    x = xy % grid.width;
-                    y = Math.floor(xy / grid.width);
-                    y = grid.height - 1 - y;
-
-                    grid.g[y][x] = ui.colors.filled;
-                    ui.paint(y, x, ui.colors.filled);
-                    if (y < miny)
-                        miny = y;
-                    if (y < grid.relief[x]) {
-                        grid.relief[x] = y;
-                    }
-                    grid.rowcounts[y]++;
-                }
-                repaintRows(0, miny);
-                if (state.ws) {
-                    return new Promise(function(resolve, reject) {
-                        state.ws.addEventListener('open', function(event) {
-                            console.log("ws connection opened..");
-                            resolve();
-                        });
-
-                        state.ws.addEventListener('error', function(event) {
-                            console.log("ws connection error..");
-                            reject();
-                        });
-
-                        state.ws.addEventListener('close', function(event) {
-                            console.log("ws connection closed..");
-                            reject();
-                        });
+                    state.ws.addEventListener('error', function(event) {
+                        console.log("ws connection error..");
+                        reject();
                     });
-                }
-            },
-            gameOver);
+
+                    state.ws.addEventListener('close', function(event) {
+                        console.log("ws connection closed..");
+                        reject();
+                    });
+                });
+            }
+        },
+              this.gameOver);
 }
 
-function initShapes() {
-    return serverRequest("shapes", initShapes)
+Game.prototype.initShapes = function() {
+    var game = this;
+    return serverRequest("shapes")
         .then(function(response) {
-                state.shapes = response;
-                if (state.shapes.length == 0) {
+            var shapes = response;
+            game.shapes = shapes;
+
+                if (shapes.length == 0) {
                     error("0 shapes received from server!");
                 }
-                for (var i = 0; i < state.shapes.length; i++) {
-                    var shape = state.shapes[i];
+                for (var i = 0; i < shapes.length; i++) {
+                    var shape = shapes[i];
                     var rots = shape.rotations;
+                    // TODO encapsulate
                     for (var r = 0; r < rots.length; r++) {
                         var zeroSeen = false;
                         var rot = rots[r];
@@ -532,88 +547,108 @@ function initShapes() {
                         }
                     }
                 }
-            },
-            gameOver);
+        },
+              // TODO
+            this.gameOver);
 }
 
-function initGameNo() {
-    return serverRequest("/games", initGameNo).then(function(response) {
+Game.prototype.initGameNo = function() {
+    return serverRequest("/games").then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
             error("no current games on server");
         } else {
-            state.gameNo = gamenoList[gamenoList.length - 1];
-            console.log("init gameNo is " + state.gameNo);
+            var gameNo = gamenoList[gamenoList.length - 1];
+            console.log("init gameNo is " + this.gameNo);
+            return gameNo;
         }
-        // TODO use either error or gameover
+        // TODO use either error or gameover, not both
     }, error);
 }
 
-function planExecute() {
+Game.prototype.planExecute = function() {
+    var game = this;
     return new Promise(function(resolve, reject) {
-        planExecuteCallback(function() {
+        game.planExecuteCallback(function() {
             resolve();
         }, reject);
     });
 }
 
-function planExecuteCallback(resolve, reject) {
-    paintTo(ui.colors.blank); // delete
-    var origR = state.b.r;
-    var origX = state.b.x;
+Game.prototype.planExecuteCallback = function(resolve, reject) {
+    var game = this;
+    var b = game.b;
+    var answer = game.answer;
+    var ui = this.ui;
 
-    if (state.b.r != state.answer.r) {
-        state.b.r++;
-        state.b.r %= 4;
-    } else if (state.b.x < state.answer.x) {
-        state.b.x++;
-    } else if (state.b.x > state.answer.x) {
-        state.b.x--;
+    this.ui.paintTo(b, UI.prototype.colors.blank); // erase
+    var origR = b.r;
+    var origX = b.x;
+
+    if (b.r != answer.r) {
+        b.r++;
+        b.r %= 4;
+    } else if (b.x < answer.x) {
+        b.x++;
+    } else if (b.x > answer.x) {
+        b.x--;
     } else {
-        drop();
-        paintTo(ui.colors.filled);
-        clearLines();
-        setTimeout(resolve, timerDelay);
+        if (!this.grid.drop(this.b))    {
+            game.gameOver = true;
+            reject();
+        }else     {
+            this.ui.paintTo(b, ui.colors.filled);
+            this.grid.clearLines(this.ui);
+            setTimeout(resolve, timerDelay);
+        }
         return;
     }
 
     // check if move is possible
-    if (gridBlockIntersects()) {
+    if (this.grid.blockIntersects(b, ui)) {
         // undo last move and repaint
-        state.b.r = origR;
-        state.b.x = origX;
-        paintTo(ui.colors.filled);
-        state.gameOver = true;
+        b.r = origR;
+        b.x = origX;
+        this.paintTo(b, UI.prototype.colors.filled);
+        game.gameOver = true;
         reject();
     } else {
-        paintTo(ui.colors.filled);
-        setTimeout(planExecuteCallback.bind(null, resolve, reject), timerDelay);
+        this.ui.paintTo(b, UI.prototype.colors.filled);
+        setTimeout(this.planExecuteCallback.bind(this, resolve, reject), timerDelay);
     }
 }
 
-function pauseToggle() {
-    state.pausedP = !pauseP;
+Game.prototype.pauseToggle = function() {
+    this.pausedP = !pauseP;
 }
 
-function gameOver() {
+Game.prototype.gameOver = function() {
     alert("game over!");
 }
 
 
-function fetchPlanExecuteLoop() {
-    fetch().then(addTetro).then(planExecute)
-        .then(fetchPlanExecuteLoop).catch(error);
+Game.prototype.fetchPlanExecuteLoop = function() {
+    var game = this;
+    this.fetch()
+        .then((function(){
+            game.ui.paintTo(game.b, UI.prototype.colors.filled)
+        }).bind(this))
+        .then(this.planExecute.bind(this))
+        .then(this.fetchPlanExecuteLoop.bind(this))
+        .catch(error);
 }
 
-function start() {
-    // TODO pass state around callbacks/promises, no global state
-    initGameNo().then(init).then(initShapes).then(fetchPlanExecuteLoop);
+Game.prototype.start = function() {
+    var game = this;
+    this.initGameNo()
+        .then(this.init.bind(this))
+        .then(this.initShapes.bind(this))
+        .then(this.fetchPlanExecuteLoop.bind(this));
 }
 
-start();
-
-function precisionRound(number, precision) {
-    var factor = Math.pow(10, precision);
-    return Math.round(number * factor) / factor;
+window.onload = function() {
+    var parentElt = document.getElementsByTagName("body")[0];
+    assert(parentElt);
+    new Game(parentElt).start();
 }
 
