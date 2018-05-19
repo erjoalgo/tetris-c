@@ -53,7 +53,7 @@
                :grid-height-width (cons tetris-ai:default-height
                                         tetris-ai:default-width)
                :ai-depth 3
-               :default-ai-move-delay-millis 500
+               :default-ai-move-delay-millis 5
                :log-filename "tetris-ai-rest.log"
                :max-move-catchup-wait-secs 10)
   "fallback service configuration to fill in any mising (nil) values"
