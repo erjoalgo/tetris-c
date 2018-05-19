@@ -47,12 +47,12 @@ var UI = function(parentElt) {
     this.parentElt = parentElt;
 
     this.init();
-}
+};
 
 UI.prototype.paint = function(r, c, color) {
     assert(color != null);
     this.cellGrid[r][c].bgColor = color;
-}
+};
 
 UI.prototype.tableCreate = function(parentElt, width, height) {
     var body = parentElt;
@@ -75,7 +75,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
             cell.width = this.cellSize;
             cell.height = this.cellSize;
             cell.bgColor = this.colors.blank;
-            cell.style.border = "1px solid #000"
+            cell.style.border = "1px solid #000";
 
             var cellText = document.createTextNode("");
             cell.appendChild(cellText);
@@ -87,7 +87,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
     tbl.appendChild(tblBody);
     body.appendChild(tbl);
     tbl.setAttribute("border", "2");
-}
+};
 
 UI.prototype.init = function() {
 
@@ -118,7 +118,8 @@ UI.prototype.init = function() {
 
 
     body.appendChild(this.slider);
-}
+};
+
 UI.prototype.initSlider = function(initialValue, onChangeFun) {
 
     this.slider.min = 1;
@@ -129,10 +130,10 @@ UI.prototype.initSlider = function(initialValue, onChangeFun) {
     };
     this.slider.onchange = function() {
         onChangeFun(this.invertValue(this.value));
-    }
+    };
 
     this.slider.value = this.slider.invertValue(initialValue);
-}
+};
 
 UI.prototype.colors = {
     'BLUE': "#0000f0",
@@ -141,7 +142,7 @@ UI.prototype.colors = {
     'GREEN': 3,
     filled: this.BLUE,
     blank: this.WHITE
-}
+};
 
 UI.prototype.colors.filled = UI.prototype.colors.BLUE;
 UI.prototype.colors.blank = UI.prototype.colors.WHITE;
@@ -152,7 +153,7 @@ UI.prototype.paintTo = function(b, color) {
         this.paint(xy[1], xy[0], color);
     }
     return true;
-}
+};
 
 UI.prototype.repaintRows = function(ymin, ymax, grid) {
     for (; ymin < ymax; ymin++) {
@@ -161,7 +162,7 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
             this.paint(ymin, x, grid.g[ymin][x] || this.colors.blank);
         }
     }
-}
+};
 
 const INITIAL_TIMER_DELAY = 90;
 
@@ -180,13 +181,13 @@ var Game = function(parentElt) {
     this.grid = null;
     this.move = new Object();
     this.timerDelay = INITIAL_TIMER_DELAY;
-}
+};
 
 var Grid = function(height, width) {
     this.height = height;
     this.width = width;
 
-    this.rowcounts = []
+    this.rowcounts = [];
     this.g = [];
     this.relief = [];
 
@@ -203,7 +204,7 @@ var Grid = function(height, width) {
     for (var i = 0; i < this.width; i++) {
         this.relief.push(this.height);
     }
-}
+};
 
 Grid.prototype.getDropDistance = function(b) {
     var botCrust = b.shape.rotations[b.r].crusts.bot;
@@ -223,7 +224,7 @@ Grid.prototype.getDropDistance = function(b) {
 
     var dropDist = minDist - 1 - b.y;
     return dropDist;
-}
+};
 
 Grid.prototype.drop = function(b) {
     var dropDistance = this.getDropDistance(b);
@@ -249,15 +250,15 @@ Grid.prototype.drop = function(b) {
         }
         return true;
     }
-}
+};
 
 Grid.prototype.clearLines = function(ui) {
 
     if (!this.needsClear) return;
 
     var cmpNum = function(a, b) {
-        return a - b
-    }
+        return a - b;
+    };
     // this.lastCleared = this.needClear.length;
     if (this.needClear.length > 0) {
         // cmpNum is necessary, otherwise sort is lexicographic, eg 10<9
@@ -319,7 +320,7 @@ Grid.prototype.clearLines = function(ui) {
     if (ui != null) {
         ui.repaintRows(YMAX, YMIN + 1, this);
     }
-}
+};
 
 Grid.prototype.blockIntersects = function(b, ui) {
     // TODO remove ui param
@@ -332,7 +333,7 @@ Grid.prototype.blockIntersects = function(b, ui) {
         }
     }
     return false;
-}
+};
 
 var Block = function(m, r, y, x, shape) {
     this.m = m;
@@ -340,7 +341,7 @@ var Block = function(m, r, y, x, shape) {
     this.y = y;
     this.x = x;
     this.shape = shape;
-}
+};
 
 Block.prototype.iter = function() {
     var b = this;
@@ -386,7 +387,7 @@ Game.prototype.logPerformance = function() {
         }
         this.last = now;
     }
-}
+};
 
 Game.prototype.fetchCallback = function(move) {
     assert(this.gameNo != null && this.moveNo != null);
@@ -397,7 +398,7 @@ Game.prototype.fetchCallback = function(move) {
     this.moveNo++;
     this.logPerformance();
     this.ui.moveNoElm.innerHTML = this.moveNo;
-}
+};
 
 Game.prototype.fetch = function() {
     var game = this;
@@ -411,7 +412,7 @@ Game.prototype.fetch = function() {
         var uri = "/games/" + this.gameNo + "/moves/" + this.moveNo;
         return serverRequest(uri).then(fetchCallback, gameOver);
     }
-}
+};
 
 Game.prototype.init = function(gameNo) {
     this.gameNo = gameNo;
@@ -481,7 +482,7 @@ Game.prototype.init = function(gameNo) {
             state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
                 (function(newVal) {
-                    state.timerDelay = newVal
+                    state.timerDelay = newVal;
                 }).bind(this));
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
@@ -502,7 +503,7 @@ Game.prototype.init = function(gameNo) {
                 });
             }
         });
-}
+};
 
 Game.prototype.initShapes = function() {
     var game = this;
@@ -544,7 +545,7 @@ Game.prototype.initShapes = function() {
                 }
             }
         });
-}
+};
 
 Game.prototype.initGameNo = function() {
     return serverRequest("/games").then(function(response) {
@@ -557,7 +558,7 @@ Game.prototype.initGameNo = function() {
             return gameNo;
         }
     });
-}
+};
 
 Game.prototype.planExecute = function() {
     var game = this;
@@ -566,7 +567,7 @@ Game.prototype.planExecute = function() {
             resolve();
         }, reject);
     });
-}
+};
 
 Game.prototype.planExecuteCallback = function(resolve, reject) {
     var game = this;
@@ -609,27 +610,26 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         this.ui.paintTo(b, UI.prototype.colors.filled);
         setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
     }
-}
+};
 
 Game.prototype.pauseToggle = function() {
     this.pausedP = !pauseP;
-}
+};
 
 Game.prototype.gameOver = function() {
     alert("game over!");
-}
-
+};
 
 Game.prototype.fetchPlanExecuteLoop = function() {
     var game = this;
     this.fetch()
         .then((function() {
-            game.ui.paintTo(game.b, UI.prototype.colors.filled)
+            game.ui.paintTo(game.b, UI.prototype.colors.filled);
         }).bind(this))
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
         .catch(handleError);
-}
+};
 
 Game.prototype.start = function() {
     var game = this;
@@ -637,10 +637,10 @@ Game.prototype.start = function() {
         .then(this.init.bind(this))
         .then(this.initShapes.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this));
-}
+};
 
 window.onload = function() {
     var parentElt = document.getElementsByTagName("body")[0];
     assert(parentElt);
     new Game(parentElt).start();
-}
+};

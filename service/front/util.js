@@ -4,7 +4,7 @@ const RETRY_TIMEOUT = 500;
 function serverRequest(url, consecFailedMills) {
 
     if (consecFailedMills == null)    {
-        consecFailedMills = 0
+        consecFailedMills = 0;
     }
 
     assert(url != null);
@@ -39,7 +39,7 @@ function serverRequest(url, consecFailedMills) {
                     resolve(response);
                 }
             }
-        }
+        };
         xhr.send(null);
     });
 }
@@ -76,7 +76,7 @@ function assert(condition, message) {
 
     // todo: upload stack trace
     if (!condition) {
-        message = message || "Assertion failed"
+        message = message || "Assertion failed";
         alert(message);
         debugger;
         throw message;
