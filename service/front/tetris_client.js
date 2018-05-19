@@ -499,9 +499,10 @@ Game.prototype.init = function(gameNo) {
                 y = grid.height - 1 - y;
 
                 grid.setCell(y, x, UI.prototype.colors.filled);
+                state.ui.paint(y, x, UI.prototype.colors.filled);
                 if (y < miny) miny = y;
             }
-            state.ui.repaintRows(0, grid.height, grid);
+            state.ui.repaintRows(0, miny, grid);
             state.ui.initSlider(this.timerDelay,
                 (function(newVal) {
                     state.timerDelay = newVal;
