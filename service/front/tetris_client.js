@@ -180,7 +180,7 @@ var Game = function(parentElt) {
     this.consecFailedMills = 0;
 
     this.grid = null;
-    this.move = new Object();
+    this.move = {};
     this.timerDelay = INITIAL_TIMER_DELAY;
 };
 
