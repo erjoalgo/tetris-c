@@ -23,7 +23,7 @@
         for the JavaScript code in this page.
 */
 
-var UI = function(parentElt){
+var UI = function(parentElt) {
 
     this.cellSize = "30";
     this.cellGrid = [];
@@ -42,7 +42,7 @@ var UI = function(parentElt){
 
             }
         }
-                                                      });
+    });
     this.moveNoElm = null;
     this.parentElt = parentElt;
 
@@ -89,7 +89,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
     tbl.setAttribute("border", "2");
 }
 
-UI.prototype.init = function(){
+UI.prototype.init = function() {
 
     var body = this.parentElt;
     body.appendChild(createElementWithProperties(
@@ -119,7 +119,7 @@ UI.prototype.init = function(){
 
     body.appendChild(this.slider);
 }
-UI.prototype.initSlider = function(initialValue, onChangeFun){
+UI.prototype.initSlider = function(initialValue, onChangeFun) {
 
     this.slider.min = 1;
     this.slider.max = 100;
@@ -146,7 +146,7 @@ UI.prototype.colors = {
 UI.prototype.colors.filled = UI.prototype.colors.BLUE;
 UI.prototype.colors.blank = UI.prototype.colors.WHITE;
 
-UI.prototype.paintTo = function(b, color){
+UI.prototype.paintTo = function(b, color) {
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
         this.paint(xy[1], xy[0], color);
@@ -165,7 +165,7 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
 
 const INITIAL_TIMER_DELAY = 90;
 
-var Game = function(parentElt){
+var Game = function(parentElt) {
     this.b = new Block();
     this.answer = new Block();
     this.ui = new UI(parentElt);
@@ -182,7 +182,7 @@ var Game = function(parentElt){
     this.timerDelay = INITIAL_TIMER_DELAY;
 }
 
-var Grid = function ( height, width )    {
+var Grid = function(height, width) {
     this.height = height;
     this.width = width;
 
@@ -205,7 +205,7 @@ var Grid = function ( height, width )    {
     }
 }
 
-Grid.prototype.getDropDistance = function(b){
+Grid.prototype.getDropDistance = function(b) {
     var botCrust = b.shape.rotations[b.r].crusts.bot;
 
     var dist, minDist = this.height;
@@ -316,7 +316,7 @@ Grid.prototype.clearLines = function(ui) {
     }
 
     this.needsClear = false;
-    if (ui != null)    {
+    if (ui != null) {
         ui.repaintRows(YMAX, YMIN + 1, this);
     }
 }
@@ -334,7 +334,7 @@ Grid.prototype.blockIntersects = function(b, ui) {
     return false;
 }
 
-var Block = function(m, r, y, x, shape){
+var Block = function(m, r, y, x, shape) {
     this.m = m;
     this.r = r;
     this.y = y;
@@ -480,7 +480,9 @@ Game.prototype.init = function(gameNo) {
             }
             state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
-                                (function(newVal){state.timerDelay = newVal}).bind(this));
+                (function(newVal) {
+                    state.timerDelay = newVal
+                }).bind(this));
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
@@ -508,39 +510,39 @@ Game.prototype.initShapes = function() {
         .then(function(response) {
             var shapes = response;
             game.shapes = shapes;
-                if (shapes.length == 0) {
-                    throw new Error("0 shapes received from server!");
-                }
-                for (var i = 0; i < shapes.length; i++) {
-                    var shape = shapes[i];
-                    var rots = shape.rotations;
-                    // TODO encapsulate
-                    for (var r = 0; r < rots.length; r++) {
-                        var zeroSeen = false;
-                        var rot = rots[r];
-                        var rotH = rot.height;
-                        var rotCoords = rot.configurations;
-                        for (var b = 0; b < rotCoords.length; b++) {
-                            var cr = rotCoords[b];
+            if (shapes.length == 0) {
+                throw new Error("0 shapes received from server!");
+            }
+            for (var i = 0; i < shapes.length; i++) {
+                var shape = shapes[i];
+                var rots = shape.rotations;
+                // TODO encapsulate
+                for (var r = 0; r < rots.length; r++) {
+                    var zeroSeen = false;
+                    var rot = rots[r];
+                    var rotH = rot.height;
+                    var rotCoords = rot.configurations;
+                    for (var b = 0; b < rotCoords.length; b++) {
+                        var cr = rotCoords[b];
+                        cr[1] *= -1;
+                        cr[1] += rotH - 1;
+                        assert(cr[1] >= 0);
+                        zeroSeen = zeroSeen || cr[1] == 0;
+                    }
+                    assert(zeroSeen);
+
+                    CRUSTNAMES = ["top", "bot", "left", "right"];
+                    for (var c = 0; c < CRUSTNAMES.length; c++) {
+                        var crust = rot.crusts[CRUSTNAMES[c]];
+                        for (var b = 0; b < crust.length; b++) {
+                            var cr = crust[b];
                             cr[1] *= -1;
                             cr[1] += rotH - 1;
                             assert(cr[1] >= 0);
-                            zeroSeen = zeroSeen || cr[1] == 0;
-                        }
-                        assert(zeroSeen);
-
-                        CRUSTNAMES = ["top", "bot", "left", "right"];
-                        for (var c = 0; c < CRUSTNAMES.length; c++) {
-                            var crust = rot.crusts[CRUSTNAMES[c]];
-                            for (var b = 0; b < crust.length; b++) {
-                                var cr = crust[b];
-                                cr[1] *= -1;
-                                cr[1] += rotH - 1;
-                                assert(cr[1] >= 0);
-                            }
                         }
                     }
                 }
+            }
         });
 }
 
@@ -584,10 +586,10 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     } else if (b.x > answer.x) {
         b.x--;
     } else {
-        if (!this.grid.drop(this.b))    {
+        if (!this.grid.drop(this.b)) {
             game.gameOver = true;
             reject();
-        }else     {
+        } else {
             this.ui.paintTo(b, ui.colors.filled);
             this.grid.clearLines(this.ui);
             setTimeout(resolve, this.timerDelay);
@@ -621,7 +623,7 @@ Game.prototype.gameOver = function() {
 Game.prototype.fetchPlanExecuteLoop = function() {
     var game = this;
     this.fetch()
-        .then((function(){
+        .then((function() {
             game.ui.paintTo(game.b, UI.prototype.colors.filled)
         }).bind(this))
         .then(this.planExecute.bind(this))
@@ -642,4 +644,3 @@ window.onload = function() {
     assert(parentElt);
     new Game(parentElt).start();
 }
-
