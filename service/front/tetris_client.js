@@ -558,7 +558,7 @@ Game.prototype.initShapes = function() {
         });
 };
 
-Game.prototype.initGameNo = function() {
+Game.prototype.fetchGameNo = function() {
     return serverRequest("/games").then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
@@ -643,7 +643,7 @@ Game.prototype.fetchPlanExecuteLoop = function() {
 };
 
 Game.prototype.start = function() {
-    this.initGameNo()
+    this.fetchGameNo()
         .then(this.init.bind(this))
         .then(this.initShapes.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this));
