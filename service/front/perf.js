@@ -30,3 +30,4 @@ function wsPerf(ws_url, max, tries) {
         ws.send(0);
     });
 }
+// wsPerf(games[0].ws_url, 5* 1000, -1);
