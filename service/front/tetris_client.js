@@ -281,7 +281,7 @@ Grid.prototype.clearLines = function(ui) {
             break;
         //nextNonFull should be non-full now
         if (this.rowcounts[y] == this.width) {
-            assert(this.needClear[this.needClear.length - 1] == y, " assertion failed at 485 ");
+            assert(this.needClear[this.needClear.length - 1] == y);
             this.needClear.pop();
             cleared.push(this.g[y]);
         }
@@ -299,7 +299,7 @@ Grid.prototype.clearLines = function(ui) {
         // assert((cleared.length>0  && sum(cleared[0])==this.width)
         // || sum(this.g[y])==this.width);
 
-        assert(cleared.length > 0, " cleared.length assertion ");
+        assert(cleared.length > 0, "cleared.length > 0 failed");
         this.g[y] = cleared.pop();
         this.rowcounts[y] = 0;
         for (i = 0; i < this.width; i++)
@@ -308,8 +308,8 @@ Grid.prototype.clearLines = function(ui) {
         y -= 1;
     }
 
-    assert(this.needClear.length == 0, " this.needClear.length==0 assertion failed");
-    assert(cleared.length == 0, "cleared.length==0 assertion failed");
+    assert(this.needClear.length == 0);
+    assert(cleared.length == 0);
 
     for (var i = 0; i < this.width; i++) {
         var relief = this.relief[i];
