@@ -447,8 +447,8 @@ Game.prototype.init = function(gameNo) {
             // game.moveNo is for current move, need to add 1 for next move
             state.moveNo++;
 
-            var grid = new Grid(game.height, game.width);
-            state.grid = grid;
+            state.grid = new Grid(game.height, game.width);
+            var grid = state.grid;
 
             console.log("move no is: " + state.moveNo);
 
