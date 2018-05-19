@@ -508,9 +508,8 @@ Game.prototype.initShapes = function() {
         .then(function(response) {
             var shapes = response;
             game.shapes = shapes;
-
                 if (shapes.length == 0) {
-                    error("0 shapes received from server!");
+                    throw new Error("0 shapes received from server!");
                 }
                 for (var i = 0; i < shapes.length; i++) {
                     var shape = shapes[i];
@@ -549,7 +548,7 @@ Game.prototype.initGameNo = function() {
     return serverRequest("/games").then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
-            error("no current games on server");
+            throw new Error("no current games on server");
         } else {
             var gameNo = gamenoList[gamenoList.length - 1];
             console.log("init gameNo is " + this.gameNo);
