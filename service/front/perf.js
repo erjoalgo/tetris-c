@@ -1,4 +1,4 @@
-function wsPerf(max, tries) {
+function wsPerf(game, max, tries) {
     if (max == null) {
         max = 10000;
     }
@@ -7,8 +7,8 @@ function wsPerf(max, tries) {
     }
     console.log("starting perf test: " + tries);
 
-    state.gameOver = true;
-    ws = new WebSocket(state.ws_url);
+    game.gameOver = true;
+    ws = new WebSocket(game.ws_url);
     var moveNo = 0;
     var start;
     ws.addEventListener('message', function(event) {
@@ -29,4 +29,3 @@ function wsPerf(max, tries) {
         ws.send(0);
     });
 }
-
