@@ -47,14 +47,16 @@ function serverRequest(url, consecFailedMills) {
 function createElementWithProperties(tag, props) {
     var elm = document.createElement(tag);
     for (var key in props) {
-        // elm.setAttribute(key, attrs[key]);
-        var val = props[key];
-        var path = key.split(".");
-        var last = path.pop();
-        var nested = path.reduce(function(cum, a) {
-            return cum[a]
-        }, elm)
-        nested[last] = val;
+        if (props.hasOwnProperty(key))    {
+            // elm.setAttribute(key, attrs[key]);
+            var val = props[key];
+            var path = key.split(".");
+            var last = path.pop();
+            var nested = path.reduce(function(cum, a) {
+                return cum[a];
+            }, elm);
+            nested[last] = val;
+        }
     }
     return elm;
 }
