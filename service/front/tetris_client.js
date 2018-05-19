@@ -467,25 +467,6 @@ Game.prototype.init = function(gameNo) {
 
             console.log("move no is: " + state.moveNo);
 
-            var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
-
-            if (supportsWebSockets && game.ws_port) {
-                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
-                    "/games/" + state.gameNo;
-                console.log("using ws url: " + state.ws_url);
-                state.ws = new WebSocket(state.ws_url);
-                state.ws.addEventListener('message', function(event) {
-                    var packed = event.data;
-                    // if (packed<0)    {state.ws.reject();}
-                    var answer = state.answer;
-                    answer.m = (packed >> 16) & 0xff;
-                    answer.r = (packed >> 8) & 0xff;
-                    answer.x = (packed >> 0) & 0xff;
-                    state.fetchCallback(answer);
-                    state.ws.resolve();
-                });
-            }
-
             //TODO delete previous table
             state.ui.tableCreate(state.ui.tableParentDiv, grid.width, grid.height);
 
@@ -512,7 +493,24 @@ Game.prototype.init = function(gameNo) {
                 state.timerDelay = newVal;
             }));
 
-            if (state.ws) {
+            var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
+
+            if (supportsWebSockets && game.ws_port) {
+                // initialize websocket connection
+                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
+                    "/games/" + state.gameNo;
+                console.log("using ws url: " + state.ws_url);
+                state.ws = new WebSocket(state.ws_url);
+                state.ws.addEventListener('message', function(event) {
+                    var packed = event.data;
+                    // if (packed<0)    {state.ws.reject();}
+                    var answer = state.answer;
+                    answer.m = (packed >> 16) & 0xff;
+                    answer.r = (packed >> 8) & 0xff;
+                    answer.x = (packed >> 0) & 0xff;
+                    state.fetchCallback(answer);
+                    state.ws.resolve();
+                });
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
                         console.log("ws connection opened..");
