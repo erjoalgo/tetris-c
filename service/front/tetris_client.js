@@ -480,7 +480,7 @@ Game.prototype.init = function(gameNo) {
             }
             state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
-                                (function(newVal){this.timerDelay = newVal}).bind(this));
+                                (function(newVal){state.timerDelay = newVal}).bind(this));
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
