@@ -36,21 +36,25 @@
 
 (defstruct config
   port
+  ws-port
   shapes-file
   seed
   grid-height-width
   max-move-catchup-wait-secs
   ai-depth
   default-ai-move-delay-millis
+  log-filename
   )
 
-(defvar config-default
+(defparameter config-default
   (make-config :port 4242
+               ;; :ws-port 4243
                :shapes-file tetris-ai:default-shapes-file
                :grid-height-width (cons tetris-ai:default-height
-                                      tetris-ai:default-width)
+                                        tetris-ai:default-width)
                :ai-depth 3
-               :default-ai-move-delay-millis 500
+               :default-ai-move-delay-millis 5
+               :log-filename "tetris-ai-rest.log"
                :max-move-catchup-wait-secs 10)
   "fallback service configuration to fill in any mising (nil) values"
   )
@@ -58,15 +62,15 @@
 (defstruct service
   config
   acceptor
+  ws-service
   curr-game-no
   game-executions
-  )
+  log-fh)
 
 (defstruct game-execution
   game
   moves
   last-recorded-state
-  final-state
   running-p
 
   max-moves
@@ -97,6 +101,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
                               (apply 'make-config make-config-args)
                               config-default
                               ))
+  (setf (config-ws-port config) (1+ (config-port config)))
   (apply 'tetris-ai:init-tetris
          (append (when (config-shapes-file config)
                    (list :shapes-file (config-shapes-file config)))
@@ -106,22 +111,35 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
   (let ((acceptor (make-instance 'hunchentoot:easy-acceptor
                                  :port (config-port config)
                                  :document-root (truename "./www")
-                                 :access-log-destination nil)))
+                                 :access-log-destination nil))
+        (ws-service (ws-start (config-ws-port config)))
+        (log-fh (when (config-log-filename config)
+                  (open (config-log-filename config)
+                        :direction :output
+                        :if-exists :append
+                        :if-does-not-exist :create))))
+    ;; TODO use the same port
+    ;; https://github.com/joaotavora/hunchensocket/issues/14
     (hunchentoot:start acceptor)
-    (vom:warn "started on port ~D" (config-port config))
+
+    (vom:warn "started on port ~D (ws ~D)" (config-port config) (config-ws-port config))
     (setf *service*
           (make-service :config (or config config-default)
                         :acceptor acceptor
                         :game-executions (make-hash-table)
+                        :ws-service ws-service
+                        :log-fh log-fh
                         :curr-game-no 0))))
 
 (defun service-stop (&optional service)
   "stop the service if running. if service is nil, stop *service*"
   (when (setf service (or service *service*))
     (let* (;; (acceptor (service-acceptor service))
-           (acceptor (slot-value service 'acceptor)))
+           (acceptor (slot-value service 'acceptor))
+           (ws-service (slot-value service 'ws-service)))
       (when (and acceptor (hunchentoot:started-p acceptor))
-        (hunchentoot:stop acceptor)))
+        (hunchentoot:stop acceptor)
+        (ws-stop ws-service)))
     (loop for thread in (sb-thread:list-all-threads)
        if (and thread (s-starts-with thread-name-prefix (sb-thread:thread-name thread)))
        do
@@ -153,43 +171,52 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 
 (define-regexp-route current-game-state-handler ("^/games/([0-9]+)/?$"
                                                  (#'parse-integer game-no))
-  "return the current state of the game `game-no'"
+    "return the current state of the game `game-no'"
   (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+
                    '(:error "no such game"))
         (json-resp nil game-exc))))
 
+(defun game-exc-move (game-exc move-no &aux moves)
+  (setf moves (game-execution-moves game-exc))
+  (cond
+    ((< move-no (length moves)) ;; test this first, even if redundant
+     (values hunchentoot:+HTTP-OK+ (aref moves move-no)))
+
+    ((not (game-execution-running-p game-exc))
+     (values hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+             '(:error "requested move outside of range of completed game")))
+
+    (t
+     (loop with
+        max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                      (service-config *service*))
+        for i below max-move-catchup-wait-secs
+        as behind = (>= move-no (length moves))
+        while behind
+        do (progn
+             (vom:debug "catching up from ~D to ~D (~D secs left)~%"
+                        (length moves) move-no (- max-move-catchup-wait-secs i))
+             (sleep 1))
+        finally
+          (return
+            (if behind
+                (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                        '(:error "reached timeout catching up to requested move" ))
+                (values hunchentoot:+HTTP-OK+ (aref moves move-no))))))))
+
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
-  "return the move number `move-no' of the game number `game-no'"
-  (let* ((game-exc (gethash game-no (service-game-executions *service*)))
-         (moves (and game-exc (game-execution-moves game-exc))))
+    "return the move number `move-no' of the game number `game-no'"
+  (let* ((game-exc (gethash game-no (service-game-executions *service*))))
     (if (null game-exc)
         (json-resp hunchentoot:+HTTP-NOT-FOUND+ '(:error "no such game"))
-        (cond
-          ((and (not (game-execution-running-p game-exc)) (>= move-no (length moves)))
-           (json-resp hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
-                      '(:error "requested move outside of range of completed game")))
-          (t (loop with
-                max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                              (service-config *service*))
-                for i below max-move-catchup-wait-secs
-                as behind = (>= move-no (length moves))
-                while behind
-                do (progn
-                     (vom:debug "catching up from ~D to ~D on game ~D (~D secs left)~%"
-                                (length moves) move-no game-no (- max-move-catchup-wait-secs i))
-                     (sleep 1))
-                finally
-                  (return
-                    (if behind
-                        (json-resp hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                                   '(:error "reached timeout catching up to requested move" ))
-                        (json-resp nil (aref moves move-no))))))))))
+        (multiple-value-bind (ret-code data) (game-exc-move game-exc move-no)
+          (json-resp ret-code data)))))
 
 (define-regexp-route game-list-handler ("^/games/?$")
-  "return a list of all existing games"
+    "return a list of all existing games"
   (json-resp nil
              (loop for game-no being the hash-keys of (service-game-executions *service*)
                 collect game-no)))
@@ -214,13 +241,13 @@ until either the game is lost, or `max-moves' is reached"
       game-exc
     (loop
        with last-recorded-state-check-multiple
-         = (max 1 (floor last-recorded-state-check-delay-secs ai-move-delay-secs))
+         = (max 1 (floor last-recorded-state-check-delay-secs (max .001 ai-move-delay-secs)))
        with print-string = nil
        for i from 0
        as next-move = (tetris-ai:game-apply-next-move game)
        while (and next-move (or (null max-moves) (< i max-moves)))
        do (when (eq (cadr vom:*config*) :DEBUG4);;this should be a single (vom:debug ...) call
-            (vom:debug (setf print-string (tetris-ai:game-printable-string game print-string))))
+            (vom:debug4 (setf print-string (tetris-ai:game-printable-string game print-string))))
        do
          (let ((native (cffi:translate-from-foreign next-move 'tetris-ai::game-move)))
            (progn
@@ -233,7 +260,7 @@ until either the game is lost, or `max-moves' is reached"
                (game-serialize-state game i))
        finally
          (setf (game-execution-running-p game-exc) nil
-               (game-execution-final-state game-exc) (game-serialize-state game i)))))
+               (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &key max-moves ai-move-delay-secs
                               (last-recorded-state-check-delay-secs 2))
@@ -258,16 +285,16 @@ until either the game is lost, or `max-moves' is reached"
                                       (cdr height-width)
                                       :ai-weights tetris-ai:ai-default-weights
                                       :ai-depth ai-depth)))
-      (assert (> ai-move-delay-secs 0))
       (assert (> last-recorded-state-check-delay-secs 0))
-      (setf (gethash game-no (service-game-executions *service*))
-            (make-game-execution :game game
-                                 :moves moves
-                                 :max-moves max-moves
-                                 :last-recorded-state (game-serialize-state game 0)
-                                 :ai-move-delay-secs ai-move-delay-secs
-                                 :last-recorded-state-check-delay-secs
-                                 last-recorded-state-check-delay-secs)))))
+      (prog1 (setf (gethash game-no (service-game-executions *service*))
+                          (make-game-execution :game game
+                                               :moves moves
+                                               :max-moves max-moves
+                                               :last-recorded-state (game-serialize-state game 0)
+                                               :ai-move-delay-secs ai-move-delay-secs
+                                               :last-recorded-state-check-delay-secs
+                                               last-recorded-state-check-delay-secs))
+                  (ws-register-game game-no (service-ws-service *service*))))))
 
 (defun game-create-run (&optional game-no &rest create-args)
   "create and execute a game. all arguments are proxied to `game-create'"

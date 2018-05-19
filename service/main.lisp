@@ -11,6 +11,7 @@
      "dimensions of the grid, in the form of HxW, e.g. 19x10")
     (("ai-depth" #\d) :type integer :optional t :documentation "libtetris ai depth")
     (("default-ai-move-delay-millis" #\m) :type integer :optional t :documentation "delay between ai moves")
+    (("log-filename" #\l) :type string :optional t :documentation "filename where to log connections")
     (("verbose" #\v) :type boolean :optional t :documentation "verbose logging")
     (("help" #\h) :type boolean :optional t :documentation "display help")
     (("version" #\V) :type boolean :optional t :documentation "display version"))
@@ -25,7 +26,9 @@
     (help (command-line-arguments:show-option-help +service-option-spec+ :sort-names t))
     (version (format t "~A~%" *version*))
     (t
-     (when verbose (vom:config t :debug4))
+     (when verbose
+       (vom:config t :debug)
+       (vom:debug "verbose enabled"))
      (let ((config (apply 'make-config (append args '(:allow-other-keys t)))))
        (when dims
          (ppcre:register-groups-bind ((#'parse-integer h) (#'parse-integer w))

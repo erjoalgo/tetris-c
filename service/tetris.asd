@@ -14,9 +14,10 @@
   :license "GPLv3"
   :author "Ernesto Alfonso <erjoalgo@gmail.com>"
   :components ((:file "server")
+               (:file "ws")
                (:file "util")
                (:file "main"))
-  :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments))
+  :depends-on (:tetris-ai :hunchentoot :jonathan :vom :command-line-arguments :clws))
 
 (asdf:defsystem :tetris-ai-rest-test
   :description "tetris-ai-rest tests package"
