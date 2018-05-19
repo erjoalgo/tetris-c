@@ -471,8 +471,6 @@ Game.prototype.init = function(gameNo) {
                 y = grid.height - 1 - y;
 
                 grid.g[y][x] = UI.prototype.colors.filled;
-                // TODO just repaint UI
-                // ui.paint(y, x, ui.colors.filled);
                 if (y < miny)
                     miny = y;
                 if (y < grid.relief[x]) {
@@ -480,7 +478,7 @@ Game.prototype.init = function(gameNo) {
                 }
                 grid.rowcounts[y]++;
             }
-            state.ui.repaintRows(0, miny, grid);
+            state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
                                 (function(newVal){this.timerDelay = newVal}).bind(this));
             if (state.ws) {
