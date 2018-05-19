@@ -643,7 +643,6 @@ Game.prototype.fetchPlanExecuteLoop = function() {
 };
 
 Game.prototype.start = function() {
-    var game = this;
     this.initGameNo()
         .then(this.init.bind(this))
         .then(this.initShapes.bind(this))
