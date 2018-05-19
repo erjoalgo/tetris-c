@@ -213,6 +213,24 @@ var Grid = function(height, width) {
     }
 };
 
+Grid.prototype.setCell = function(y, x, val){
+    this.g[y][x] = val;
+
+    if (val == UI.prototype.colors.filled)    {
+        if (y < this.relief[x]) {
+            this.relief[x] = y;
+        }
+        this.rowcounts[y]++;
+    }else     {
+        this.rowcounts[y]--;
+        if (y == this.relief[x])    {
+            var i;
+            for (i = y-1; i>=0 && this.g[y][x] == Grid.OFF; i--);
+            this.relief[x] = i;
+        }
+    }
+}
+
 Grid.prototype.getDropDistance = function(b) {
     var botCrust = b.shape.rotations[b.r].crusts.bot;
 
@@ -481,13 +499,9 @@ Game.prototype.init = function(gameNo) {
                 y = Math.floor(xy / grid.width);
                 y = grid.height - 1 - y;
 
-                grid.g[y][x] = UI.prototype.colors.filled;
                 if (y < miny)
                     miny = y;
-                if (y < grid.relief[x]) {
-                    grid.relief[x] = y;
-                }
-                grid.rowcounts[y]++;
+                grid.setCell(y, x, UI.prototype.colors.filled);
             }
             state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
