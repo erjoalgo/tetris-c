@@ -85,3 +85,12 @@ function assert(condition, message) {
         throw message;
     }
 }
+
+function listMin(list) {
+    var min = list[0];
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] < min)
+            min = list[i];
+    }
+    return min;
+}

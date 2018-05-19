@@ -251,15 +251,6 @@ Grid.prototype.drop = function(b) {
     }
 }
 
-function listMin(list) {
-    var min = list[0];
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] < min)
-            min = list[i];
-    }
-    return min;
-}
-
 Grid.prototype.clearLines = function(ui) {
 
     if (!this.needsClear) return;
