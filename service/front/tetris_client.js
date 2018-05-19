@@ -252,9 +252,9 @@ Grid.prototype.drop = function(b) {
 }
 
 function listMin(list) {
-    var min = null;
+    var min = list[0];
     for (var i = 0; i < list.length; i++) {
-        if (min == null || list[i] < min)
+        if (list[i] < min)
             min = list[i];
     }
     return min;
