@@ -242,7 +242,6 @@ function getDropDistance() {
         dist = reliefY - xy[1];
         if (dist < minDist) {
             minDist = dist;
-            newY = reliefY;
         }
     }
 
