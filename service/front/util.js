@@ -16,8 +16,8 @@ function serverRequest(url, consecFailedMills) {
             // Ready state 4 means the request is done
             if (xhr.readyState === 4) {
                 if (xhr.status != 200) {
-                    error(url + " returned non-200 status: " + xhr.status +
-                        ", server response: " + xhr.responseText);
+                    reject(url + " returned non-200 status: " + xhr.status +
+                           ", server response: " + xhr.responseText);
                 } else {
                     var response = null;
                     try {
