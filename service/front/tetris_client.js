@@ -432,7 +432,7 @@ function repaintRows(ymin, ymax) {
 }
 
 function logPerformance(state) {
-    const MOD = 100;
+    const MOD = 1000;
     if (state.moveNo % MOD == 0) {
         var now = window.performance.now();
         if (state.last != null) {
