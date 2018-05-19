@@ -496,39 +496,45 @@ Game.prototype.init = function(gameNo) {
             var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
 
             if (supportsWebSockets && game.ws_port) {
-                // initialize websocket connection
-                state.ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
+                var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
                     "/games/" + state.gameNo;
-                console.log("using ws url: " + state.ws_url);
-                state.ws = new WebSocket(state.ws_url);
-                state.ws.addEventListener('message', function(event) {
-                    var packed = event.data;
-                    // if (packed<0)    {state.ws.reject();}
-                    var answer = state.answer;
-                    answer.m = (packed >> 16) & 0xff;
-                    answer.r = (packed >> 8) & 0xff;
-                    answer.x = (packed >> 0) & 0xff;
-                    state.fetchCallback(answer);
-                    state.ws.resolve();
-                });
-                return new Promise(function(resolve, reject) {
-                    state.ws.addEventListener('open', function(event) {
-                        console.log("ws connection opened..");
-                        resolve();
-                    });
-
-                    state.ws.addEventListener('error', function(event) {
-                        console.log("ws connection error..");
-                        reject();
-                    });
-
-                    state.ws.addEventListener('close', function(event) {
-                        console.log("ws connection closed..");
-                        reject();
-                    });
-                });
+                return state.initWs(ws_url);
             }
         });
+};
+
+Game.prototype.initWs = function(ws_url){
+    var state = this;
+    return new Promise(function(resolve, reject) {
+        // initialize websocket connection
+        state.ws_url = ws_url;
+        console.log("using ws url: " + state.ws_url);
+        state.ws = new WebSocket(state.ws_url);
+        state.ws.addEventListener('message', function(event) {
+            var packed = event.data;
+            // if (packed<0)    {state.ws.reject();}
+            var answer = state.answer;
+            answer.m = (packed >> 16) & 0xff;
+            answer.r = (packed >> 8) & 0xff;
+            answer.x = (packed >> 0) & 0xff;
+            state.fetchCallback(answer);
+            state.ws.resolve();
+        });
+        state.ws.addEventListener('open', function(event) {
+            console.log("ws connection opened..");
+            resolve();
+        });
+
+        state.ws.addEventListener('error', function(event) {
+            console.log("ws connection error..");
+            reject();
+        });
+
+        state.ws.addEventListener('close', function(event) {
+            console.log("ws connection closed..");
+            reject();
+        });
+    });
 };
 
 Game.prototype.initShapes = function() {
