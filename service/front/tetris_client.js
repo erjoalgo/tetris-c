@@ -452,9 +452,6 @@ Game.prototype.init = function(gameNo) {
         .then(function(response) {
             var game = response;
 
-
-            var miny = game.height;
-
             var START_FROM_FIRST_MOVE = false;
             if (START_FROM_FIRST_MOVE) {
                 game.move_no = -1;
@@ -493,15 +490,16 @@ Game.prototype.init = function(gameNo) {
             state.ui.tableCreate(state.ui.tableParentDiv, grid.width, grid.height);
 
             var xy, x, y;
+            var miny = game.height;
+
             for (var i = 0; i < game.on_cells.length; i++) {
                 xy = game.on_cells[i];
                 x = xy % grid.width;
                 y = Math.floor(xy / grid.width);
                 y = grid.height - 1 - y;
 
-                if (y < miny)
-                    miny = y;
                 grid.setCell(y, x, UI.prototype.colors.filled);
+                if (y < miny) miny = y;
             }
             state.ui.repaintRows(0, grid.height, grid);
             state.ui.initSlider(this.timerDelay,
