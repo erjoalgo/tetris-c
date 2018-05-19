@@ -64,6 +64,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
     tbl.class = "table";
     var tblBody = document.createElement("tbody");
 
+    var cellRow;
     for (var j = 0; j < height; j++) {
         cellRow = [];
         this.cellGrid.push(cellRow);
@@ -194,14 +195,16 @@ var Grid = function(height, width) {
     this.needClear = [];
     this.needsClear = false;
 
-    for (var i = 0; i < this.height; i++) {
+    var i;
+    for (i = 0; i < this.height; i++) {
         this.rowcounts.push(0);
         var row = [];
         this.g.push(row);
         for (var ii = 0; ii < this.height; ii++)
             row.push(UI.prototype.colors.blank);
     }
-    for (var i = 0; i < this.width; i++) {
+
+    for (i = 0; i < this.width; i++) {
         this.relief.push(this.height);
     }
 };
@@ -210,13 +213,11 @@ Grid.prototype.getDropDistance = function(b) {
     var botCrust = b.shape.rotations[b.r].crusts.bot;
 
     var dist, minDist = this.height;
-    var x = b.x;
-    var y = b.y;
 
     for (var i = 0, reliefY; i < botCrust.length; i++) {
         var xy = botCrust[i];
-        var reliefY = this.relief[xy[0] + b.x];
-        var dist = reliefY - xy[1];
+        reliefY = this.relief[xy[0] + b.x];
+        dist = reliefY - xy[1];
         if (dist < minDist) {
             minDist = dist;
         }
@@ -235,13 +236,14 @@ Grid.prototype.drop = function(b) {
         b.y += dropDistance;
 
         var topCrust = b.shape.rotations[b.r].crusts.top;
-        for (var i = 0, xy = null; i < topCrust.length; i++) {
+        var xy;
+        for (var i = 0; i < topCrust.length; i++) {
             xy = topCrust[i];
             this.relief[xy[0] + b.x] = xy[1] + b.y;
         }
 
         for (var itr = b.iter(); itr.hasNext();) {
-            var xy = itr.next().value;
+            xy = itr.next().value;
             if (++this.rowcounts[xy[1]] == this.width) {
                 this.needsClear = true;
                 this.needClear.push(xy[1]);
@@ -300,7 +302,7 @@ Grid.prototype.clearLines = function(ui) {
         assert(cleared.length > 0, " cleared.length assertion ");
         this.g[y] = cleared.pop();
         this.rowcounts[y] = 0;
-        for (var i = 0; i < this.width; i++)
+        for (i = 0; i < this.width; i++)
             // TODO use 0, 1
             this.g[y][i] = UI.prototype.colors.blank;
         y -= 1;
@@ -465,6 +467,7 @@ Game.prototype.init = function(gameNo) {
             //delete previous table
             state.ui.tableCreate(state.ui.parentElt, grid.width, grid.height);
 
+            var xy, x, y;
             for (var i = 0; i < game.on_cells.length; i++) {
                 xy = game.on_cells[i];
                 x = xy % grid.width;
@@ -523,8 +526,9 @@ Game.prototype.initShapes = function() {
                     var rot = rots[r];
                     var rotH = rot.height;
                     var rotCoords = rot.configurations;
-                    for (var b = 0; b < rotCoords.length; b++) {
-                        var cr = rotCoords[b];
+                    var b, cr;
+                    for (b = 0; b < rotCoords.length; b++) {
+                        cr = rotCoords[b];
                         cr[1] *= -1;
                         cr[1] += rotH - 1;
                         assert(cr[1] >= 0);
@@ -532,11 +536,11 @@ Game.prototype.initShapes = function() {
                     }
                     assert(zeroSeen);
 
-                    CRUSTNAMES = ["top", "bot", "left", "right"];
+                    var CRUSTNAMES = ["top", "bot", "left", "right"];
                     for (var c = 0; c < CRUSTNAMES.length; c++) {
                         var crust = rot.crusts[CRUSTNAMES[c]];
-                        for (var b = 0; b < crust.length; b++) {
-                            var cr = crust[b];
+                        for (b = 0; b < crust.length; b++) {
+                            cr = crust[b];
                             cr[1] *= -1;
                             cr[1] += rotH - 1;
                             assert(cr[1] >= 0);
