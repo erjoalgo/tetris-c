@@ -114,20 +114,24 @@ UI.prototype.init = function(){
     this.slider = createElementWithProperties(
         "input", {
             type: "range",
-            min: 1,
-            max: 100,
-            value: timerDelay,
-            invertValue: function(val) {
-                return parseInt(this.max) - val + parseInt(this.min);
-            },
-            onchange: function() {
-                timerDelay = this.invertValue(this.value);
-            }
         });
 
-    this.slider.value = this.slider.invertValue(timerDelay);
 
     body.appendChild(this.slider);
+}
+UI.prototype.initSlider = function(initialValue, onChangeFun){
+
+    this.slider.min = 1;
+    this.slider.max = 100;
+
+    this.slider.invertValue = function(val) {
+        return parseInt(this.max) - val + parseInt(this.min);
+    };
+    this.slider.onchange = function() {
+        onChangeFun(this.invertValue(this.value));
+    }
+
+    this.slider.value = this.slider.invertValue(initialValue);
 }
 
 UI.prototype.colors = {
@@ -159,7 +163,7 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
     }
 }
 
-var timerDelay = 90;
+const INITIAL_TIMER_DELAY = 90;
 
 var Game = function(parentElt){
     this.b = new Block();
@@ -175,6 +179,7 @@ var Game = function(parentElt){
 
     this.grid = null;
     this.move = new Object();
+    this.timerDelay = INITIAL_TIMER_DELAY;
 }
 
 var Grid = function ( height, width )    {
@@ -485,6 +490,8 @@ Game.prototype.init = function(gameNo) {
                 grid.rowcounts[y]++;
             }
             state.ui.repaintRows(0, miny, grid);
+            state.ui.initSlider(this.timerDelay,
+                                (function(newVal){this.timerDelay = newVal}).bind(this));
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
@@ -599,7 +606,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         }else     {
             this.ui.paintTo(b, ui.colors.filled);
             this.grid.clearLines(this.ui);
-            setTimeout(resolve, timerDelay);
+            setTimeout(resolve, this.timerDelay);
         }
         return;
     }
@@ -614,7 +621,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         reject();
     } else {
         this.ui.paintTo(b, UI.prototype.colors.filled);
-        setTimeout(this.planExecuteCallback.bind(this, resolve, reject), timerDelay);
+        setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
     }
 }
 
