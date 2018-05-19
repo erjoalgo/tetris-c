@@ -35,7 +35,7 @@ function serverRequest(url, consecFailedMills) {
                         }
                         return;
                     }
-                    assert(!(response == null), " error from server");
+                    assert(response != null, " error from server");
                     resolve(response);
                 }
             }
