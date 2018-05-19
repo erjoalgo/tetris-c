@@ -507,10 +507,11 @@ Game.prototype.init = function(gameNo) {
             }
             // repaint remaining UI rows from grid
             state.ui.repaintRows(0, miny, grid);
-            state.ui.initSlider(this.timerDelay,
-                (function(newVal) {
-                    state.timerDelay = newVal;
-                }));
+
+            state.ui.initSlider(this.timerDelay, (function(newVal) {
+                state.timerDelay = newVal;
+            }));
+
             if (state.ws) {
                 return new Promise(function(resolve, reject) {
                     state.ws.addEventListener('open', function(event) {
