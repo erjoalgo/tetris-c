@@ -452,17 +452,18 @@ Game.prototype.init = function(gameNo) {
         .then(function(response) {
             var game = response;
 
-            var START_FROM_FIRST_MOVE = false;
-            if (START_FROM_FIRST_MOVE) {
-                game.move_no = -1;
-                game.on_cells = [];
-            }
-
             state.moveNo = game.move_no;
             // game.moveNo is for current move, need to add 1 for next move
             state.moveNo++;
 
+            var START_FROM_FIRST_MOVE = false;
+            if (START_FROM_FIRST_MOVE) {
+                game.move_no = 0;
+                game.on_cells = [];
+            }
+
             console.log("move no is: " + state.moveNo);
+
             state.initCells(game.height, game.width, game.on_cells);
 
             state.ui.initSlider(this.timerDelay, (function(newVal) {
