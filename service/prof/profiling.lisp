@@ -4,6 +4,7 @@
 (require :sb-sprof)
 
 (defun profile (&key (secs 20) (out "prof.out.tmp"))
+  "first start the service, then call wsPerf from the client pointing to the service ws"
   (sb-sprof:reset)
   (sb-sprof:start-profiling)
   (sleep secs)
