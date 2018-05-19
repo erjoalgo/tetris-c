@@ -437,8 +437,8 @@ Game.prototype.init = function(gameNo) {
 
             var miny = game.height;
 
-            var skip = false; // start from move 0
-            if (skip) {
+            var START_FROM_FIRST_MOVE = false;
+            if (START_FROM_FIRST_MOVE) {
                 game.move_no = -1;
                 game.on_cells = [];
             }
