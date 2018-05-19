@@ -499,8 +499,7 @@ Game.prototype.init = function(gameNo) {
                     });
                 });
             }
-        },
-              this.gameOver);
+        });
 }
 
 Game.prototype.initShapes = function() {
@@ -543,9 +542,7 @@ Game.prototype.initShapes = function() {
                         }
                     }
                 }
-        },
-              // TODO
-            this.gameOver);
+        });
 }
 
 Game.prototype.initGameNo = function() {
@@ -558,8 +555,7 @@ Game.prototype.initGameNo = function() {
             console.log("init gameNo is " + this.gameNo);
             return gameNo;
         }
-        // TODO use either error or gameover, not both
-    }, error);
+    });
 }
 
 Game.prototype.planExecute = function() {
