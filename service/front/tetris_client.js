@@ -486,22 +486,26 @@ Game.prototype.init = function(gameNo) {
                 });
             }
 
-            //delete previous table
+            //TODO delete previous table
             state.ui.tableCreate(state.ui.tableParentDiv, grid.width, grid.height);
 
+            // initialize grid and UI grid
             var xy, x, y;
             var miny = game.height;
 
             for (var i = 0; i < game.on_cells.length; i++) {
+                // unpack server move
                 xy = game.on_cells[i];
                 x = xy % grid.width;
                 y = Math.floor(xy / grid.width);
+                // flip y upside down from server representation
                 y = grid.height - 1 - y;
 
                 grid.setCell(y, x, UI.prototype.colors.filled);
                 state.ui.paint(y, x, UI.prototype.colors.filled);
                 if (y < miny) miny = y;
             }
+            // repaint remaining UI rows from grid
             state.ui.repaintRows(0, miny, grid);
             state.ui.initSlider(this.timerDelay,
                 (function(newVal) {
