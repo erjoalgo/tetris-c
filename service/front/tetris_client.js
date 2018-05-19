@@ -180,7 +180,6 @@ var Game = function(parentElt) {
     this.moveNo = null;
     this.gameNo = null;
     this.shapes = null;
-    this.consecFailedMills = 0;
 
     this.grid = null;
     this.move = {};
