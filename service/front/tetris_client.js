@@ -462,32 +462,8 @@ Game.prototype.init = function(gameNo) {
             // game.moveNo is for current move, need to add 1 for next move
             state.moveNo++;
 
-            state.grid = new Grid(game.height, game.width);
-            var grid = state.grid;
-
             console.log("move no is: " + state.moveNo);
-
-            //TODO delete previous table
-            state.ui.tableCreate(state.ui.tableParentDiv, grid.width, grid.height);
-
-            // initialize grid and UI grid
-            var xy, x, y;
-            var miny = game.height;
-
-            for (var i = 0; i < game.on_cells.length; i++) {
-                // unpack server move
-                xy = game.on_cells[i];
-                x = xy % grid.width;
-                y = Math.floor(xy / grid.width);
-                // flip y upside down from server representation
-                y = grid.height - 1 - y;
-
-                grid.setCell(y, x, UI.prototype.colors.filled);
-                state.ui.paint(y, x, UI.prototype.colors.filled);
-                if (y < miny) miny = y;
-            }
-            // repaint remaining UI rows from grid
-            state.ui.repaintRows(0, miny, grid);
+            state.initCells(game.height, game.width, game.on_cells);
 
             state.ui.initSlider(this.timerDelay, (function(newVal) {
                 state.timerDelay = newVal;
@@ -502,6 +478,34 @@ Game.prototype.init = function(gameNo) {
             }
         });
 };
+
+Game.prototype.initCells = function(height, width, onCells){
+    // onCells from server are packed, also vertically flipped wrt JS representation
+
+    this.grid = new Grid(height, width);
+
+    //TODO delete previous table
+    this.ui.tableCreate(this.ui.tableParentDiv, width, height);
+
+    // initialize grid and UI grid
+    var xy, x, y;
+    var miny = height;
+
+    for (var i = 0; i < onCells.length; i++) {
+        // unpack server cell
+        xy = onCells[i];
+        x = xy % width;
+        y = Math.floor(xy / width);
+        // flip y upside down from server representation
+        y = height - 1 - y;
+
+        this.grid.setCell(y, x, UI.prototype.colors.filled);
+        this.ui.paint(y, x, UI.prototype.colors.filled);
+        if (y < miny) miny = y;
+    }
+    // repaint remaining UI rows from grid
+    this.ui.repaintRows(0, miny, this.grid);
+}
 
 Game.prototype.initWs = function(ws_url){
     var state = this;
