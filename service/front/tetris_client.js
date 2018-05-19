@@ -676,8 +676,11 @@ Game.prototype.start = function() {
         .then(this.fetchPlanExecuteLoop.bind(this));
 };
 
+var games = [];
 window.onload = function() {
     var parentElt = document.getElementsByTagName("body")[0];
     assert(parentElt);
-    new Game(parentElt).start();
+    var game = new Game(parentElt);
+    games.push(game);
+    game.start();
 };
