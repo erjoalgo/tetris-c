@@ -624,7 +624,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
 };
 
 Game.prototype.pauseToggle = function() {
-    this.pausedP = !pauseP;
+    this.pausedP = !this.pausedP;
 };
 
 Game.prototype.gameOver = function() {
