@@ -93,6 +93,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
 
 UI.prototype.init = function() {
 
+    // add table div, move counter and slider
     var body = this.parentElt;
     body.appendChild(this.tableParentDiv);
 
@@ -152,6 +153,7 @@ UI.prototype.colors.filled = UI.prototype.colors.BLUE;
 UI.prototype.colors.blank = UI.prototype.colors.WHITE;
 
 UI.prototype.paintTo = function(b, color) {
+    // paint cells occupied by block b with the given color
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
         this.paint(xy[1], xy[0], color);
@@ -160,6 +162,7 @@ UI.prototype.paintTo = function(b, color) {
 };
 
 UI.prototype.repaintRows = function(ymin, ymax, grid) {
+    // repaint UI rows from ymin to ymax, with grid as reference
     for (; ymin < ymax; ymin++) {
         for (var x = 0; x < grid.width; x++) {
             // TODO
@@ -441,8 +444,7 @@ Game.prototype.init = function(gameNo) {
             }
 
             state.moveNo = game.move_no;
-
-            // game.moveNo is for current move.
+            // game.moveNo is for current move, need to add 1 for next move
             state.moveNo++;
 
             var grid = new Grid(game.height, game.width);
