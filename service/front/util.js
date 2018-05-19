@@ -72,9 +72,6 @@ function handleError(message) {
     throw new Error(message);
 }
 
-// TODO rename handle error
-var error = handleError;
-
 function assert(condition, message) {
 
     // todo: upload stack trace

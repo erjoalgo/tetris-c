@@ -626,7 +626,7 @@ Game.prototype.fetchPlanExecuteLoop = function() {
         }).bind(this))
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
-        .catch(error);
+        .catch(handleError);
 }
 
 Game.prototype.start = function() {
