@@ -1,3 +1,5 @@
+// var ws_url = "ws://ec2-34-214-135-69.us-west-2.compute.amazonaws.com:81/games/1";
+
 function wsPerf(ws_url, max, tries) {
     if (max == null) {
         max = 10000;
