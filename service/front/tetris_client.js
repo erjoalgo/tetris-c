@@ -404,7 +404,7 @@ Game.prototype.fetchCallback = function(move) {
     this.answer.r = move.rot;
     this.answer.x = move.col;
 
-    this.moveNo++;
+    this.moveNo+=1;
     this.logPerformance();
     this.ui.moveNoElm.innerHTML = this.moveNo;
 };
