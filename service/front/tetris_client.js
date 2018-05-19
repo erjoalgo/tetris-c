@@ -45,6 +45,7 @@ var UI = function(parentElt) {
     });
     this.moveNoElm = null;
     this.parentElt = parentElt;
+    this.tableParentDiv = document.createElement("div");
 
     this.init();
 };
@@ -93,6 +94,8 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
 UI.prototype.init = function() {
 
     var body = this.parentElt;
+    body.appendChild(this.tableParentDiv);
+
     body.appendChild(createElementWithProperties(
         "label", {
             innerHTML: "Move ",
@@ -472,7 +475,7 @@ Game.prototype.init = function(gameNo) {
             }
 
             //delete previous table
-            state.ui.tableCreate(state.ui.parentElt, grid.width, grid.height);
+            state.ui.tableCreate(state.ui.tableParentDiv, grid.width, grid.height);
 
             var xy, x, y;
             for (var i = 0; i < game.on_cells.length; i++) {
