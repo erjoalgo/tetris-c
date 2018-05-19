@@ -164,7 +164,7 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
     }
 };
 
-const INITIAL_TIMER_DELAY = 90;
+var INITIAL_TIMER_DELAY = 90;
 
 var Game = function(parentElt) {
     this.b = new Block();
@@ -265,8 +265,8 @@ Grid.prototype.clearLines = function(ui) {
         // would be nice to make needClear a pqueue
         this.needClear.sort(cmpNum); //smallest to largest
     }
-    const YMIN = this.needClear[this.needClear.length - 1];
-    const YMAX = listMin(this.relief); //the tallest row is 0. ymax should be as small as possible
+    var YMIN = this.needClear[this.needClear.length - 1];
+    var YMAX = listMin(this.relief); //the tallest row is 0. ymax should be as small as possible
     var y = YMIN;
     // this.needClear.reverse ();
     var nextNonFull = y - 1; //not necessarily non-full here
@@ -373,12 +373,12 @@ Block.prototype.iter = function() {
             hasNext: function() {
                 return i < rotCoords.length;
             }
-        }
+        };
     })();
-}
+};
 
 Game.prototype.logPerformance = function() {
-    const MOD = 1000;
+    var MOD = 1000;
     if (this.moveNo % MOD == 0) {
         var now = window.performance.now();
         if (this.last != null) {

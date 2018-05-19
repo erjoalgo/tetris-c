@@ -1,5 +1,5 @@
-const SERVER_TIMEOUT = 20000;
-const RETRY_TIMEOUT = 500;
+var SERVER_TIMEOUT = 20000;
+var RETRY_TIMEOUT = 500;
 
 function serverRequest(url, consecFailedMills) {
 
