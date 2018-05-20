@@ -345,13 +345,10 @@ Grid.prototype.clearLines = function(ui) {
     }
 };
 
-Grid.prototype.blockIntersects = function(b, ui) {
-    // TODO remove ui param
+Grid.prototype.blockIntersects = function(b) {
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
-        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.COLORS.BLANK ||
-            this.g[xy[1]][xy[0]] !== OFF);
-        if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.COLORS.BLANK) {
+        if (this.g[xy[1]][xy[0]] != OFF) {
             return true;
         }
     }
@@ -636,7 +633,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     }
 
     // check if move is possible
-    if (this.grid.blockIntersects(b, ui)) {
+    if (this.grid.blockIntersects(b)) {
         // undo last move and repaint
         b.r = origR;
         b.x = origX;
