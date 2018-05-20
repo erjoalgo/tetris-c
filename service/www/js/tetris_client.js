@@ -546,7 +546,7 @@ Game.prototype.initWs = function(ws_url){
     });
 };
 
-Game.prototype.initShapes = function() {
+Game.prototype.fetchShapes = function() {
     // fetch the shape configurations used by the server
     var game = this;
     return serverRequest("shapes")
@@ -684,7 +684,7 @@ Game.prototype.fetchPlanExecuteLoop = function() {
 Game.prototype.start = function() {
     this.fetchGameNo()
         .then(this.init.bind(this))
-        .then(this.initShapes.bind(this))
+        .then(this.fetchShapes.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this));
 };
 
