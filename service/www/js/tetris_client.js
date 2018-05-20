@@ -25,7 +25,7 @@
 
 var UI = function(parentElt, config) {
 
-    this.config = config;
+    this.config = config || UI.DEFAULT_CONFIG;
     this.cellGrid = [];
     this.loading = createElementWithProperties("img", {
         hw: ["400", "550"],
@@ -678,7 +678,7 @@ var games = [];
 window.onload = function() {
     var parentElt = document.getElementsByTagName("body")[0];
     assert(parentElt);
-    var game = new Game(parentElt, UI.DEFAULT_CONFIG);
+    var game = new Game(parentElt);
     games.push(game);
     game.start();
 };
