@@ -176,18 +176,18 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
 var INITIAL_TIMER_DELAY = 90;
 
 var Game = function(parentElt, uiConfig) {
-    this.b = new Block();
-    this.answer = new Block();
+    this.b = new Block(); // the currently active block
+    this.answer = new Block(); // the best-move answer from the AI server
     this.ui = new UI(parentElt, uiConfig);
 
     this.pausedP = false;
     this.gameOver = false;
     this.moveNo = null;
     this.gameNo = null;
-    this.shapes = null;
+    this.shapes = null; // the shape configurations from the server
 
     this.grid = null;
-    this.timerDelay = INITIAL_TIMER_DELAY;
+    this.timerDelay = INITIAL_TIMER_DELAY; // ms delay between moves
 };
 
 const OFF = 0;
@@ -199,10 +199,11 @@ var Grid = function(height, width) {
 
     this.rowcounts = [];
     this.g = [];
-    this.relief = [];
+    this.relief = []; // track the tallest ON cell for each column
 
-    this.needClear = [];
+    this.needClear = []; //list of rows that need to be cleared
 
+    // initialize the HxW grid
     var i;
     for (i = 0; i < this.height; i++) {
         this.rowcounts.push(0);
@@ -358,11 +359,11 @@ Grid.prototype.blockIntersects = function(b) {
 };
 
 var Block = function(m, r, y, x, shape) {
-    this.m = m;
-    this.r = r;
-    this.y = y;
-    this.x = x;
-    this.shape = shape;
+    this.m = m; // the shape or 'model' index
+    this.r = r; // the rotation
+    this.y = y; // the row index
+    this.x = x; // the column index
+    this.shape = shape; // the shape configuration obect for model `this.m'
 };
 
 Block.prototype.iter = function() {
@@ -412,6 +413,7 @@ Game.prototype.logPerformance = function() {
 };
 
 Game.prototype.fetchCallback = function(move) {
+    // set the next block to display
     assert(this.gameNo != null && this.moveNo != null);
 
     // todo wrap
@@ -423,10 +425,12 @@ Game.prototype.fetchCallback = function(move) {
 
     this.moveNo+=1;
     this.logPerformance();
+    // update UI move number
     this.ui.moveNoElm.innerHTML = this.moveNo;
 };
 
 Game.prototype.fetch = function() {
+    // send request to fetch the next block and the AI best move
     var game = this;
     if (this.ws != null) {
         return new Promise(function(resolve, reject) {
@@ -441,6 +445,7 @@ Game.prototype.fetch = function() {
 };
 
 Game.prototype.init = function(gameNo) {
+    // initialize the game
     this.gameNo = gameNo;
 
     // use 'state' as 'this' to distinguish from game. TODO
@@ -479,6 +484,8 @@ Game.prototype.init = function(gameNo) {
 };
 
 Game.prototype.initCells = function(height, width, onCells){
+    // initialize the game.grid cells and the UI cells
+
     // onCells from server are packed, also vertically flipped wrt JS representation
 
     this.grid = new Grid(height, width);
@@ -507,6 +514,7 @@ Game.prototype.initCells = function(height, width, onCells){
 }
 
 Game.prototype.initWs = function(ws_url){
+    // initialize the websocket connection
     var state = this;
     return new Promise(function(resolve, reject) {
         // initialize websocket connection
@@ -539,6 +547,7 @@ Game.prototype.initWs = function(ws_url){
 };
 
 Game.prototype.initShapes = function() {
+    // fetch the shape configurations used by the server
     var game = this;
     return serverRequest("shapes")
         .then(function(response) {
@@ -547,6 +556,8 @@ Game.prototype.initShapes = function() {
             if (shapes.length == 0) {
                 throw new Error("0 shapes received from server!");
             }
+            // the purpose of the loop below is to vertically flip the shapes
+            // since the server represenation is vertically flipped wrt client
             for (var i = 0; i < shapes.length; i++) {
                 var shape = shapes[i];
                 var rots = shape.rotations;
@@ -582,6 +593,7 @@ Game.prototype.initShapes = function() {
 };
 
 Game.prototype.fetchGameNo = function() {
+    // fetch a currently active game number from the server
     return serverRequest("/games").then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
@@ -595,6 +607,8 @@ Game.prototype.fetchGameNo = function() {
 };
 
 Game.prototype.planExecute = function() {
+    // execute a plan to get the currently active block
+    // into the AI-best-move state
     var game = this;
     return new Promise(function(resolve, reject) {
         game.planExecuteCallback(function() {
@@ -604,6 +618,8 @@ Game.prototype.planExecute = function() {
 };
 
 Game.prototype.planExecuteCallback = function(resolve, reject) {
+    // make moves one by one until game.b looks like game.answer
+    // with game.timerDelay in between moves
     var game = this;
     var b = game.b;
     var answer = game.answer;
@@ -656,9 +672,10 @@ Game.prototype.gameOver = function() {
 };
 
 Game.prototype.fetchPlanExecuteLoop = function() {
+    // a recursive promise to continuously fetch, plan, execute
     var game = this;
     this.fetch()
-        .then(this.ui.paintTo.bind(this.ui, game.b, ON))
+        .then(this.ui.paintTo.bind(this.ui, game.b, ON)) // add active block to the UI
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
         .catch(handleError);
