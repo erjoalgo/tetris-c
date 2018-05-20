@@ -459,37 +459,37 @@ Game.prototype.init = function(gameNo) {
     // initialize the game
     this.gameNo = gameNo;
 
-    // use 'state' as 'this' to distinguish from game. TODO
+    // use 'state' as 'this' to distinguish from game
 
-    var state = this;
+    var game = this;
     return serverRequest("/games/" + gameNo)
         .then(function(response) {
-            var game = response;
+            var resp = response;
 
-            state.moveNo = game.move_no;
-            // game.moveNo is for current move, need to add 1 for next move
-            state.moveNo++;
+            game.moveNo = resp.move_no;
+            // resp.moveNo is for current move, need to add 1 for next move
+            game.moveNo++;
 
             var START_FROM_FIRST_MOVE = false;
             if (START_FROM_FIRST_MOVE) {
-                game.move_no = 0;
-                game.on_cells = [];
+                resp.move_no = 0;
+                resp.on_cells = [];
             }
 
-            console.log("move no is: " + state.moveNo);
+            console.log("move no is: " + game.moveNo);
 
-            state.initCells(game.height, game.width, game.on_cells);
+            game.initCells(resp.height, resp.width, resp.on_cells);
 
-            state.ui.initSlider(this.timerDelay, (function(newVal) {
-                state.timerDelay = newVal;
+            game.ui.initSlider(this.timerDelay, (function(newVal) {
+                game.timerDelay = newVal;
             }));
 
             var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
 
-            if (supportsWebSockets && game.ws_port) {
-                var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
-                    "/games/" + state.gameNo;
-                return state.initWs(ws_url);
+            if (supportsWebSockets && resp.ws_port) {
+                var ws_url = "ws://" + window.location.hostname + ":" + resp.ws_port +
+                    "/games/" + game.gameNo;
+                return game.initWs(ws_url);
             }
         });
 };
