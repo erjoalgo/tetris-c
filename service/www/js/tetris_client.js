@@ -640,7 +640,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         // undo last move and repaint
         b.r = origR;
         b.x = origX;
-        this.paintTo(b, ON);
+        this.ui.paintTo(b, ON);
         game.gameOver = true;
         reject();
     } else {
