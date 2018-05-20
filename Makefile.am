@@ -1,23 +1,44 @@
+ACLOCAL_AMFLAGS = -I m4
+
 CC=gcc
-CFLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops  --param max-unroll-times=200  -fPIC# -fno-inline -fno-inline-functions  # -g -funroll-loops -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
-# CFLAGS=-Wall -W -Werror -Wextra -fno-inline -g -fno-inline-functions # -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
-DEPS=tetris.h tetri_ai.h
-OBJ=ai.o game.o grid.o block.o shape.o
-OBJ_EXTRA=evolution.o tetris-ncurses.o tetris-play.o
+AMLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops --param max-unroll-times=200
+OBJ_C=ai.c game.c grid.c block.c shape.c evolution.c
 
-all: tetris
+# OBJ_EXTRA=evolution.o tetris-ncurses.o tetris-play.o
+# OBJ=ai.o game.o grid.o block.o shape.o
 
-tetris: tetris.o $(OBJ) $(OBJ_EXTRA)
-	$(CC) -o $@ $< $(OBJ) $(OBJ_EXTRA) $(CFLAGS) -lncurses
+# all: tetris
 
-tetris-prof: tetris.o $(OBJ)
-	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
+# tetris: tetris.o $(OBJ) $(OBJ_EXTRA)
+# 	$(CC) -o $@ $< $(OBJ) $(OBJ_EXTRA) $(CFLAGS) -lncurses
 
-libtetris.so: $(OBJ) evolution.o
-	$(CC) -shared -Wl,-soname,$@.1 -o $@ $(OBJ) evolution.o $(CFLAGS) -lc
+# tetris-prof: tetris.o $(OBJ)
+# 	$(CC) -o $@ $< $(OBJ) $(CFLAGS) -lncurses
 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+lib_LTLIBRARIES = libtetris.la
+libtetris_la_SOURCES = $(OBJ_C)
+# tetris_LDADD = libncurses
+
+
+bin_PROGRAMS = tetris
+tetris_SOURCES = tetris.c
+tetris_LDADD = libtetris.la
+
+# EXTRA_tetris_SOURCES = tetris-ncurses.c tetris-play.c
+
+# if HAVE_LIBNCURSES
+if USE_LIBNCURSES
+tetris_SOURCES += tetris-play.c tetris-ncurses.c
+endif
+
+# TODO make
+# AX_WITH_CURSES
+
+# libtetris.so: $(OBJ) evolution.o
+# 	$(CC) -shared -Wl,-soname,$@.1 -o $@ $(OBJ) evolution.o $(CFLAGS) -lc
+
+# .c.o: $(DEPS)
+# 	$(CC) -c -o $@ $< $(CFLAGS)
 
 perf.data: FORCE tetris-prof
 	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
@@ -26,11 +47,10 @@ call.svg: perf.data
 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
 	firefox --new-tab $@
 
-clean:
+clean-local:
 	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
 
 FORCE:
 
-install: libtetris.so
-	cp -f $< /usr/local/lib/
-	ldconfig
+service: libtetris.so FORCE
+	cd service; make
