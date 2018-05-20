@@ -4,3 +4,15 @@ libtetris.so
 TODO.org
 README.html
 README.md
+config
+**/Makefile.in
+**/Makefile
+.deps
+.libs
+m4
+config.log
+config.status
+libtool
+aclocal.m4
+autom4te.cache/
+configure
