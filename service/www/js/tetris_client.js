@@ -23,11 +23,10 @@
         for the JavaScript code in this page.
 */
 
-var UI = function(parentElt) {
+var UI = function(parentElt, config) {
 
-    this.cellSize = "30";
+    this.config = config;
     this.cellGrid = [];
-    this.fontSize = "30px";
     this.loading = createElementWithProperties("img", {
         hw: ["400", "550"],
         show: function(show) {
@@ -55,6 +54,12 @@ UI.prototype.paint = function(r, c, color) {
     this.cellGrid[r][c].bgColor = color !== OFF? UI.COLORS.FILLED: UI.COLORS.BLANK;
 };
 
+UI.DEFAULT_CONFIG = {
+    borderStyle: "1px solid #000",
+    cellSize: "30",
+    fontSize: "30px"
+}
+
 UI.prototype.tableCreate = function(parentElt, width, height) {
     var body = parentElt;
 
@@ -74,10 +79,10 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
             var cell = document.createElement("td");
             cellRow.push(cell);
 
-            cell.width = this.cellSize;
-            cell.height = this.cellSize;
+            cell.width = this.config.cellSize;
+            cell.height = this.config.cellSize;
             cell.bgColor = UI.COLORS.BLANK;
-            cell.style.border = "1px solid #000";
+            cell.style.border = this.config.borderStyle;
 
             var cellText = document.createTextNode("");
             cell.appendChild(cellText);
@@ -100,11 +105,11 @@ UI.prototype.init = function() {
     body.appendChild(createElementWithProperties(
         "label", {
             innerHTML: "Move ",
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
     this.moveNoElm = (createElementWithProperties(
         "label", {
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
     body.appendChild(this.moveNoElm);
 
@@ -113,7 +118,7 @@ UI.prototype.init = function() {
     body.appendChild(createElementWithProperties(
         "label", {
             innerHTML: "Speed ",
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
 
     this.slider = createElementWithProperties(
@@ -170,10 +175,10 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
 
 var INITIAL_TIMER_DELAY = 90;
 
-var Game = function(parentElt) {
+var Game = function(parentElt, uiConfig) {
     this.b = new Block();
     this.answer = new Block();
-    this.ui = new UI(parentElt);
+    this.ui = new UI(parentElt, uiConfig);
 
     this.pausedP = false;
     this.gameOver = false;
@@ -673,7 +678,7 @@ var games = [];
 window.onload = function() {
     var parentElt = document.getElementsByTagName("body")[0];
     assert(parentElt);
-    var game = new Game(parentElt);
+    var game = new Game(parentElt, UI.DEFAULT_CONFIG);
     games.push(game);
     game.start();
 };
