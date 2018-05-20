@@ -527,13 +527,11 @@ Game.prototype.initWs = function(ws_url){
         });
 
         state.ws.addEventListener('error', function(event) {
-            console.log("ws connection error..");
-            reject();
+            reject("ws connection error..");
         });
 
         state.ws.addEventListener('close', function(event) {
-            console.log("ws connection closed..");
-            reject();
+            reject("ws connection closed..");
         });
     });
 };
@@ -623,7 +621,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     } else {
         if (!this.grid.drop(this.b)) {
             game.gameOver = true;
-            reject();
+            reject("cannot drop");
         } else {
             this.ui.paintTo(b, ON);
             this.grid.clearLines(this.ui);
@@ -639,7 +637,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         b.x = origX;
         this.ui.paintTo(b, ON);
         game.gameOver = true;
-        reject();
+        reject("cannot place block");
     } else {
         this.ui.paintTo(b, ON);
         setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
