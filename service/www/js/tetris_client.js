@@ -57,7 +57,8 @@ UI.prototype.paint = function(r, c, color) {
 UI.DEFAULT_CONFIG = {
     borderStyle: "1px solid #000",
     cellSize: "30",
-    fontSize: "30px"
+    fontSize: "30px",
+    borderWidth: "2"
 }
 
 UI.prototype.tableCreate = function(parentElt, width, height) {
@@ -93,7 +94,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
     }
     tbl.appendChild(tblBody);
     body.appendChild(tbl);
-    tbl.setAttribute("border", "2");
+    tbl.setAttribute("border", this.config.borderWidth);
 };
 
 UI.prototype.init = function() {
