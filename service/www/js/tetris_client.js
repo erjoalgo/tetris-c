@@ -204,7 +204,7 @@ var Grid = function(height, width) {
         this.rowcounts.push(0);
         var row = [];
         this.g.push(row);
-        for (var ii = 0; ii < this.height; ii++)
+        for (var ii = 0; ii < this.width; ii++)
             row.push(OFF);
     }
 
