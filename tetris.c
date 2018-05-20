@@ -62,7 +62,11 @@ int main(int argc, char** argv)
   srand(seed);
 
   if (!strcmp(cmd, "play"))	{
+    #if defined(HAVE_LIBNCURSES)
     ui_play();
+    #else
+    printf( "not compiled with ncurses support\n" );
+    #endif
   }else if (!strcmp(cmd, "ai"))	{
     ai_run(max_moves, depth, show_grid);
   }else if (!strcmp(cmd, "evolve"))	{
