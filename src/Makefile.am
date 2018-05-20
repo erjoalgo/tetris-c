@@ -24,6 +24,3 @@ clean-local:
 	rm -f *.o *.s *.so prof gmon.out call.svg tetris perf.data*
 
 FORCE:
-
-service: libtetris.so FORCE
-	cd service; make
