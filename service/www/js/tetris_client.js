@@ -23,11 +23,10 @@
         for the JavaScript code in this page.
 */
 
-var UI = function(parentElt) {
+var UI = function(parentElt, config) {
 
-    this.cellSize = "30";
+    this.config = config || UI.DEFAULT_CONFIG;
     this.cellGrid = [];
-    this.fontSize = "30px";
     this.loading = createElementWithProperties("img", {
         hw: ["400", "550"],
         show: function(show) {
@@ -52,8 +51,15 @@ var UI = function(parentElt) {
 
 UI.prototype.paint = function(r, c, color) {
     assert(color != null);
-    this.cellGrid[r][c].bgColor = color;
+    this.cellGrid[r][c].bgColor = color !== OFF? UI.COLORS.FILLED: UI.COLORS.BLANK;
 };
+
+UI.DEFAULT_CONFIG = {
+    borderStyle: "1px solid #000",
+    cellSize: "30",
+    fontSize: "30px",
+    borderWidth: "20"
+}
 
 UI.prototype.tableCreate = function(parentElt, width, height) {
     var body = parentElt;
@@ -74,10 +80,10 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
             var cell = document.createElement("td");
             cellRow.push(cell);
 
-            cell.width = this.cellSize;
-            cell.height = this.cellSize;
-            cell.bgColor = this.colors.blank;
-            cell.style.border = "1px solid #000";
+            cell.width = this.config.cellSize;
+            cell.height = this.config.cellSize;
+            cell.bgColor = UI.COLORS.BLANK;
+            cell.style.border = this.config.borderStyle;
 
             var cellText = document.createTextNode("");
             cell.appendChild(cellText);
@@ -88,7 +94,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
     }
     tbl.appendChild(tblBody);
     body.appendChild(tbl);
-    tbl.setAttribute("border", "2");
+    tbl.setAttribute("border", this.config.borderWidth);
 };
 
 UI.prototype.init = function() {
@@ -100,11 +106,11 @@ UI.prototype.init = function() {
     body.appendChild(createElementWithProperties(
         "label", {
             innerHTML: "Move ",
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
     this.moveNoElm = (createElementWithProperties(
         "label", {
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
     body.appendChild(this.moveNoElm);
 
@@ -113,7 +119,7 @@ UI.prototype.init = function() {
     body.appendChild(createElementWithProperties(
         "label", {
             innerHTML: "Speed ",
-            "style.fontSize": this.fontSize
+            "style.fontSize": this.config.fontSize
         }));
 
     this.slider = createElementWithProperties(
@@ -140,17 +146,14 @@ UI.prototype.initSlider = function(initialValue, onChangeFun) {
     this.slider.value = this.slider.invertValue(initialValue);
 };
 
-UI.prototype.colors = {
-    'BLUE': "#0000f0",
-    'BLACK': "#000000",
-    'WHITE': "#ffffff",
-    'GREEN': 3,
-    filled: this.BLUE,
-    blank: this.WHITE
-};
+UI.COLORS = [
+    "#ffffff", // WHITE
+    "#0000f0", // BLUE
+    '000000' // BLACK
+];
 
-UI.prototype.colors.filled = UI.prototype.colors.BLUE;
-UI.prototype.colors.blank = UI.prototype.colors.WHITE;
+UI.COLORS.BLANK = UI.COLORS[0];
+UI.COLORS.FILLED = UI.COLORS[1];
 
 UI.prototype.paintTo = function(b, color) {
     // paint cells occupied by block b with the given color
@@ -166,27 +169,30 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
     for (; ymin < ymax; ymin++) {
         for (var x = 0; x < grid.width; x++) {
             // TODO
-            this.paint(ymin, x, grid.g[ymin][x] || this.colors.blank);
+            this.paint(ymin, x, grid.g[ymin][x]);
         }
     }
 };
 
 var INITIAL_TIMER_DELAY = 90;
 
-var Game = function(parentElt) {
-    this.b = new Block();
-    this.answer = new Block();
-    this.ui = new UI(parentElt);
+var Game = function(parentElt, uiConfig) {
+    this.b = new Block(); // the currently active block
+    this.answer = new Block(); // the best-move answer from the AI server
+    this.ui = new UI(parentElt, uiConfig);
 
     this.pausedP = false;
     this.gameOver = false;
     this.moveNo = null;
     this.gameNo = null;
-    this.shapes = null;
+    this.shapes = null; // the shape configurations from the server
 
     this.grid = null;
-    this.timerDelay = INITIAL_TIMER_DELAY;
+    this.timerDelay = INITIAL_TIMER_DELAY; // ms delay between moves
 };
+
+const OFF = 0;
+const ON = 1;
 
 var Grid = function(height, width) {
     this.height = height;
@@ -194,18 +200,18 @@ var Grid = function(height, width) {
 
     this.rowcounts = [];
     this.g = [];
-    this.relief = [];
+    this.relief = []; // track the tallest ON cell for each column
 
-    this.needClear = [];
-    this.needsClear = false;
+    this.needClear = []; //list of rows that need to be cleared
 
+    // initialize the HxW grid
     var i;
     for (i = 0; i < this.height; i++) {
         this.rowcounts.push(0);
         var row = [];
         this.g.push(row);
-        for (var ii = 0; ii < this.height; ii++)
-            row.push(UI.prototype.colors.blank);
+        for (var ii = 0; ii < this.width; ii++)
+            row.push(OFF);
     }
 
     for (i = 0; i < this.width; i++) {
@@ -214,9 +220,10 @@ var Grid = function(height, width) {
 };
 
 Grid.prototype.setCell = function(y, x, val){
+    // set grid cell to a given value, keeping invariants
     this.g[y][x] = val;
 
-    if (val == UI.prototype.colors.filled)    {
+    if (val !== OFF)    {
         if (y < this.relief[x]) {
             this.relief[x] = y;
         }
@@ -232,6 +239,7 @@ Grid.prototype.setCell = function(y, x, val){
 }
 
 Grid.prototype.getDropDistance = function(b) {
+    // return the max number of units b can move down
     var botCrust = b.shape.rotations[b.r].crusts.bot;
 
     var dist, minDist = this.height;
@@ -250,6 +258,7 @@ Grid.prototype.getDropDistance = function(b) {
 };
 
 Grid.prototype.drop = function(b) {
+    // drop b onto the grid and add it
     var dropDistance = this.getDropDistance(b);
     if (dropDistance < 0) {
         return false;
@@ -267,10 +276,9 @@ Grid.prototype.drop = function(b) {
         for (var itr = b.iter(); itr.hasNext();) {
             xy = itr.next().value;
             if (++this.rowcounts[xy[1]] == this.width) {
-                this.needsClear = true;
                 this.needClear.push(xy[1]);
             }
-            this.g[xy[1]][xy[0]] = UI.prototype.colors.filled;
+            this.g[xy[1]][xy[0]] = ON;
         }
         return true;
     }
@@ -278,7 +286,9 @@ Grid.prototype.drop = function(b) {
 
 Grid.prototype.clearLines = function(ui) {
 
-    if (!this.needsClear) return;
+    // clear full lines in grid, as well as in `ui' if provided
+
+    if (this.needClear.length == 0) return;
 
     var cmpNum = function(a, b) {
         return a - b;
@@ -325,8 +335,7 @@ Grid.prototype.clearLines = function(ui) {
         this.g[y] = cleared.pop();
         this.rowcounts[y] = 0;
         for (i = 0; i < this.width; i++)
-            // TODO use 0, 1
-            this.g[y][i] = UI.prototype.colors.blank;
+            this.g[y][i] = OFF;
         y -= 1;
     }
 
@@ -335,24 +344,21 @@ Grid.prototype.clearLines = function(ui) {
 
     for (var i = 0; i < this.width; i++) {
         var relief = this.relief[i];
-        while (relief < this.height && this.g[relief][i] == UI.prototype.colors.blank)
+        while (relief < this.height && this.g[relief][i] == OFF)
             relief += 1;
         this.relief[i] = relief;
     }
 
-    this.needsClear = false;
     if (ui != null) {
         ui.repaintRows(YMAX, YMIN + 1, this);
     }
 };
 
-Grid.prototype.blockIntersects = function(b, ui) {
-    // TODO remove ui param
+Grid.prototype.blockIntersects = function(b) {
+    // determine whether the floating block `b' overlaps with any ON cell in the grid
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
-        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.prototype.colors.blank ||
-            this.grid.g[xy[1]][xy[0]] == ui.colors.filled);
-        if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.prototype.colors.blank) {
+        if (this.g[xy[1]][xy[0]] != OFF) {
             return true;
         }
     }
@@ -360,14 +366,17 @@ Grid.prototype.blockIntersects = function(b, ui) {
 };
 
 var Block = function(m, r, y, x, shape) {
-    this.m = m;
-    this.r = r;
-    this.y = y;
-    this.x = x;
-    this.shape = shape;
+    // a 'tetro', here called Block
+
+    this.m = m; // the shape or 'model' index
+    this.r = r; // the rotation
+    this.y = y; // the row index
+    this.x = x; // the column index
+    this.shape = shape; // the shape configuration obect for model `this.m'
 };
 
 Block.prototype.iter = function() {
+    // return an iterator over the block cells
     var b = this;
     return (function() {
         var i = 0;
@@ -402,6 +411,7 @@ Block.prototype.iter = function() {
 };
 
 Game.prototype.logPerformance = function() {
+    // periodically log moves/sec
     var MOD = 1000;
     if (this.moveNo % MOD == 0) {
         var now = window.performance.now();
@@ -414,21 +424,24 @@ Game.prototype.logPerformance = function() {
 };
 
 Game.prototype.fetchCallback = function(move) {
+    // set the fetched next block/move to display
     assert(this.gameNo != null && this.moveNo != null);
 
-    // todo wrap
+    // reset the block to the new shape and center it at the top and middle
     this.b.m = move.m;
+    this.b.shape = this.shapes[this.b.m];
     this.b.r = 0;
     this.b.x = this.grid.width / 2 - 1;
     this.b.y = 0;
-    this.b.shape = this.shapes[this.b.m];
 
     this.moveNo+=1;
     this.logPerformance();
+    // update UI move number
     this.ui.moveNoElm.innerHTML = this.moveNo;
 };
 
 Game.prototype.fetch = function() {
+    // send request to fetch the next block and the AI best move
     var game = this;
     if (this.ws != null) {
         return new Promise(function(resolve, reject) {
@@ -443,44 +456,47 @@ Game.prototype.fetch = function() {
 };
 
 Game.prototype.init = function(gameNo) {
+    // initialize the game
     this.gameNo = gameNo;
 
-    // use 'state' as 'this' to distinguish from game. TODO
+    // use 'state' as 'this' to distinguish from game
 
-    var state = this;
+    var game = this;
     return serverRequest("/games/" + gameNo)
         .then(function(response) {
-            var game = response;
+            var resp = response;
 
-            state.moveNo = game.move_no;
-            // game.moveNo is for current move, need to add 1 for next move
-            state.moveNo++;
+            game.moveNo = resp.move_no;
+            // resp.moveNo is for current move, need to add 1 for next move
+            game.moveNo++;
 
             var START_FROM_FIRST_MOVE = false;
             if (START_FROM_FIRST_MOVE) {
-                game.move_no = 0;
-                game.on_cells = [];
+                resp.move_no = 0;
+                resp.on_cells = [];
             }
 
-            console.log("move no is: " + state.moveNo);
+            console.log("move no is: " + game.moveNo);
 
-            state.initCells(game.height, game.width, game.on_cells);
+            game.initCells(resp.height, resp.width, resp.on_cells);
 
-            state.ui.initSlider(this.timerDelay, (function(newVal) {
-                state.timerDelay = newVal;
+            game.ui.initSlider(this.timerDelay, (function(newVal) {
+                game.timerDelay = newVal;
             }));
 
             var supportsWebSockets = 'WebSocket' in window || 'MozWebSocket' in window;
 
-            if (supportsWebSockets && game.ws_port) {
-                var ws_url = "ws://" + window.location.hostname + ":" + game.ws_port +
-                    "/games/" + state.gameNo;
-                return state.initWs(ws_url);
+            if (supportsWebSockets && resp.ws_port) {
+                var ws_url = "ws://" + window.location.hostname + ":" + resp.ws_port +
+                    "/games/" + game.gameNo;
+                return game.initWs(ws_url);
             }
         });
 };
 
 Game.prototype.initCells = function(height, width, onCells){
+    // initialize the game.grid cells and the UI cells
+
     // onCells from server are packed, also vertically flipped wrt JS representation
 
     this.grid = new Grid(height, width);
@@ -500,8 +516,8 @@ Game.prototype.initCells = function(height, width, onCells){
         // flip y upside down from server representation
         y = height - 1 - y;
 
-        this.grid.setCell(y, x, UI.prototype.colors.filled);
-        this.ui.paint(y, x, UI.prototype.colors.filled);
+        this.grid.setCell(y, x, ON);
+        this.ui.paint(y, x, ON);
         if (y < miny) miny = y;
     }
     // repaint remaining UI rows from grid
@@ -509,9 +525,9 @@ Game.prototype.initCells = function(height, width, onCells){
 }
 
 Game.prototype.initWs = function(ws_url){
+    // initialize the websocket connection
     var state = this;
     return new Promise(function(resolve, reject) {
-        // initialize websocket connection
         state.ws_url = ws_url;
         console.log("using ws url: " + state.ws_url);
         state.ws = new WebSocket(state.ws_url);
@@ -531,18 +547,17 @@ Game.prototype.initWs = function(ws_url){
         });
 
         state.ws.addEventListener('error', function(event) {
-            console.log("ws connection error..");
-            reject();
+            reject("ws connection error..");
         });
 
         state.ws.addEventListener('close', function(event) {
-            console.log("ws connection closed..");
-            reject();
+            reject("ws connection closed..");
         });
     });
 };
 
-Game.prototype.initShapes = function() {
+Game.prototype.fetchShapes = function() {
+    // fetch the shape configurations used by the server
     var game = this;
     return serverRequest("shapes")
         .then(function(response) {
@@ -551,6 +566,8 @@ Game.prototype.initShapes = function() {
             if (shapes.length == 0) {
                 throw new Error("0 shapes received from server!");
             }
+            // the purpose of the loop below is to vertically flip the shapes
+            // since the server represenation is vertically flipped wrt client
             for (var i = 0; i < shapes.length; i++) {
                 var shape = shapes[i];
                 var rots = shape.rotations;
@@ -558,7 +575,7 @@ Game.prototype.initShapes = function() {
                 for (var r = 0; r < rots.length; r++) {
                     var zeroSeen = false;
                     var rot = rots[r];
-                    var rotH = rot.height;
+                    var rotH = rot.height; // (rot.height -1) is the max Y value, mapped to 0
                     var rotCoords = rot.configurations;
                     var b, cr;
                     for (b = 0; b < rotCoords.length; b++) {
@@ -586,6 +603,7 @@ Game.prototype.initShapes = function() {
 };
 
 Game.prototype.fetchGameNo = function() {
+    // fetch a currently active game number from the server
     return serverRequest("/games").then(function(response) {
         var gamenoList = response;
         if (gamenoList.length == 0) {
@@ -599,6 +617,8 @@ Game.prototype.fetchGameNo = function() {
 };
 
 Game.prototype.planExecute = function() {
+    // execute a plan to get the currently active block
+    // into the AI-best-move state
     var game = this;
     return new Promise(function(resolve, reject) {
         game.planExecuteCallback(function() {
@@ -608,12 +628,14 @@ Game.prototype.planExecute = function() {
 };
 
 Game.prototype.planExecuteCallback = function(resolve, reject) {
+    // make moves one by one until game.b looks like game.answer
+    // with game.timerDelay in between moves
     var game = this;
     var b = game.b;
     var answer = game.answer;
     var ui = this.ui;
 
-    this.ui.paintTo(b, UI.prototype.colors.blank); // erase
+    this.ui.paintTo(b, OFF); // erase
     var origR = b.r;
     var origX = b.x;
 
@@ -625,11 +647,14 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     } else if (b.x > answer.x) {
         b.x--;
     } else {
+        // we are done. drop and resolve the promise
         if (!this.grid.drop(this.b)) {
+            // this should never happen since block is not intersecting the grid
+            assert(false);
             game.gameOver = true;
-            reject();
+            reject("cannot drop");
         } else {
-            this.ui.paintTo(b, ui.colors.filled);
+            this.ui.paintTo(b, ON);
             this.grid.clearLines(this.ui);
             setTimeout(resolve, this.timerDelay);
         }
@@ -637,15 +662,16 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     }
 
     // check if move is possible
-    if (this.grid.blockIntersects(b, ui)) {
-        // undo last move and repaint
+    if (this.grid.blockIntersects(b)) {
+        // unable to move block. undo last move and repaint
         b.r = origR;
         b.x = origX;
-        this.paintTo(b, UI.prototype.colors.filled);
+        this.ui.paintTo(b, ON);
         game.gameOver = true;
-        reject();
+        reject("cannot place block");
     } else {
-        this.ui.paintTo(b, UI.prototype.colors.filled);
+        // continue with plan
+        this.ui.paintTo(b, ON);
         setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
     }
 };
@@ -659,11 +685,10 @@ Game.prototype.gameOver = function() {
 };
 
 Game.prototype.fetchPlanExecuteLoop = function() {
+    // a recursive promise to continuously fetch, plan, execute
     var game = this;
     this.fetch()
-        .then((function() {
-            game.ui.paintTo(game.b, UI.prototype.colors.filled);
-        }).bind(this))
+        .then(this.ui.paintTo.bind(this.ui, game.b, ON)) // add active block to the UI
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
         .catch(handleError);
@@ -672,7 +697,7 @@ Game.prototype.fetchPlanExecuteLoop = function() {
 Game.prototype.start = function() {
     this.fetchGameNo()
         .then(this.init.bind(this))
-        .then(this.initShapes.bind(this))
+        .then(this.fetchShapes.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this));
 };
 
