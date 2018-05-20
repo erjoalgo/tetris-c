@@ -660,9 +660,7 @@ Game.prototype.gameOver = function() {
 Game.prototype.fetchPlanExecuteLoop = function() {
     var game = this;
     this.fetch()
-        .then((function() {
-            game.ui.paintTo(game.b, ON);
-        }).bind(this))
+        .then(this.ui.paintTo.bind(this.ui, game.b, ON))
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
         .catch(handleError);
