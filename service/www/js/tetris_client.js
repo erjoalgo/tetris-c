@@ -220,6 +220,7 @@ var Grid = function(height, width) {
 };
 
 Grid.prototype.setCell = function(y, x, val){
+    // set grid cell to a given value, keeping invariants
     this.g[y][x] = val;
 
     if (val !== OFF)    {
@@ -238,6 +239,7 @@ Grid.prototype.setCell = function(y, x, val){
 }
 
 Grid.prototype.getDropDistance = function(b) {
+    // return the max number of units b can move down
     var botCrust = b.shape.rotations[b.r].crusts.bot;
 
     var dist, minDist = this.height;
@@ -256,6 +258,7 @@ Grid.prototype.getDropDistance = function(b) {
 };
 
 Grid.prototype.drop = function(b) {
+    // drop b onto the grid and add it
     var dropDistance = this.getDropDistance(b);
     if (dropDistance < 0) {
         return false;
@@ -282,6 +285,8 @@ Grid.prototype.drop = function(b) {
 };
 
 Grid.prototype.clearLines = function(ui) {
+
+    // clear full lines in grid, as well as in `ui' if provided
 
     if (this.needClear.length == 0) return;
 
@@ -350,6 +355,7 @@ Grid.prototype.clearLines = function(ui) {
 };
 
 Grid.prototype.blockIntersects = function(b) {
+    // determine whether the floating block `b' overlaps with any ON cell in the grid
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
         if (this.g[xy[1]][xy[0]] != OFF) {
@@ -360,6 +366,8 @@ Grid.prototype.blockIntersects = function(b) {
 };
 
 var Block = function(m, r, y, x, shape) {
+    // a 'tetro', here called Block
+
     this.m = m; // the shape or 'model' index
     this.r = r; // the rotation
     this.y = y; // the row index
@@ -368,6 +376,7 @@ var Block = function(m, r, y, x, shape) {
 };
 
 Block.prototype.iter = function() {
+    // return an iterator over the block cells
     var b = this;
     return (function() {
         var i = 0;
@@ -402,6 +411,7 @@ Block.prototype.iter = function() {
 };
 
 Game.prototype.logPerformance = function() {
+    // periodically log moves/sec
     var MOD = 1000;
     if (this.moveNo % MOD == 0) {
         var now = window.performance.now();
@@ -414,15 +424,15 @@ Game.prototype.logPerformance = function() {
 };
 
 Game.prototype.fetchCallback = function(move) {
-    // set the next block to display
+    // set the fetched next block/move to display
     assert(this.gameNo != null && this.moveNo != null);
 
-    // todo wrap
+    // reset the block to the new shape and center it at the top and middle
     this.b.m = move.m;
+    this.b.shape = this.shapes[this.b.m];
     this.b.r = 0;
     this.b.x = this.grid.width / 2 - 1;
     this.b.y = 0;
-    this.b.shape = this.shapes[this.b.m];
 
     this.moveNo+=1;
     this.logPerformance();
@@ -518,7 +528,6 @@ Game.prototype.initWs = function(ws_url){
     // initialize the websocket connection
     var state = this;
     return new Promise(function(resolve, reject) {
-        // initialize websocket connection
         state.ws_url = ws_url;
         console.log("using ws url: " + state.ws_url);
         state.ws = new WebSocket(state.ws_url);
@@ -566,7 +575,7 @@ Game.prototype.fetchShapes = function() {
                 for (var r = 0; r < rots.length; r++) {
                     var zeroSeen = false;
                     var rot = rots[r];
-                    var rotH = rot.height;
+                    var rotH = rot.height; // (rot.height -1) is the max Y value, mapped to 0
                     var rotCoords = rot.configurations;
                     var b, cr;
                     for (b = 0; b < rotCoords.length; b++) {
@@ -638,7 +647,9 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     } else if (b.x > answer.x) {
         b.x--;
     } else {
+        // we are done. drop and resolve the promise
         if (!this.grid.drop(this.b)) {
+            // this should never happen since block is not intersecting the grid
             assert(false);
             game.gameOver = true;
             reject("cannot drop");
@@ -652,13 +663,14 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
 
     // check if move is possible
     if (this.grid.blockIntersects(b)) {
-        // undo last move and repaint
+        // unable to move block. undo last move and repaint
         b.r = origR;
         b.x = origX;
         this.ui.paintTo(b, ON);
         game.gameOver = true;
         reject("cannot place block");
     } else {
+        // continue with plan
         this.ui.paintTo(b, ON);
         setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
     }
