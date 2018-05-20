@@ -350,7 +350,7 @@ Grid.prototype.blockIntersects = function(b, ui) {
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
         assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.COLORS.BLANK ||
-            this.grid.g[xy[1]][xy[0]] !== OFF);
+            this.g[xy[1]][xy[0]] !== OFF);
         if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.COLORS.BLANK) {
             return true;
         }
