@@ -52,7 +52,7 @@ var UI = function(parentElt) {
 
 UI.prototype.paint = function(r, c, color) {
     assert(color != null);
-    this.cellGrid[r][c].bgColor = color;
+    this.cellGrid[r][c].bgColor = color !== OFF? UI.COLORS.FILLED: UI.COLORS.BLANK;
 };
 
 UI.prototype.tableCreate = function(parentElt, width, height) {
@@ -76,7 +76,7 @@ UI.prototype.tableCreate = function(parentElt, width, height) {
 
             cell.width = this.cellSize;
             cell.height = this.cellSize;
-            cell.bgColor = this.colors.blank;
+            cell.bgColor = UI.COLORS.BLANK;
             cell.style.border = "1px solid #000";
 
             var cellText = document.createTextNode("");
@@ -140,17 +140,14 @@ UI.prototype.initSlider = function(initialValue, onChangeFun) {
     this.slider.value = this.slider.invertValue(initialValue);
 };
 
-UI.prototype.colors = {
-    'BLUE': "#0000f0",
-    'BLACK': "#000000",
-    'WHITE': "#ffffff",
-    'GREEN': 3,
-    filled: this.BLUE,
-    blank: this.WHITE
-};
+UI.COLORS = [
+    "#ffffff", // WHITE
+    "#0000f0", // BLUE
+    '000000' // BLACK
+];
 
-UI.prototype.colors.filled = UI.prototype.colors.BLUE;
-UI.prototype.colors.blank = UI.prototype.colors.WHITE;
+UI.COLORS.BLANK = UI.COLORS[0];
+UI.COLORS.FILLED = UI.COLORS[1];
 
 UI.prototype.paintTo = function(b, color) {
     // paint cells occupied by block b with the given color
@@ -166,7 +163,7 @@ UI.prototype.repaintRows = function(ymin, ymax, grid) {
     for (; ymin < ymax; ymin++) {
         for (var x = 0; x < grid.width; x++) {
             // TODO
-            this.paint(ymin, x, grid.g[ymin][x] || this.colors.blank);
+            this.paint(ymin, x, grid.g[ymin][x]);
         }
     }
 };
@@ -188,6 +185,9 @@ var Game = function(parentElt) {
     this.timerDelay = INITIAL_TIMER_DELAY;
 };
 
+const OFF = 0;
+const ON = 1;
+
 var Grid = function(height, width) {
     this.height = height;
     this.width = width;
@@ -205,7 +205,7 @@ var Grid = function(height, width) {
         var row = [];
         this.g.push(row);
         for (var ii = 0; ii < this.height; ii++)
-            row.push(UI.prototype.colors.blank);
+            row.push(OFF);
     }
 
     for (i = 0; i < this.width; i++) {
@@ -216,7 +216,7 @@ var Grid = function(height, width) {
 Grid.prototype.setCell = function(y, x, val){
     this.g[y][x] = val;
 
-    if (val == UI.prototype.colors.filled)    {
+    if (val !== OFF)    {
         if (y < this.relief[x]) {
             this.relief[x] = y;
         }
@@ -270,7 +270,7 @@ Grid.prototype.drop = function(b) {
                 this.needsClear = true;
                 this.needClear.push(xy[1]);
             }
-            this.g[xy[1]][xy[0]] = UI.prototype.colors.filled;
+            this.g[xy[1]][xy[0]] = ON;
         }
         return true;
     }
@@ -325,8 +325,7 @@ Grid.prototype.clearLines = function(ui) {
         this.g[y] = cleared.pop();
         this.rowcounts[y] = 0;
         for (i = 0; i < this.width; i++)
-            // TODO use 0, 1
-            this.g[y][i] = UI.prototype.colors.blank;
+            this.g[y][i] = OFF;
         y -= 1;
     }
 
@@ -335,7 +334,7 @@ Grid.prototype.clearLines = function(ui) {
 
     for (var i = 0; i < this.width; i++) {
         var relief = this.relief[i];
-        while (relief < this.height && this.g[relief][i] == UI.prototype.colors.blank)
+        while (relief < this.height && this.g[relief][i] == OFF)
             relief += 1;
         this.relief[i] = relief;
     }
@@ -350,9 +349,9 @@ Grid.prototype.blockIntersects = function(b, ui) {
     // TODO remove ui param
     for (var itr = b.iter(); itr.hasNext();) {
         var xy = itr.next().value;
-        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.prototype.colors.blank ||
-            this.grid.g[xy[1]][xy[0]] == ui.colors.filled);
-        if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.prototype.colors.blank) {
+        assert(ui.cellGrid[xy[1]][xy[0]].bgColor == UI.COLORS.BLANK ||
+            this.grid.g[xy[1]][xy[0]] !== OFF);
+        if (ui.cellGrid[xy[1]][xy[0]].bgColor != UI.COLORS.BLANK) {
             return true;
         }
     }
@@ -500,8 +499,8 @@ Game.prototype.initCells = function(height, width, onCells){
         // flip y upside down from server representation
         y = height - 1 - y;
 
-        this.grid.setCell(y, x, UI.prototype.colors.filled);
-        this.ui.paint(y, x, UI.prototype.colors.filled);
+        this.grid.setCell(y, x, ON);
+        this.ui.paint(y, x, ON);
         if (y < miny) miny = y;
     }
     // repaint remaining UI rows from grid
@@ -613,7 +612,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
     var answer = game.answer;
     var ui = this.ui;
 
-    this.ui.paintTo(b, UI.prototype.colors.blank); // erase
+    this.ui.paintTo(b, OFF); // erase
     var origR = b.r;
     var origX = b.x;
 
@@ -629,7 +628,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
             game.gameOver = true;
             reject();
         } else {
-            this.ui.paintTo(b, ui.colors.filled);
+            this.ui.paintTo(b, ON);
             this.grid.clearLines(this.ui);
             setTimeout(resolve, this.timerDelay);
         }
@@ -641,11 +640,11 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         // undo last move and repaint
         b.r = origR;
         b.x = origX;
-        this.paintTo(b, UI.prototype.colors.filled);
+        this.paintTo(b, ON);
         game.gameOver = true;
         reject();
     } else {
-        this.ui.paintTo(b, UI.prototype.colors.filled);
+        this.ui.paintTo(b, ON);
         setTimeout(this.planExecuteCallback.bind(this, resolve, reject), this.timerDelay);
     }
 };
@@ -662,7 +661,7 @@ Game.prototype.fetchPlanExecuteLoop = function() {
     var game = this;
     this.fetch()
         .then((function() {
-            game.ui.paintTo(game.b, UI.prototype.colors.filled);
+            game.ui.paintTo(game.b, ON);
         }).bind(this))
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this))
