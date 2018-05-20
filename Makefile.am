@@ -1,9 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
-OBJ_C=ai.c game.c grid.c block.c shape.c evolution.c
-
 lib_LTLIBRARIES = libtetris.la
-libtetris_la_SOURCES = $(OBJ_C)
+libtetris_la_SOURCES = ai.c game.c grid.c block.c shape.c evolution.c
 
 
 bin_PROGRAMS = tetris
