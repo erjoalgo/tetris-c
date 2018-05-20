@@ -58,7 +58,7 @@ UI.DEFAULT_CONFIG = {
     borderStyle: "1px solid #000",
     cellSize: "30",
     fontSize: "30px",
-    borderWidth: "2"
+    borderWidth: "20"
 }
 
 UI.prototype.tableCreate = function(parentElt, width, height) {
