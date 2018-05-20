@@ -202,7 +202,6 @@ var Grid = function(height, width) {
     this.relief = [];
 
     this.needClear = [];
-    this.needsClear = false;
 
     var i;
     for (i = 0; i < this.height; i++) {
@@ -272,7 +271,6 @@ Grid.prototype.drop = function(b) {
         for (var itr = b.iter(); itr.hasNext();) {
             xy = itr.next().value;
             if (++this.rowcounts[xy[1]] == this.width) {
-                this.needsClear = true;
                 this.needClear.push(xy[1]);
             }
             this.g[xy[1]][xy[0]] = ON;
@@ -283,7 +281,7 @@ Grid.prototype.drop = function(b) {
 
 Grid.prototype.clearLines = function(ui) {
 
-    if (!this.needsClear) return;
+    if (this.needClear.length == 0) return;
 
     var cmpNum = function(a, b) {
         return a - b;
@@ -344,7 +342,6 @@ Grid.prototype.clearLines = function(ui) {
         this.relief[i] = relief;
     }
 
-    this.needsClear = false;
     if (ui != null) {
         ui.repaintRows(YMAX, YMIN + 1, this);
     }
