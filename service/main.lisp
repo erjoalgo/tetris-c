@@ -5,7 +5,7 @@
 (defparameter +service-option-spec+
   '(
     (("port" #\p) :type integer :optional t :documentation "service port")
-    (("shapes-file" #\s) :type boolean :optional t :documentation "path to a libtetris shapes.in")
+    (("shapes-file" #\s) :type string :optional t :documentation "path to a libtetris shapes.in")
     (("seed" #\e) :type integer :optional t :documentation "libtetris ai seed to use")
     (("dims" #\g) :type string :optional t :documentation
      "dimensions of the grid, in the form of HxW, e.g. 19x10")
