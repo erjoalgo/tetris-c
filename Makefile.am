@@ -3,15 +3,13 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libtetris.la
 libtetris_la_SOURCES = ai.c game.c grid.c block.c shape.c evolution.c
 
-
 bin_PROGRAMS = tetris
 tetris_SOURCES = tetris.c
 tetris_LDADD = libtetris.la
 
-
+if USE_LIBNCURSES
 # EXTRA_tetris_SOURCES = tetris-ncurses.c tetris-play.c
 # if HAVE_LIBNCURSES
-if USE_LIBNCURSES
 tetris_SOURCES += tetris-play.c tetris-ncurses.c
 endif
 
