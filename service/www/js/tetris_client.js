@@ -620,6 +620,7 @@ Game.prototype.planExecuteCallback = function(resolve, reject) {
         b.x--;
     } else {
         if (!this.grid.drop(this.b)) {
+            assert(false);
             game.gameOver = true;
             reject("cannot drop");
         } else {
