@@ -1,7 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
 
-CC=gcc
-AMLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops --param max-unroll-times=200
 OBJ_C=ai.c game.c grid.c block.c shape.c evolution.c
 
 lib_LTLIBRARIES = libtetris.la
