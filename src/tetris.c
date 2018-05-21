@@ -81,7 +81,9 @@ int main(int argc, char** argv)
     printf( "not compiled with ncurses support\n" );
     #endif
   }else if (!strcmp(cmd, "ai"))	{
+    int start = time(NULL);
     ai_run(max_moves, depth, show_grid, w);
+    printf( "%ld secs elapsed\n", (time(NULL)-start) );
   }else if (!strcmp(cmd, "evolve"))	{
     evolution_test();
   }else if (!strcmp(cmd, "test"))	{
