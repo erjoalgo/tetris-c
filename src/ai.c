@@ -17,19 +17,13 @@
 #define FEATIDX_GAPS 3
 #define FEATIDX_OBS 4
 #define FEATIDX_DISCONT 5
+
+const char* FEAT_NAMES[] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS     ", "OBS     ", "DISCONT"};
 const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
 
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
-void init_feat_names (  )	{
-  feat_names[FEATIDX_RELIEF_MAX] = "RELIEF_MAX";
-  feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
-  feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
-  feat_names[FEATIDX_GAPS] = "GAPS     ";
-  feat_names[FEATIDX_OBS] = "OBS     ";
-  feat_names[FEATIDX_DISCONT] = "DISCONT";
-}
 
 double grid_eval ( grid* g, double* weights )	{
   double raws[FEAT_COUNT];
@@ -205,7 +199,6 @@ void ai_init (  )	{
 
   default_weights = malloc(sizeof(w));
   memcpy(default_weights, w, sizeof(w));
-  init_feat_names();
 }
 
 void ai_run ( int max_moves, int depth, int show_grid )	{

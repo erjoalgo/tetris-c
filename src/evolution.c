@@ -30,6 +30,7 @@ void mutate_ai ( ai* ai, double* parent_weights )	{
   ai->mutation_amt = amount;
 }
 
+extern char* feat_names[FEAT_COUNT];
 void mutation_print ( int feat_idx, double amount )	{
   printf( "%s %s BY %.2f\n", feat_names[feat_idx],
 	  amount>0? "UP" : "DOWN",
