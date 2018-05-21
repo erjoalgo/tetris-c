@@ -199,14 +199,16 @@ void test_feature (  )	{
   grid_set_color(g, 4, 0, 1);
 }
 
+void ai_run ( int max_moves, int depth, int show_grid, double* w )	{
+  if (w == NULL)    {
+    w = default_weights_cpy();
+  }
 
-void ai_run ( int max_moves, int depth, int show_grid )	{
   printf( "grid height is %d, depth %d, max moves is %d\n", GRID_HEIGHT, depth,
 	  max_moves );
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  double* w = default_weights_cpy();
   int applied = 0, succ;
   block b;
 

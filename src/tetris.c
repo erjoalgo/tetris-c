@@ -60,18 +60,19 @@ int main(int argc, char** argv)
   if (!shapes_init(shapes_file))	{
     FATAL("unable to open %s", shapes_file);
   }
+  double* w = default_weights_cpy();
 
   printf( "seed %d \n", seed );
   srand(seed);
 
   if (!strcmp(cmd, "play"))	{
     #if defined(HAVE_LIBNCURSES)
-    ui_play();
+    ui_play(w);
     #else
     printf( "not compiled with ncurses support\n" );
     #endif
   }else if (!strcmp(cmd, "ai"))	{
-    ai_run(max_moves, depth, show_grid);
+    ai_run(max_moves, depth, show_grid, w);
   }else if (!strcmp(cmd, "evolve"))	{
     evolution_test();
   }else if (!strcmp(cmd, "test"))	{
