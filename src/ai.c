@@ -24,6 +24,29 @@ const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
+double* load_weights ( char* file )    {
+  FILE* fh = fopen(file, "r");
+  if (!fh)    {
+    printf( "no such file: %s\n", file );
+    return NULL;
+  }else     {
+    double* w = malloc(FEAT_COUNT*sizeof(*w));
+    for ( int i = 0; i < FEAT_COUNT; i++ )    {
+      if (fscanf(fh, "%lf", w+i) != 1)    {
+        printf( "found %d weights in %s but wanted %d\n", i, file, FEAT_COUNT );
+        return NULL;
+      }
+    }
+
+    printf( "[" );
+    for ( int i = 0; i < FEAT_COUNT; i++ )
+      printf( "%lf%s", w[i], i?", ":"" );
+    printf( "]\n" );
+
+    return w;
+  }
+}
+
 double* default_weights_cpy ( )    {
   double* w = malloc(sizeof(default_weights));
   memcpy(w, default_weights, sizeof(default_weights));
