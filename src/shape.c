@@ -232,14 +232,14 @@ shape** shapes_read ( char* file, int* shape_count)	{
   int id = 0;
   while (!feof (fh))	{
     int len;
-    fscanf(fh, "%d", &len);
+    if (!fscanf(fh, "%d", &len))return NULL;
     int i;
     // int rot[len][2];
     int** rot = malloc(len*sizeof(*rot));
     for ( i = 0; i < len; i++ )	{
       rot[i] = malloc(2*sizeof(*rot[i]));
-      fscanf(fh, "%d", &rot[i][0]);
-      fscanf(fh, "%d", &rot[i][1]);
+      if (!fscanf(fh, "%d", &rot[i][0]))return NULL;
+      if (!fscanf(fh, "%d", &rot[i][1]))return NULL;
     }
     shapes = realloc(shapes, (*shape_count+1)*sizeof(shape*));
     shapes[(*shape_count)++] = shape_new(rot, len, id++);
