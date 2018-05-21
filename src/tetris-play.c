@@ -65,7 +65,7 @@ ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
   (void)arg;//ai will make moves one at a time
   if (gm == NULL)	{
     // new block. just display it
-    gm = ai_best_move(g, ss, default_weights);
+    gm = ai_best_move(g, ss, default_weights_cpy());
     return NONE;
   }else 	{
     // make moves one at a time. rotations first
@@ -172,7 +172,7 @@ void ui_play_ai(int depth, int delay_secs) {
   shape_stream* ss = shape_stream_new(depth);
   ai_init();
   ncurses_setup(g);
-  double* w = default_weights;
+  double* w = default_weights_cpy();
   assert(w);
   // double* w = get_default_weights();
   block bb;

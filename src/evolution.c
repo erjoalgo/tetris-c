@@ -199,7 +199,7 @@ void evolution_test (  )	{
   mutate_weights_test();
   double w[FEAT_COUNT];
   ai initial;
-  memcpy(initial.w, default_weights, sizeof(w));
+  memcpy(initial.w, default_weights_cpy(), sizeof(w));
   ai_print(&initial);
   breed_ai (&initial, -1);
 }

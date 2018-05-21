@@ -24,6 +24,11 @@ const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
+double* default_weights_cpy ( )    {
+  double* w = malloc(sizeof(default_weights));
+  memcpy(w, default_weights, sizeof(default_weights));
+  return w;
+}
 
 double grid_eval ( grid* g, double* weights )	{
   double raws[FEAT_COUNT];
@@ -208,8 +213,7 @@ void ai_run ( int max_moves, int depth, int show_grid )	{
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  double w[FEAT_COUNT];
-  memcpy(w, default_weights, sizeof(w));
+  double* w = default_weights_cpy();
   int applied = 0, succ;
   block b;
 
