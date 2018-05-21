@@ -11,6 +11,14 @@
 
 #define MAX(a, b) ((a)>(b)? (a):(b))
 
+#define FEATIDX_RELIEF_MAX 0
+#define FEATIDX_RELIEF_AVG 1
+#define FEATIDX_RELIEF_VAR 2
+#define FEATIDX_GAPS 3
+#define FEATIDX_OBS 4
+#define FEATIDX_DISCONT 5
+const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
+
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
