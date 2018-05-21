@@ -8,12 +8,15 @@
 
 #include <unistd.h>
 
+#ifndef DATADIR
+#define DATADIR "."
+#endif
 
 #define FATAL(fmt, ...) { fprintf(stderr, fmt, ##__VA_ARGS__); exit(1); }
 
 int main(int argc, char** argv)
 {
-  char* shapes_file = "shapes.in";
+  char* shapes_file =  DATADIR "/shapes.in";
   int seed = time(NULL);
 
   int depth = 3;
