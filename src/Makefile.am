@@ -15,7 +15,7 @@ tetris_SOURCES += tetris-play.c tetris-ncurses.c
 endif
 
 AM_CPPFLAGS = -DDATADIR=\"$(pkgdatadir)\"
-AM_CPPFLAGS += -Wall -Wextra -Werror
+AM_CPPFLAGS += -Wall -Wextra
 
 perf.data: FORCE tetris-prof
 	perf record --call-graph dwarf -g ./tetris-prof ai -d 4 -m 1000
