@@ -38,6 +38,7 @@
   port
   ws-port
   shapes-file
+  ai-weights-file
   seed
   grid-height-width
   max-move-catchup-wait-secs
@@ -273,7 +274,7 @@ until either the game is lost, or `max-moves' is reached"
   (when (gethash game-no (service-game-executions *service*))
     (error "game ~D exists" game-no))
 
-  (with-slots (ai-depth grid-height-width default-ai-move-delay-millis)
+  (with-slots (ai-depth grid-height-width default-ai-move-delay-millis ai-weights-file)
       (service-config *service*)
     (let* ((moves (make-array 0 :adjustable t
                               :fill-pointer t
@@ -283,7 +284,9 @@ until either the game is lost, or `max-moves' is reached"
            (height-width grid-height-width)
            (game (tetris-ai:game-init (car height-width)
                                       (cdr height-width)
-                                      :ai-weights tetris-ai:ai-default-weights
+                                      :ai-weights (if ai-weights-file
+(tetris-ai:load-weights ai-weights-file)
+tetris-ai:ai-default-weights)
                                       :ai-depth ai-depth)))
       (assert (> last-recorded-state-check-delay-secs 0))
       (prog1 (setf (gethash game-no (service-game-executions *service*))

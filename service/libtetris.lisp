@@ -17,6 +17,7 @@
    #:game-move
    #:game-move-pack
    #:game-move-unpack
+   #:load-weights
    )
   )
 
@@ -30,23 +31,22 @@
 
 (defvar default-seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
 (defvar default-shapes-file "shapes.in")
+(defvar default-ai-weights "ai-weights.json")
 
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
-(defun init-tetris (&key (seed default-seed) (shapes-file default-shapes-file))
+(defun init-tetris (&key (seed default-seed)
+                      (shapes-file default-shapes-file))
   "initialize the tetris foreign library with the given `seed' and `shapes-file'"
   (vom:debug "reading shapes...~%" )
-  (setf shapes
-        (cffi:foreign-funcall "shapes_read"
-                              :string shapes-file
-                              :pointer (cffi:get-var-pointer 'SHAPE-COUNT)
-                              :pointer))
+  (cffi:foreign-funcall "shapes_init"
+                        :string shapes-file
+                        :boolean)
   (vom:info "loaded ~D shapes ~%" SHAPE-COUNT)
   (vom:warn "using seed: ~D~%" seed)
   (cffi:foreign-funcall "srand" :int seed)
-  (assert (> SHAPE-COUNT 0))
-  (cffi:foreign-funcall "ai_init" :void))
+  (assert (> SHAPE-COUNT 0)))
 
 (defstruct game
   g ;; grid
@@ -189,6 +189,10 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
   (shape :pointer)
   (rot :int)
   (col :int))
+
+(defcfun (load-weights "load_weights")
+    :pointer
+  (filename :string))
 
 (defmethod translate-from-foreign (pointer game-move)
   "translate a C foreign move into a `game-move'"
