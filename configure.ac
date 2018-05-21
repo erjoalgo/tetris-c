@@ -1,6 +1,6 @@
 AC_INIT([tetris], [0.01], erjoalgo@gmail.com)
 
-: ${CFLAGS="-Ofast -DNDEBUG -funroll-all-loops --param max-unroll-times=200"}
+: ${CFLAGS="-Ofast -DNDEBUG"}
 
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_FILES([Makefile src/Makefile data/Makefile])
