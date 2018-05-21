@@ -17,6 +17,8 @@
 int main(int argc, char** argv)
 {
   char* shapes_file =  DATADIR "/shapes.in";
+  char* weights_file =  DATADIR "/default_weights.in";
+
   int seed = time(NULL);
 
   int depth = 3;
@@ -24,7 +26,7 @@ int main(int argc, char** argv)
   int show_grid = 0;
 
   int c;
-  while ((c = getopt (argc, argv, "d:m:hvs:S:")) != -1)
+  while ((c = getopt (argc, argv, "d:m:hvs:S:w:")) != -1)
     switch (c)
       {
       case 'd':
@@ -38,6 +40,9 @@ int main(int argc, char** argv)
         break;
       case 'S':
 	shapes_file = optarg;
+        break;
+      case 'w':
+	weights_file = optarg;
         break;
       case 'v':
 	show_grid = 1;
@@ -60,7 +65,11 @@ int main(int argc, char** argv)
   if (!shapes_init(shapes_file))	{
     FATAL("unable to open %s", shapes_file);
   }
-  double* w = default_weights_cpy();
+  double* w = NULL;
+  if (!(w = load_weights(weights_file)))    {
+    printf("WARN: unable to load weights from %s. falling back to defaults\n", weights_file);
+    w = default_weights_cpy();
+  }
 
   printf( "seed %d \n", seed );
   srand(seed);
