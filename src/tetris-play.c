@@ -95,7 +95,6 @@ void ui_play() {
   int dropped = 1;
 
   // allow ai to make moves for human
-  ai_init();
   shape_stream* ss = shape_stream_new(3);
 
   while(1) {
@@ -170,7 +169,6 @@ void ui_play_ai(int depth, int delay_secs) {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
-  ai_init();
   ncurses_setup(g);
   double* w = default_weights_cpy();
   assert(w);

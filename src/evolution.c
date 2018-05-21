@@ -194,7 +194,6 @@ void evolution_init (  )	{
 }
 
 void evolution_test (  )	{
-  ai_init();
   evolution_init();
   mutate_weights_test();
   double w[FEAT_COUNT];

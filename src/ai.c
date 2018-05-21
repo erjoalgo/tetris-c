@@ -199,15 +199,8 @@ void test_feature (  )	{
   grid_set_color(g, 4, 0, 1);
 }
 
-void ai_init (  )	{
-  double w[FEAT_COUNT] =    { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
-
-  default_weights = malloc(sizeof(w));
-  memcpy(default_weights, w, sizeof(w));
-}
 
 void ai_run ( int max_moves, int depth, int show_grid )	{
-  ai_init();
   printf( "grid height is %d, depth %d, max moves is %d\n", GRID_HEIGHT, depth,
 	  max_moves );
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
