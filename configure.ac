@@ -11,7 +11,7 @@ dnl AM_CONDITIONAL([HAVE_LIBNCURSES], [test "$HAVE_LIBNCURSES" -eq 1])
 dnl AX_WITH_CURSES
 AM_CONDITIONAL([USE_LIBNCURSES], [test "$ac_cv_lib_ncurses_initscr" = yes])
 
-AM_INIT_AUTOMAKE([-Wall -Werror])
+AM_INIT_AUTOMAKE([-W -Wall])
 
 AC_CHECK_FUNCS([memmove])
 AC_CHECK_FUNCS([memset])
