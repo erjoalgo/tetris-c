@@ -8,12 +8,15 @@
 
 #include <unistd.h>
 
+#ifndef DATADIR
+#define DATADIR "."
+#endif
 
 #define FATAL(fmt, ...) { fprintf(stderr, fmt, ##__VA_ARGS__); exit(1); }
 
 int main(int argc, char** argv)
 {
-  char* shapes_file = "shapes.in";
+  char* shapes_file =  DATADIR "/shapes.in";
   int seed = time(NULL);
 
   int depth = 3;
@@ -62,7 +65,11 @@ int main(int argc, char** argv)
   srand(seed);
 
   if (!strcmp(cmd, "play"))	{
+    #if defined(HAVE_LIBNCURSES)
     ui_play();
+    #else
+    printf( "not compiled with ncurses support\n" );
+    #endif
   }else if (!strcmp(cmd, "ai"))	{
     ai_run(max_moves, depth, show_grid);
   }else if (!strcmp(cmd, "evolve"))	{

@@ -23,7 +23,7 @@
 (in-package #:tetris-ai)
 
 (define-foreign-library libtetris
-  (:unix (:or "libtetris.so.1" "libtetris.so"))
+  (:unix (:or "libtetris.so"))
   (t (:default "libtetris.so")))
 
 (use-foreign-library libtetris)

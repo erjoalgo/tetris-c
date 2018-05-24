@@ -65,7 +65,7 @@ void grid_cpy ( grid* dest, grid* src )	{
   }
   for ( i = 0; i < src->width; i++ )	{
     memcpy(dest->stacks[i], src->stacks[i],
-	   src->width*sizeof(*src->stacks[i]));
+	   src->height*sizeof(*src->stacks[i]));
   }
   memcpy(dest->full_rows, src->full_rows,
 	 src->height*sizeof(*src->full_rows));
