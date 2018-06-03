@@ -71,22 +71,12 @@
   "pop the next shape in the shape stream, and position it at the top.
 return a block with the newly-popped shape, or nil if the block intersects the grid"
   (with-slots (g b ss) game
-    (let (next-shape)
-      (setf next-shape (cffi:foreign-funcall "shape_stream_pop"
-                                             :pointer ss
-                                             :pointer))
-      (cffi:foreign-funcall "block_init"
-                            :pointer b
-                            :pointer next-shape
-                            :void)
-      (cffi:foreign-funcall "grid_block_center_elevate"
-                            :pointer g
-                            :pointer b)
-      (unless (cffi:foreign-funcall "grid_block_intersects"
-                                    :pointer g
-                                    :pointer b
-                                    :boolean)
-        b))))
+    (unless (cffi:foreign-funcall "game_cycle_next_move"
+                                  :pointer g
+                                  :pointer b
+                                  :pointer ss
+                                  :boolean)
+      b)))
 
 (defun game-apply-move (game move &optional no-add)
   "apply the specified `move' to `game'"
