@@ -108,6 +108,7 @@ typedef struct{
 shape_stream* shape_stream_new ( int max_len );
 shape* shape_stream_peek ( shape_stream* stream, int idx );
 shape* shape_stream_pop ( shape_stream* stream );
+int game_cycle_next_move ( grid* g, block* b, shape_stream* ss );
 
 #define RAND(len) (rand()%(len))
 
