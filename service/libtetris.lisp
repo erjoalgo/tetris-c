@@ -185,7 +185,8 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
   "translate a C foreign move into a `game-move'"
   (declare (ignore game-move))
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move-foreign))
-    (let ((shape-id (mem-ref shape :int)))
+    ;;uses the fact that the first struct field is id
+    (let ((shape-id (mem-ref shape :int 0)))
       (make-game-move :shape-code shape-id :rot rot :col col))))
 
 (defun game-apply-next-move (game &optional game-move)
