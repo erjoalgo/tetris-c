@@ -22,7 +22,6 @@
   (:export
    #:service-start
    #:service-stop
-   #:game-create-run
    #:game-create-run-thread
    #:make-config
    #:service-config

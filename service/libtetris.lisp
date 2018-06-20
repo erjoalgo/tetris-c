@@ -31,10 +31,11 @@
 
 (defvar default-seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
 (defvar default-shapes-file "shapes.in")
-(defvar default-ai-weights "ai-weights.json")
 
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
+
+(defvar ai-default-weights)
 
 (defun init-tetris (&key (seed default-seed)
                       (shapes-file default-shapes-file))
@@ -46,7 +47,9 @@
   (vom:info "loaded ~D shapes ~%" SHAPE-COUNT)
   (vom:warn "using seed: ~D~%" seed)
   (cffi:foreign-funcall "srand" :int seed)
-  (assert (> SHAPE-COUNT 0)))
+  (assert (> SHAPE-COUNT 0))
+  (setf ai-default-weights
+        (cffi:foreign-funcall "default_weights_cpy" :pointer)))
 
 (defstruct game
   g ;; grid
@@ -171,8 +174,6 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
 
 (defvar default-height 19)
 (defvar default-width 10)
-
-(cffi:defcvar ("default_weights" ai-default-weights) :pointer)
 
 (defun ai-best-move (game weights)
   "return the best move according to the ai"
