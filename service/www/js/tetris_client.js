@@ -690,15 +690,15 @@ Game.prototype.fetchPlanExecuteLoop = function() {
     this.fetch()
         .then(this.ui.paintTo.bind(this.ui, game.b, ON)) // add active block to the UI
         .then(this.planExecute.bind(this))
-        .then(this.fetchPlanExecuteLoop.bind(this))
-        .catch(handleError);
+        .then(this.fetchPlanExecuteLoop.bind(this));
 };
 
 Game.prototype.start = function() {
     this.fetchGameNo()
         .then(this.init.bind(this))
         .then(this.fetchShapes.bind(this))
-        .then(this.fetchPlanExecuteLoop.bind(this));
+        .then(this.fetchPlanExecuteLoop.bind(this))
+        .catch(handleError);
 };
 
 var games = [];
