@@ -1,19 +1,5 @@
 (in-package #:tetris-ai-rest)
 
-(defun merge-structs (type &rest objs)
-  "merge several structs.
-values appearing earlier have higher precedence. nil interpreted as undefined"
-  (loop with ret = (make-instance type)
-     with slots = (loop for slot in (sb-mop:class-direct-slots (find-class type))
-                     collect (slot-value slot 'SB-PCL::NAME))
-     for obj in (reverse objs) if obj do
-       (loop for slot in slots
-          as val = (slot-value obj slot)
-          if val do
-            (setf (slot-value ret slot) val))
-     finally (return ret)))
-
-
 (defun s-starts-with (prefix string)
   (and (<= (length prefix) (length string))
        (string= prefix (subseq string 0 (length prefix)))))

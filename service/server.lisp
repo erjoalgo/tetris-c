@@ -35,29 +35,17 @@
 (in-package #:tetris-ai-rest)
 
 (defstruct config
-  port
+  (port 4242)
   ws-port
   shapes-file
   ai-weights-file
   seed
-  grid-height-width
-  max-move-catchup-wait-secs
-  ai-depth
-  default-ai-move-delay-millis
-  log-filename
-  )
-
-(defparameter config-default
-  (make-config :port 4242
-               ;; :ws-port 4243
-               :shapes-file tetris-ai:default-shapes-file
-               :grid-height-width (cons tetris-ai:default-height
-                                        tetris-ai:default-width)
-               :ai-depth 3
-               :default-ai-move-delay-millis 5
-               :log-filename "tetris-ai-rest.log"
-               :max-move-catchup-wait-secs 10)
-  "fallback service configuration to fill in any mising (nil) values"
+  (grid-height-width (cons tetris-ai:default-height
+                           tetris-ai:default-width))
+  (max-move-catchup-wait-secs 10)
+  (ai-depth 3)
+  (default-ai-move-delay-millis 5)
+  (log-filename "tetris-ai-rest.log")
   )
 
 (defstruct service
@@ -90,18 +78,14 @@
 
 (defvar *service* nil "the default currently active service")
 
-(defun service-start (&optional config &rest make-config-args)
-  "start the service. `config' is used as the base service configuration
-any remaining arguments are interpreted as flattened key-value pairs and are proxied to
-`make-config-args'
-"
+(defun service-start (&rest make-config-args)
+  "start a service based on the config obtained by proxying all arguments make-config"
+  (service-start-with-config (apply 'make-config make-config-args)))
+
+(defun service-start-with-config (config)
+  "start the service based on`config'"
   (when (service-running-p *service*)
     (error "service is running"))
-  (setf config (merge-structs 'config
-                              config
-                              (apply 'make-config make-config-args)
-                              config-default
-                              ))
   (setf (config-ws-port config) (1+ (config-port config)))
   (apply 'tetris-ai:init-tetris
          (append (when (config-shapes-file config)
@@ -125,7 +109,7 @@ any remaining arguments are interpreted as flattened key-value pairs and are pro
 
     (vom:warn "started on port ~D (ws ~D)" (config-port config) (config-ws-port config))
     (setf *service*
-          (make-service :config (or config config-default)
+          (make-service :config config
                         :acceptor acceptor
                         :game-executions (make-hash-table)
                         :ws-service ws-service
