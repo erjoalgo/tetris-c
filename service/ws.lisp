@@ -30,7 +30,7 @@
      path
      (make-instance 'exc-resource :game-exc game-exc)
 
-     (lambda (&rest args) t))
+     (lambda (&rest args) (declare (ignore args)) t))
 
     (push (bordeaux-threads:make-thread
            (lambda ()
