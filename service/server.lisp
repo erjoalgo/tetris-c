@@ -53,18 +53,20 @@
   acceptor
   ws-service
   curr-game-no
-  game-executions
+  (game-executions (make-hash-table))
   log-fh)
 
 (defstruct game-execution
   game
-  moves
+  (moves (make-array 0 :adjustable t
+                     :fill-pointer t
+                     :element-type 'tetris-ai:game-move))
   last-recorded-state
   running-p
 
   max-moves
   ai-move-delay-secs
-  last-recorded-state-check-delay-secs
+  (last-recorded-state-check-delay-secs 2)
   )
 
 (defstruct last-recorded-state
@@ -111,7 +113,6 @@
     (setf *service*
           (make-service :config config
                         :acceptor acceptor
-                        :game-executions (make-hash-table)
                         :ws-service ws-service
                         :log-fh log-fh
                         :curr-game-no 0))))
@@ -248,7 +249,6 @@ until either the game is lost, or `max-moves' is reached"
                (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (game-no &key max-moves ai-move-delay-secs
-                              (last-recorded-state-check-delay-secs 2))
   "create a game `game-no' with the specified `max-moves', `ai-move-delay-secs',
 `last-recorded-state-check-delay-secs'. service-global configs are drawn from
 (service-config *service*)"
@@ -260,9 +260,7 @@ until either the game is lost, or `max-moves' is reached"
 
   (with-slots (ai-depth grid-height-width default-ai-move-delay-millis ai-weights-file)
       (service-config *service*)
-    (let* ((moves (make-array 0 :adjustable t
-                              :fill-pointer t
-                              :element-type 'tetris-ai:game-move))
+    (let* (
            (ai-move-delay-secs (or ai-move-delay-secs
                                    (/ default-ai-move-delay-millis 1000)))
            (height-width grid-height-width)
@@ -272,15 +270,13 @@ until either the game is lost, or `max-moves' is reached"
 (tetris-ai:load-weights ai-weights-file)
 tetris-ai:ai-default-weights)
                                       :ai-depth ai-depth)))
-      (assert (> last-recorded-state-check-delay-secs 0))
       (prog1 (setf (gethash game-no (service-game-executions *service*))
                           (make-game-execution :game game
                                                :moves moves
                                                :max-moves max-moves
                                                :last-recorded-state (game-serialize-state game 0)
                                                :ai-move-delay-secs ai-move-delay-secs
-                                               :last-recorded-state-check-delay-secs
-                                               last-recorded-state-check-delay-secs))
+                                               ))
                   (ws-register-game game-no (service-ws-service *service*))))))
 
 (defun game-create-run (&optional game-no &rest create-args)
