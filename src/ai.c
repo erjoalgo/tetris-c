@@ -223,9 +223,7 @@ void test_feature (  )	{
 }
 
 void ai_run ( int max_moves, int depth, int show_grid, double* w )	{
-  if (w == NULL)    {
-    w = default_weights_cpy();
-  }
+  assert(w);
 
   printf( "grid height is %d, depth %d, max moves is %d\n", GRID_HEIGHT, depth,
 	  max_moves );
