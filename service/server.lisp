@@ -63,7 +63,7 @@
   running-p
 
   max-moves
-  ai-move-delay-secs
+  (ai-move-delay-secs .5)
   (last-recorded-state-check-delay-secs 2)
   )
 
@@ -266,7 +266,9 @@ until either the game is lost, or `max-moves' is reached"
                             :game game
                             :last-recorded-state (game-serialize-state game 0)
 
-                            make-game-exc-extra-args))
+                            (append make-game-exc-extra-args
+                                    (list :ai-move-delay-secs
+                                          (/ default-ai-move-delay-millis 1000)))))
            (exc-table (service-game-executions *service*))
            (game-no (HASH-TABLE-SIZE exc-table)))
 
@@ -274,10 +276,6 @@ until either the game is lost, or `max-moves' is reached"
 
       (loop while (gethash game-no exc-table)
          do (incf game-no))
-
-      (unless (game-execution-ai-move-delay-secs game-exc)
-        (setf (game-execution-ai-move-delay-secs game-exc)
-              (/ default-ai-move-delay-millis 1000)))
 
       (setf (gethash game-no exc-table) game-exc)
       (ws-register-game game-no (service-ws-service *service*))
