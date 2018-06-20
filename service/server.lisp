@@ -87,7 +87,7 @@
 (defun service-start-with-config (config)
   "start the service based on`config'"
   (when (service-running-p *service*)
-    (error "service is running"))
+    (service-stop *service*))
   (setf (config-ws-port config) (1+ (config-port config)))
   (apply 'tetris-ai:init-tetris
          (append (when (config-shapes-file config)
