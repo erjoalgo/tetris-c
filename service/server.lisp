@@ -52,7 +52,6 @@
   config
   acceptor
   ws-service
-  curr-game-no
   (game-executions (make-hash-table))
   log-fh)
 
@@ -114,8 +113,7 @@
           (make-service :config config
                         :acceptor acceptor
                         :ws-service ws-service
-                        :log-fh log-fh
-                        :curr-game-no 0))))
+                        :log-fh log-fh))))
 
 (defun service-stop (&optional service)
   "stop the service if running. if service is nil, stop *service*"
@@ -248,46 +246,48 @@ until either the game is lost, or `max-moves' is reached"
          (setf (game-execution-running-p game-exc) nil
                (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
 
-(defun game-create (game-no &key max-moves ai-move-delay-secs
+(defun game-create (&rest make-game-exc-extra-args)
   "create a game `game-no' with the specified `max-moves', `ai-move-delay-secs',
-`last-recorded-state-check-delay-secs'. service-global configs are drawn from
-(service-config *service*)"
+  `last-recorded-state-check-delay-secs'. service-global configs are drawn from
+  (service-config *service*)"
+
   (unless (service-running-p *service*)
     (error "service not running"))
-  (assert (numberp game-no))
-  (when (gethash game-no (service-game-executions *service*))
-    (error "game ~D exists" game-no))
 
   (with-slots (ai-depth grid-height-width default-ai-move-delay-millis ai-weights-file)
       (service-config *service*)
-    (let* (
-           (ai-move-delay-secs (or ai-move-delay-secs
-                                   (/ default-ai-move-delay-millis 1000)))
-           (height-width grid-height-width)
-           (game (tetris-ai:game-init (car height-width)
-                                      (cdr height-width)
-                                      :ai-weights (if ai-weights-file
-(tetris-ai:load-weights ai-weights-file)
-tetris-ai:ai-default-weights)
-                                      :ai-depth ai-depth)))
-      (prog1 (setf (gethash game-no (service-game-executions *service*))
-                          (make-game-execution :game game
-                                               :moves moves
-                                               :max-moves max-moves
-                                               :last-recorded-state (game-serialize-state game 0)
-                                               :ai-move-delay-secs ai-move-delay-secs
-                                               ))
-                  (ws-register-game game-no (service-ws-service *service*))))))
+    (let* ((game (destructuring-bind (height . width)
+                     grid-height-width
+                   (tetris-ai:game-init height width
+                                        :ai-weights (if ai-weights-file
+                                                        (tetris-ai:load-weights ai-weights-file)
+                                                        tetris-ai:ai-default-weights)
+                                        :ai-depth ai-depth)))
+           (game-exc (apply 'make-game-execution
+                            :game game
+                            :last-recorded-state (game-serialize-state game 0)
 
-(defun game-create-run (&optional game-no &rest create-args)
-  "create and execute a game. all arguments are proxied to `game-create'"
-  (let ((game-no (or game-no (incf (service-curr-game-no *service*)))))
-    (game-run (apply 'game-create game-no create-args))))
+                            make-game-exc-extra-args))
+           (exc-table (service-game-executions *service*))
+           (game-no (HASH-TABLE-SIZE exc-table)))
 
-(defun game-create-run-thread (&optional game-no &rest create-args)
+      (assert (service-game-executions *service*))
+
+      (loop while (gethash game-no exc-table)
+         do (incf game-no))
+
+      (unless (game-execution-ai-move-delay-secs game-exc)
+        (setf (game-execution-ai-move-delay-secs game-exc)
+              (/ default-ai-move-delay-millis 1000)))
+
+      (setf (gethash game-no exc-table) game-exc)
+      (ws-register-game game-no (service-ws-service *service*))
+      (values game-exc game-no))))
+
+(defun game-create-run-thread (&rest game-create-args)
   "create and execute a game on a new thread. all arguments are proxied to `game-create-run'"
-  (let* ((game-exc (apply 'game-create game-no create-args)))
-    (values
-     (sb-thread:make-thread 'game-run :arguments (list game-exc)
-                            :name (format nil "~A ~D" thread-name-prefix game-no))
-     game-exc)))
+  (multiple-value-bind (game-exc game-no) (apply 'game-create game-create-args)
+    (let* ((thread-name (format nil "~A ~D" thread-name-prefix game-no)))
+      (values (sb-thread:make-thread 'game-run :arguments (list game-exc)
+                                     :name thread-name)
+              game-exc))))
