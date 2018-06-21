@@ -77,3 +77,9 @@ void shape_stream_test (  )	{
     assert(shape_stream_pop(ss) == SHAPES[i]);
   }
 }
+
+int game_cycle_next_move ( grid* g, block* b, shape_stream* ss ) {
+  shape* s = shape_stream_pop(ss);
+  block_init(b, s);
+  return grid_block_center_elevate(g, b);
+}

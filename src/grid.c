@@ -709,8 +709,7 @@ void grid_test (  )	{
   // test a simple flow until grid gets full
   while (1)	{
     block_init(b, SHAPES[RAND(SHAPE_COUNT)]);
-    grid_block_center_elevate(g, b);
-    if (grid_block_intersects(g, b))	{
+    if (!grid_block_center_elevate(g, b))	{
       break;
     }
     grid_block_add(g, b);

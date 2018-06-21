@@ -13,7 +13,9 @@
   :description "A restful service on top of tetris-ai"
   :license "GPLv3"
   :author "Ernesto Alfonso <erjoalgo@gmail.com>"
-  :components ((:file "server")
+  :components (
+               (:file "infarray")
+               (:file "server")
                (:file "ws")
                (:file "util")
                (:file "main"))

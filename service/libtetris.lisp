@@ -71,22 +71,12 @@
   "pop the next shape in the shape stream, and position it at the top.
 return a block with the newly-popped shape, or nil if the block intersects the grid"
   (with-slots (g b ss) game
-    (let (next-shape)
-      (setf next-shape (cffi:foreign-funcall "shape_stream_pop"
-                                             :pointer ss
-                                             :pointer))
-      (cffi:foreign-funcall "block_init"
-                            :pointer b
-                            :pointer next-shape
-                            :void)
-      (cffi:foreign-funcall "grid_block_center_elevate"
-                            :pointer g
-                            :pointer b)
-      (unless (cffi:foreign-funcall "grid_block_intersects"
-                                    :pointer g
-                                    :pointer b
-                                    :boolean)
-        b))))
+    (unless (cffi:foreign-funcall "game_cycle_next_move"
+                                  :pointer g
+                                  :pointer b
+                                  :pointer ss
+                                  :boolean)
+      b)))
 
 (defun game-apply-move (game move &optional no-add)
   "apply the specified `move' to `game'"
@@ -195,7 +185,8 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
   "translate a C foreign move into a `game-move'"
   (declare (ignore game-move))
   (with-foreign-slots ((shape rot col) pointer (:struct %game-move-foreign))
-    (let ((shape-id (mem-ref shape :int)))
+    ;;uses the fact that the first struct field is id
+    (let ((shape-id (mem-ref shape :int 0)))
       (make-game-move :shape-code shape-id :rot rot :col col))))
 
 (defun game-apply-next-move (game &optional game-move)
