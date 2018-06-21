@@ -443,16 +443,18 @@ Game.prototype.fetchCallback = function(move) {
 Game.prototype.fetch = function() {
     // send request to fetch the next block and the AI best move
     var game = this;
+    var fetch;
     if (this.ws != null) {
-        return new Promise(function(resolve, reject) {
+        fetch = new Promise(function(resolve, reject) {
             game.ws.resolve = resolve;
             game.ws.reject = reject;
             game.ws.send(game.moveNo);
         });
     } else {
         var uri = "/games/" + this.gameNo + "/moves/" + this.moveNo;
-        return serverRequest(uri).then(fetchCallback, gameOver);
+        fetch = serverRequest(uri);
     }
+    return fetch.then(this.fetchCallback.bind(this));
 };
 
 Game.prototype.init = function(gameNo) {
@@ -539,7 +541,7 @@ Game.prototype.initWs = function(ws_url){
             answer.r = (packed >> 8) & 0xff;
             answer.x = (packed >> 0) & 0xff;
             state.fetchCallback(answer);
-            state.ws.resolve();
+            state.ws.resolve(answer);
         });
         state.ws.addEventListener('open', function(event) {
             console.log("ws connection opened..");
