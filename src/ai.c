@@ -18,7 +18,7 @@
 #define FEATIDX_OBS 4
 #define FEATIDX_DISCONT 5
 
-const char* FEAT_NAMES[] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS     ", "OBS     ", "DISCONT"};
+const char* FEAT_NAMES[] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS", "OBS", "DISCONT"};
 const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
 
 void feature_gaps ( grid* g, double* ordered_raws );
@@ -26,23 +26,47 @@ void feature_variance ( grid* g, double* ordered_raws );
 
 double* load_weights ( char* file )    {
   FILE* fh = fopen(file, "r");
+  char err[200];
+  err[0] = 0;
+
+  double* w = malloc(FEAT_COUNT*sizeof(*w));
+  memset(w, 0, sizeof(FEAT_COUNT*sizeof(*w)));
+
   if (!fh)    {
-    printf( "no such file: %s\n", file );
-    return NULL;
+    sprintf( err, "no such file: %s\n", file );
   }else     {
-    double* w = malloc(FEAT_COUNT*sizeof(*w));
+
+    int seen[FEAT_COUNT];
+    memset(seen, 0, sizeof(seen));
+
+    char feat_name[21];
     for ( int i = 0; i < FEAT_COUNT; i++ )    {
-      if (fscanf(fh, "%lf", w+i) != 1)    {
-        printf( "found %d weights in %s but wanted %d\n", i, file, FEAT_COUNT );
-        return NULL;
+      double wi;
+      if (fscanf(fh, "%20s\t%lf", feat_name, &wi) != 2)    {
+        sprintf(err, "found %d weights in %s but wanted %d\n", i, file, FEAT_COUNT );
+        break;
+      } else  {
+        int feat_idx;
+        for ( feat_idx = 0;
+              feat_idx < FEAT_COUNT && strcmp(FEAT_NAMES[feat_idx], feat_name);
+              feat_idx++ );
+        if (feat_idx == FEAT_COUNT) {
+          sprintf(err, "unknown feature name: %s\n", feat_name );
+          break;
+        } else if (seen[feat_idx]) {
+          sprintf(err, "duplicate feature name: %s\n", feat_name );
+          break;
+        } else  {
+          w[feat_idx] = wi;
+          seen[feat_idx] = 1;
+        }
       }
     }
-
-    printf( "[" );
-    for ( int i = 0; i < FEAT_COUNT; i++ )
-      printf( "%lf%s", w[i], i?", ":"" );
-    printf( "]\n" );
-
+  }
+  if (strlen(err)) {
+    printf("%s\n", err);
+    return NULL;
+  } else  {
     return w;
   }
 }
