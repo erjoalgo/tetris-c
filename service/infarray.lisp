@@ -53,7 +53,8 @@
                (incf page-len))
         (let ((new-page page-last) (old-page page))
           (setf page new-page
-                page-last old-page)
+                page-last old-page
+                page-len 0)
           (incf page-base-idx page-max-elements)
           (incf forgotten-pages-count)
           (infarray-push infarray elt)))))
