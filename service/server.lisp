@@ -27,7 +27,12 @@
    #:service-config
    #:grid-height-width
    #:config-grid-height-width
-   #:game-serialize-state))
+   #:game-serialize-state)
+  (:import-from #:tetris-ai-rest/infarray
+                #:infarray-new
+                #:infarray-nth
+                #:infarray-length
+                #:infarray-push))
 
 (in-package #:tetris-ai-rest)
 
@@ -42,6 +47,7 @@
   (max-move-catchup-wait-secs 10)
   (ai-depth 3)
   (default-ai-move-delay-millis 5)
+  (max-remembered-moves 10000000);; 10 million
   (log-filename "tetris-ai-rest.log"))
 
 (defstruct service
@@ -53,9 +59,7 @@
 
 (defstruct game-execution
   game
-  (moves (make-array 0 :adjustable t
-                     :fill-pointer t
-                     :element-type 'tetris-ai:game-move))
+  (moves (infarray-new 'tetris-ai:game-move))
   last-recorded-state
   running-p
 
@@ -158,31 +162,26 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 
 (defun game-exc-move (game-exc move-no &aux moves)
   (setf moves (game-execution-moves game-exc))
-  (cond
-    ((< move-no (length moves)) ;; test this first, even if redundant
-     (values hunchentoot:+HTTP-OK+ (aref moves move-no)))
-
-    ((not (game-execution-running-p game-exc))
-     (values hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
-             '(:error "requested move outside of range of completed game")))
-
-    (t
-     (loop with
-        max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
-                                      (service-config *service*))
-        for i below max-move-catchup-wait-secs
-        as behind = (>= move-no (length moves))
-        while behind
-        do (progn
-             (vom:debug "catching up from ~D to ~D (~D secs left)~%"
-                        (length moves) move-no (- max-move-catchup-wait-secs i))
-             (sleep 1))
-        finally
-          (return
-            (if behind
-                (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
-                        '(:error "reached timeout catching up to requested move" ))
-                (values hunchentoot:+HTTP-OK+ (aref moves move-no))))))))
+  (multiple-value-bind (move err) (infarray-nth moves move-no)
+    (cond
+      ((null err) (values hunchentoot:+HTTP-OK+ move))
+      ((eq err :forgotten) '(:error "the requested move has been forgotten by the service"))
+      ((not (game-execution-running-p game-exc))
+       (assert (eq err :out-of-bounds))
+       (values hunchentoot:+HTTP-REQUESTED-RANGE-NOT-SATISFIABLE+
+               '(:error "requested move outside of range of completed game")))
+      (t (loop
+            ;; blocking wait to allow ai thread to catch up...
+            with max-move-catchup-wait-secs = (config-max-move-catchup-wait-secs
+                                               (service-config *service*))
+            for i below max-move-catchup-wait-secs
+            do (vom:debug "catching up from ~D to ~D (~D secs left)~%"
+                          (infarray-length moves) move-no (- max-move-catchup-wait-secs i))
+            thereis (multiple-value-bind (move err) (infarray-nth moves move-no)
+                      (and (null err) (values hunchentoot:+HTTP-OK+ move)))
+            finally
+              (return (values hunchentoot:+HTTP-SERVICE-UNAVAILABLE+
+                              '(:error "reached timeout catching up to requested move"))))))))
 
 (define-regexp-route game-move-handler ("^/games/([0-9]+)/moves/([0-9]+)$"
                                         (#'parse-integer game-no) (#'parse-integer move-no))
@@ -231,7 +230,7 @@ until either the game is lost, or `max-moves' is reached"
            (progn
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
-             (vector-push-extend native moves)))
+             (infarray-push moves native)))
        if (zerop (mod i last-recorded-state-check-multiple))
        do
          (setf (game-execution-last-recorded-state game-exc)
@@ -247,7 +246,8 @@ until either the game is lost, or `max-moves' is reached"
   (unless (service-running-p *service*)
     (error "service not running"))
 
-  (with-slots (ai-depth grid-height-width default-ai-move-delay-millis ai-weights-file)
+  (with-slots (ai-depth grid-height-width default-ai-move-delay-millis
+                        ai-weights-file max-remembered-moves)
       (service-config *service*)
     (let* ((game (destructuring-bind (height . width)
                      grid-height-width
@@ -258,6 +258,8 @@ until either the game is lost, or `max-moves' is reached"
                                         :ai-depth ai-depth)))
            (game-exc (apply 'make-game-execution
                             :game game
+                            :moves (infarray-new 'tetris-ai:game-move
+                                                 :max-elements max-remembered-moves)
                             :last-recorded-state (game-serialize-state game 0)
 
                             (append make-game-exc-extra-args
