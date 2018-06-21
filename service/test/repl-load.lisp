@@ -11,11 +11,3 @@
            :port 4242)
   (funcall (find-symbol
             "GAME-CREATE-RUN-THREAD" "TETRIS-AI-REST")))
-
-
-'(let ((out "./doc/README.org"))
-  (ql:quickload "clod")
-  (when (probe-file out) (delete-file out))
-  (document-package 'tetris-ai-rest out
-   :author "Ernesto Alfonso"
-   :email  "erjoalgo@gmail.com"))
