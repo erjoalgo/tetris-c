@@ -36,7 +36,7 @@
              ("([0-9]+)x([0-9]+)" dims)
            (setf (config-grid-height-width config) (cons h w))))
        (service-start-with-config config))
-     (loop do (game-create-run-thread)))))
+     (loop do (sb-thread:join-thread (game-create-run-thread))))))
 
 (defun main (args)
   "main entry point"
