@@ -17,7 +17,7 @@
 int main(int argc, char** argv)
 {
   char* shapes_file =  DATADIR "/shapes.in";
-  char* weights_file =  DATADIR "/default_weights.in";
+  char* weights_file =  DATADIR "/default_weights.tsv";
 
   int seed = time(NULL);
 

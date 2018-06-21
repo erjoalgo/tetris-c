@@ -1,1 +1,1 @@
-dist_pkgdata_DATA = shapes.in default_weights.in
+dist_pkgdata_DATA = shapes.in default_weights.tsv
