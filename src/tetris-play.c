@@ -12,8 +12,8 @@
 #define DELAY 300000
 #define SEC 100000
 
-void ui_play();// human or ai
-void ui_play_ai(int depth, int delay_secs);// ai only
+void ui_play(double* w);// human or ai
+void ui_play_ai(int depth, int delay_secs, double* w);// ai only
 void sig_handler(int sig);
 void toggle_ai ( );
 
@@ -61,11 +61,11 @@ ui_move human_get_move ( grid* g, block* b, shape_stream* ss, int* arg )	{
 }
 
 game_move* gm;
-ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
+ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, double* w, int* arg)	{
   (void)arg;//ai will make moves one at a time
   if (gm == NULL)	{
     // new block. just display it
-    gm = ai_best_move(g, ss, default_weights);
+    gm = ai_best_move(g, ss, w);
     return NONE;
   }else 	{
     // make moves one at a time. rotations first
@@ -83,7 +83,7 @@ ui_move ai_get_move ( grid* g, block* b, shape_stream* ss, int* arg)	{
 
 int ai_playing = 1;
 
-void ui_play() {
+void ui_play(double* w) {
   signal(SIGINT, sig_handler);
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
@@ -95,7 +95,6 @@ void ui_play() {
   int dropped = 1;
 
   // allow ai to make moves for human
-  ai_init();
   shape_stream* ss = shape_stream_new(3);
 
   while(1) {
@@ -115,7 +114,7 @@ void ui_play() {
       dropped = 0;
     }else	{
       int arg = 0; //optional 'prefix arg'
-      ui_move move = ai_playing? ai_get_move(g, b, ss, &arg) :
+      ui_move move = ai_playing? ai_get_move(g, b, ss, w, &arg) :
 	human_get_move(g, b, ss, &arg);
 
       if (ai_playing)	usleep(.7*SEC); // ai 'thinking'
@@ -166,13 +165,11 @@ void ui_play() {
   endwin();
 }
 
-void ui_play_ai(int depth, int delay_secs) {
+void ui_play_ai(int depth, int delay_secs, double* w) {
 
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
-  ai_init();
   ncurses_setup(g);
-  double* w = default_weights;
   assert(w);
   // double* w = get_default_weights();
   block bb;

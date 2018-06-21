@@ -11,16 +11,70 @@
 
 #define MAX(a, b) ((a)>(b)? (a):(b))
 
+#define FEATIDX_RELIEF_MAX 0
+#define FEATIDX_RELIEF_AVG 1
+#define FEATIDX_RELIEF_VAR 2
+#define FEATIDX_GAPS 3
+#define FEATIDX_OBS 4
+#define FEATIDX_DISCONT 5
+
+const char* FEAT_NAMES[] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS", "OBS", "DISCONT"};
+const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
+
 void feature_gaps ( grid* g, double* ordered_raws );
 void feature_variance ( grid* g, double* ordered_raws );
 
-void init_feat_names (  )	{
-  feat_names[FEATIDX_RELIEF_MAX] = "RELIEF_MAX";
-  feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
-  feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
-  feat_names[FEATIDX_GAPS] = "GAPS     ";
-  feat_names[FEATIDX_OBS] = "OBS     ";
-  feat_names[FEATIDX_DISCONT] = "DISCONT";
+double* load_weights ( char* file )    {
+  FILE* fh = fopen(file, "r");
+  char err[200];
+  err[0] = 0;
+
+  double* w = malloc(FEAT_COUNT*sizeof(*w));
+  memset(w, 0, sizeof(FEAT_COUNT*sizeof(*w)));
+
+  if (!fh)    {
+    sprintf( err, "no such file: %s\n", file );
+  }else     {
+
+    int seen[FEAT_COUNT];
+    memset(seen, 0, sizeof(seen));
+
+    char feat_name[21];
+    for ( int i = 0; i < FEAT_COUNT; i++ )    {
+      double wi;
+      if (fscanf(fh, "%20s\t%lf", feat_name, &wi) != 2)    {
+        sprintf(err, "found %d weights in %s but wanted %d\n", i, file, FEAT_COUNT );
+        break;
+      } else  {
+        int feat_idx;
+        for ( feat_idx = 0;
+              feat_idx < FEAT_COUNT && strcmp(FEAT_NAMES[feat_idx], feat_name);
+              feat_idx++ );
+        if (feat_idx == FEAT_COUNT) {
+          sprintf(err, "unknown feature name: %s\n", feat_name );
+          break;
+        } else if (seen[feat_idx]) {
+          sprintf(err, "duplicate feature name: %s\n", feat_name );
+          break;
+        } else  {
+          w[feat_idx] = wi;
+          seen[feat_idx] = 1;
+        }
+      }
+    }
+  }
+  if (strlen(err)) {
+    printf("%s\n", err);
+    return NULL;
+  } else  {
+    return w;
+  }
+}
+
+double* default_weights_cpy ( )    {
+  double* w = malloc(sizeof(default_weights));
+  memcpy(w, default_weights, sizeof(default_weights));
+  return w;
 }
 
 double grid_eval ( grid* g, double* weights )	{
@@ -192,23 +246,14 @@ void test_feature (  )	{
   grid_set_color(g, 4, 0, 1);
 }
 
-void ai_init (  )	{
-  double w[FEAT_COUNT] =    { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
+void ai_run ( int max_moves, int depth, int show_grid, double* w )	{
+  assert(w);
 
-  default_weights = malloc(sizeof(w));
-  memcpy(default_weights, w, sizeof(w));
-  init_feat_names();
-}
-
-void ai_run ( int max_moves, int depth, int show_grid )	{
-  ai_init();
   printf( "grid height is %d, depth %d, max moves is %d\n", GRID_HEIGHT, depth,
 	  max_moves );
   grid* g = grid_new(GRID_HEIGHT, GRID_WIDTH);
   shape_stream* ss = shape_stream_new(depth);
   g = grid_new(GRID_HEIGHT, GRID_WIDTH);
-  double w[FEAT_COUNT];
-  memcpy(w, default_weights, sizeof(w));
   int applied = 0, succ;
   block b;
 

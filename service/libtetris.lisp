@@ -17,8 +17,7 @@
    #:game-move
    #:game-move-pack
    #:game-move-unpack
-   )
-  )
+   #:load-weights))
 
 (in-package #:tetris-ai)
 
@@ -34,19 +33,21 @@
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
 
-(defun init-tetris (&key (seed default-seed) (shapes-file default-shapes-file))
+(defvar ai-default-weights)
+
+(defun init-tetris (&key (seed default-seed)
+                      (shapes-file default-shapes-file))
   "initialize the tetris foreign library with the given `seed' and `shapes-file'"
   (vom:debug "reading shapes...~%" )
-  (setf shapes
-        (cffi:foreign-funcall "shapes_read"
-                              :string shapes-file
-                              :pointer (cffi:get-var-pointer 'SHAPE-COUNT)
-                              :pointer))
+  (cffi:foreign-funcall "shapes_init"
+                        :string shapes-file
+                        :boolean)
   (vom:info "loaded ~D shapes ~%" SHAPE-COUNT)
   (vom:warn "using seed: ~D~%" seed)
   (cffi:foreign-funcall "srand" :int seed)
   (assert (> SHAPE-COUNT 0))
-  (cffi:foreign-funcall "ai_init" :void))
+  (setf ai-default-weights
+        (cffi:foreign-funcall "default_weights_cpy" :pointer)))
 
 (defstruct game
   g ;; grid
@@ -55,8 +56,7 @@
   height
   width
   ai-weights
-  over-p
-  )
+  over-p)
 
 (defun game-init (height width &key ai-weights (ai-depth 3))
   "initialize a game with the given `height' and `width'"
@@ -102,8 +102,7 @@ return a block with the newly-popped shape, or nil if the block intersects the g
                             (outer-action :do)
                             (inner-action :do)
                             (condition nil)
-                            body
-                            )
+                            body)
   "a loop-wrapper to iterate over every cell in the grid of `game'. the coordinate (r,c)
 will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will be boud to `val'"
   (let ((if-cond (when condition `(if ,condition)))
@@ -172,8 +171,6 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
 (defvar default-height 19)
 (defvar default-width 10)
 
-(cffi:defcvar ("default_weights" ai-default-weights) :pointer)
-
 (defun ai-best-move (game weights)
   "return the best move according to the ai"
   (cffi:foreign-funcall "ai_best_move"
@@ -189,6 +186,10 @@ will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will b
   (shape :pointer)
   (rot :int)
   (col :int))
+
+(defcfun (load-weights "load_weights")
+    :pointer
+  (filename :string))
 
 (defmethod translate-from-foreign (pointer game-move)
   "translate a C foreign move into a `game-move'"

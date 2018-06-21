@@ -30,7 +30,7 @@
      path
      (make-instance 'exc-resource :game-exc game-exc)
 
-     (lambda (&rest args) t))
+     (lambda (&rest args) (declare (ignore args)) t))
 
     (push (bordeaux-threads:make-thread
            (lambda ()
@@ -67,5 +67,4 @@
             (clws:write-to-client-text client (write-to-string packed)))))))
 
 (defmethod clws:resource-received-binary ((res exc-resource) client message)
-  (vom:debug "received binary: ~A" message)
-  )
+  (vom:debug "received binary: ~A" message))

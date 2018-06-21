@@ -30,6 +30,7 @@ void mutate_ai ( ai* ai, double* parent_weights )	{
   ai->mutation_amt = amount;
 }
 
+extern char* feat_names[FEAT_COUNT];
 void mutation_print ( int feat_idx, double amount )	{
   printf( "%s %s BY %.2f\n", feat_names[feat_idx],
 	  amount>0? "UP" : "DOWN",
@@ -193,12 +194,11 @@ void evolution_init (  )	{
 }
 
 void evolution_test (  )	{
-  ai_init();
   evolution_init();
   mutate_weights_test();
   double w[FEAT_COUNT];
   ai initial;
-  memcpy(initial.w, default_weights, sizeof(w));
+  memcpy(initial.w, default_weights_cpy(), sizeof(w));
   ai_print(&initial);
   breed_ai (&initial, -1);
 }

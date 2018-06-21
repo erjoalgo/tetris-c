@@ -6,6 +6,7 @@
   '(
     (("port" #\p) :type integer :optional t :documentation "service port")
     (("shapes-file" #\s) :type string :optional t :documentation "path to a libtetris shapes.in")
+    (("ai-weights-file" #\a) :type string :optional t :documentation "path to a libtetris ai weights file")
     (("seed" #\e) :type integer :optional t :documentation "libtetris ai seed to use")
     (("dims" #\g) :type string :optional t :documentation
      "dimensions of the grid, in the form of HxW, e.g. 19x10")
@@ -34,8 +35,8 @@
          (ppcre:register-groups-bind ((#'parse-integer h) (#'parse-integer w))
              ("([0-9]+)x([0-9]+)" dims)
            (setf (config-grid-height-width config) (cons h w))))
-       (service-start config))
-     (loop do (game-create-run)))))
+       (service-start-with-config config))
+     (loop do (sb-thread:join-thread (game-create-run-thread))))))
 
 (defun main (args)
   "main entry point"
