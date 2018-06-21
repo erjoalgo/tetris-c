@@ -61,7 +61,7 @@
          (game-exc (exc-resource/game-exc res)))
     (multiple-value-bind (ret-code data) (game-exc-move game-exc move-no)
       (if (not (= 200 ret-code))
-          (clws:write-to-client-binary client (- ret-code))
+          (clws:write-to-client-text client (write-to-string (- ret-code)))
           (let* ((game-move data)
                  (packed (tetris-ai:game-move-pack game-move)))
             (clws:write-to-client-text client (write-to-string packed)))))))
