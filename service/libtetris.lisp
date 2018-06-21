@@ -17,9 +17,7 @@
    #:game-move
    #:game-move-pack
    #:game-move-unpack
-   #:load-weights
-   )
-  )
+   #:load-weights))
 
 (in-package #:tetris-ai)
 
@@ -58,8 +56,7 @@
   height
   width
   ai-weights
-  over-p
-  )
+  over-p)
 
 (defun game-init (height width &key ai-weights (ai-depth 3))
   "initialize a game with the given `height' and `width'"
@@ -105,8 +102,7 @@ return a block with the newly-popped shape, or nil if the block intersects the g
                             (outer-action :do)
                             (inner-action :do)
                             (condition nil)
-                            body
-                            )
+                            body)
   "a loop-wrapper to iterate over every cell in the grid of `game'. the coordinate (r,c)
 will be bound to `r-sym' and `c-sym' respectively, and the value at (r,c) will be boud to `val'"
   (let ((if-cond (when condition `(if ,condition)))

@@ -2,9 +2,7 @@
   ;; (:use :cl :lisp-unit)
   (:use :cl :stefil)
   (:export
-   #:run-tests
-   ))
-
+   #:run-tests))
 
 (in-package #:tetris-ai-rest-test)
 
@@ -41,8 +39,8 @@
   (setf *test-service*
         (tetris-ai-rest:service-start test-service-config))
   (tetris-ai-rest:game-create-run test-game-no :max-moves max-no-moves)
-  (setf (tetris-ai-rest::service-curr-game-no *test-service*) test-game-no);;TODO
-  )
+  ;;TODO
+  (setf (tetris-ai-rest::service-curr-game-no *test-service*) test-game-no))
 
 ;; https://sites.google.com/site/sabraonthehill/home/json-libraries
 ;; hack to return json as a string

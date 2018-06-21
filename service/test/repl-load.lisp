@@ -18,5 +18,4 @@
   (when (probe-file out) (delete-file out))
   (document-package 'tetris-ai-rest out
    :author "Ernesto Alfonso"
-   :email  "erjoalgo@gmail.com"
-   ))
+   :email  "erjoalgo@gmail.com"))

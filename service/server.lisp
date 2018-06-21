@@ -27,9 +27,7 @@
    #:service-config
    #:grid-height-width
    #:config-grid-height-width
-   #:game-serialize-state
-   )
-  )
+   #:game-serialize-state))
 
 (in-package #:tetris-ai-rest)
 
@@ -44,8 +42,7 @@
   (max-move-catchup-wait-secs 10)
   (ai-depth 3)
   (default-ai-move-delay-millis 5)
-  (log-filename "tetris-ai-rest.log")
-  )
+  (log-filename "tetris-ai-rest.log"))
 
 (defstruct service
   config
@@ -64,15 +61,13 @@
 
   max-moves
   (ai-move-delay-secs .5)
-  (last-recorded-state-check-delay-secs 2)
-  )
+  (last-recorded-state-check-delay-secs 2))
 
 (defstruct last-recorded-state
   timestamp
   on-cells
   ;; on-cells-cnt
-  move-no
-  )
+  move-no)
 
 (defvar thread-name-prefix "tetris-game-thread" "prefix for name of tetris worker threads")
 
