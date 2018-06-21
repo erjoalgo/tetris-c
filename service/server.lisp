@@ -241,9 +241,8 @@ until either the game is lost, or `max-moves' is reached"
                (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
 
 (defun game-create (&rest make-game-exc-extra-args)
-  "create a game `game-no' with the specified `max-moves', `ai-move-delay-secs',
-  `last-recorded-state-check-delay-secs'. service-global configs are drawn from
-  (service-config *service*)"
+  "create a game `game-no' with any arguments proxied to make-game-execution.
+   depth, grid dimensions, ai weights, etc are drawn from the global service config"
 
   (unless (service-running-p *service*)
     (error "service not running"))
