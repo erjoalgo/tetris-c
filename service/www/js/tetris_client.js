@@ -691,7 +691,7 @@ Game.prototype.gameOver = function() {
 
 Game.prototype.fetchPlanExecuteLoop = function() {
     // a recursive promise to continuously fetch, plan, execute
-    this.fetch()
+    return this.fetch()
         .then(this.ui.paintTo.bind(this.ui, this.b, ON)) // add active block to the UI
         .then(this.planExecute.bind(this))
         .then(this.fetchPlanExecuteLoop.bind(this));
