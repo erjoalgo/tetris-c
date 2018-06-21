@@ -610,7 +610,7 @@ Game.prototype.fetchGameNo = function() {
             throw new Error("no current games on server");
         } else {
             var gameNo = gamenoList[gamenoList.length - 1];
-            console.log("init gameNo is " + this.gameNo);
+            console.log("init gameNo is " + gameNo);
             return gameNo;
         }
     });
