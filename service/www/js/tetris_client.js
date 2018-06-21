@@ -535,13 +535,16 @@ Game.prototype.initWs = function(ws_url){
         state.ws = new WebSocket(state.ws_url);
         state.ws.addEventListener('message', function(event) {
             var packed = event.data;
-            // if (packed<0)    {state.ws.reject();}
-            var answer = state.answer;
-            answer.m = (packed >> 16) & 0xff;
-            answer.r = (packed >> 8) & 0xff;
-            answer.x = (packed >> 0) & 0xff;
-            state.fetchCallback(answer);
-            state.ws.resolve(answer);
+            if (packed<0)    {
+                var status_code = -packed;
+                state.ws.reject("bad status code from server: "+status_code);
+            } else  {
+                var answer = state.answer;
+                answer.m = (packed >> 16) & 0xff;
+                answer.r = (packed >> 8) & 0xff;
+                answer.x = (packed >> 0) & 0xff;
+                state.ws.resolve(answer);
+            }
         });
         state.ws.addEventListener('open', function(event) {
             console.log("ws connection opened..");
