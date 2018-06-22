@@ -266,7 +266,7 @@ until either the game is lost, or `max-moves' is reached"
                                     (list :ai-move-delay-secs
                                           (/ default-ai-move-delay-millis 1000)))))
            (exc-table (service-game-executions *service*))
-           (game-no (HASH-TABLE-SIZE exc-table)))
+           (game-no (HASH-TABLE-COUNT exc-table)))
 
       (assert (service-game-executions *service*))
 
