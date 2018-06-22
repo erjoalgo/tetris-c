@@ -40,7 +40,8 @@ double* load_weights ( char* file )    {
     memset(seen, 0, sizeof(seen));
 
     char feat_name[21];
-    for ( int i = 0; i < FEAT_COUNT; i++ )    {
+    int i;
+    for ( i = 0; i < FEAT_COUNT; i++ )    {
       double wi;
       if (fscanf(fh, "%20s\t%lf", feat_name, &wi) != 2)    {
         sprintf(err, "found %d weights in %s but wanted %d\n", i, file, FEAT_COUNT );
