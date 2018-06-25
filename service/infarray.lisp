@@ -9,56 +9,33 @@
 (in-package #:tetris-ai-rest/infarray)
 
 (defstruct infarray
-  max-elements
-  page-max-elements
   page
-  page-len
-  page-last
-  page-base-idx
-  forgotten-pages-count)
+  len
+  page-len)
 
 (defun infarray-new (element-type &key (max-elements 10000000))
   (assert (>= max-elements 2))
-  (let ((page-max-elements (floor max-elements 2)))
-    (make-infarray
-     :max-elements max-elements
-     :page-max-elements page-max-elements
-     :page (make-array page-max-elements :element-type element-type)
-     :page-last (make-array page-max-elements :element-type element-type)
-     :page-base-idx 0
-     :page-len 0
-     :forgotten-pages-count 0)))
+  (make-infarray
+   :page-len max-elements
+   :page (make-array max-elements :element-type element-type)
+   :len 0))
 
 (defun infarray-nth (infarray nth)
-  (with-slots (page page-base-idx page-len page-last page-max-elements forgotten-pages-count)
+  (with-slots (page len page-len)
       infarray
-    (let ((idx (- nth page-base-idx)))
-      (if (>= idx 0)
-          (if (< idx page-len)
-              (aref page idx)
-              (values nil :out-of-bounds))
-          (if (and (>= (+ idx page-max-elements) 0)
-                   (> forgotten-pages-count 0))
-              (aref page-last (+ idx page-max-elements))
-              (if (< idx 0)
-                  (values nil :out-of-bounds)
-                  (values nil :forgotten)))))))
+    (if (or (< nth 0) (>= nth len))
+        (values nil :out-of-bounds)
+        (let ((oldest-idx (- len page-len)))
+          (if (< nth oldest-idx)
+              (values nil :forgotten)
+              (values (aref page (mod nth page-len))))))))
 
 (defun infarray-push (infarray elt)
-  (with-slots (page page-base-idx page-len page-last page-max-elements
-                    forgotten-pages-count)
+  (with-slots (page page-len len)
       infarray
-    (if (< page-len page-max-elements)
-        (progn (setf (aref page page-len) elt)
-               (incf page-len))
-        (let ((new-page page-last) (old-page page))
-          (setf page new-page
-                page-last old-page
-                page-len 0)
-          (incf page-base-idx page-max-elements)
-          (incf forgotten-pages-count)
-          (infarray-push infarray elt)))))
+    (let ((idx (mod len page-len)))
+      (setf (aref page idx) elt)
+      (incf len))))
 
 (defun infarray-length (infarray)
-  (with-slots (page-len page-max-elements forgotten-pages-count) infarray
-      (+ page-len (* forgotten-pages-count page-max-elements))))
+  (infarray-len infarray))
