@@ -35,6 +35,8 @@
       infarray
     (let ((idx (mod len page-len)))
       (setf (aref page idx) elt)
+      (when (zerop idx)
+        (sb-ext:gc :full t))
       (incf len))))
 
 (defun infarray-length (infarray)
