@@ -26,6 +26,8 @@ tetris play
      - http://tetris.erjoalgo.com
 ** ncurses
 
+    AI starts playing, then human takes control to make mistakes,
+    then back to AI
     #+CAPTION: ai, human, back to ai
     #+ATTR_HTML: :alt tetris ai-human-ai demo :title Action! :align right
     [[https://raw.githubusercontent.com/erjoalgo/tetris-c/demo/tetris.gif]]
