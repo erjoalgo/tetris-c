@@ -28,7 +28,5 @@ sbcl --eval "(describe 'ql:quickload)" --eval "(exit)"
 
 cd service
 make
-BINARY=$(pwd)/bin/tetris-ai-rest
-test -e ${BINARY}
-
-LOGFILE="tetris" daemonize "${BINARY}"
+tetris-ai-service -h
+echo "built server binary: tetris-ai-service"
