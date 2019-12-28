@@ -24,7 +24,7 @@ sbcl --eval "(describe 'ql:quickload)" --eval "(exit)"
 
 cd service
 make
-sudo make install tetris-ai-service
+sudo make install
 tetris-ai-service -h
 
 echo "built server binary: tetris-ai-service"
