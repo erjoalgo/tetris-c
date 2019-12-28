@@ -2,19 +2,13 @@
 
 set -euo pipefail
 
-GIT_DIR=${HOME}/git/tetris-c
-
-test -d "${GIT_DIR}" ||  \
-    git clone https://github.com/erjoalgo/tetris-c "${GIT_DIR}"
-
-cd "${GIT_DIR}"
 if ! tetris -h; then
     autoreconf --install && ./configure && make
     sudo make install
     sudo ldconfig
     ldconfig -p | grep libtetris
 fi
-# check binary was installed
+# check that binary was installed
 tetris -h
 
 # build, start the service
