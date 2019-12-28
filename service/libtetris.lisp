@@ -28,7 +28,6 @@
 (use-foreign-library libtetris)
 
 (defvar default-seed (cffi:foreign-funcall "time" :pointer (cffi:null-pointer) :int))
-(defvar default-shapes-file "shapes.in")
 
 (cffi:defcvar ("SHAPE_COUNT" shape-count) :int)
 (cffi:defcvar ("SHAPES" shapes) :pointer)
@@ -36,7 +35,7 @@
 (defvar ai-default-weights)
 
 (defun init-tetris (&key (seed default-seed)
-                      (shapes-file default-shapes-file))
+                      (shapes-file "shapes.in"))
   "initialize the tetris foreign library with the given `seed' and `shapes-file'"
   (vom:debug "reading shapes...~%" )
   (cffi:foreign-funcall "shapes_init"
