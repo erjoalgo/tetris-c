@@ -7,10 +7,12 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 if ! command -v autoreconf || ! command -v libtoolize; then
     sudo apt-get install -y autoconf libtool
 fi
-autoreconf --install && ./configure && make
-sudo make install
-sudo ldconfig
-ldconfig -p | grep libtetris
+if ! tetris -h > /dev/null; then
+    autoreconf --install && ./configure && make
+    sudo make install
+    sudo ldconfig
+    ldconfig -p | grep libtetris
+fi
 # check that binary was installed
 tetris -h
 
