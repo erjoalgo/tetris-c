@@ -1,0 +1,744 @@
+diff --git a/Makefile b/Makefile
+index d68b2a9..8f4affd 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,8 @@
+ CC=gcc
+-CFLAGS=-Wall -W -Werror -Wextra -DNDEBUG -Ofast #-g -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
++CFLAGS=-Wall -W -Wextra -Ofast -DNDEBUG -funroll-all-loops  --param max-unroll-times=200  #-fno-inline -fno-inline-functions  # -g -funroll-loops -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
++#define G_STACK_CNT(g, c) ((g)->stacks[c][-2])
++#define G_RELIEF(g, c) ((g)->stacks[c][G_STACK_CNT(g, c)-1])
++# CFLAGS=-Wall -W -Werror -Wextra -fno-inline -g -fno-inline-functions # -funroll-loops --param max-unroll-times=200 -fno-inline-functions #-fno-inline #-fno-omit-frame-pointer # -fverbose-asm -fpic
+ DEPS=tetris.h tetri_ai.h
+ OBJ=ai.o game.o grid.o block.o shape.o evolution.o tetris-ncurses.o tetris-play.o
+ 
+@@ -18,9 +21,15 @@ libtetris.so: $(OBJ) evolution.o
+ 	$(CC) -c -o $@ $< $(CFLAGS)
+ 
+ 
+-
++PROF_PARAMS=ai -d 4 -m 1000
+ perf.data: FORCE tetris-prof
+-	perf record --call-graph dwarf -g ./tetris-prof ai
++	perf record --call-graph dwarf -g ./tetris-prof $(PROF_PARAMS)
++
++stat: FORCE tetris-prof
++	perf stat ./tetris $(PROF_PARAMS)
++
++time: FORCE tetris-prof
++	time ./tetris $(PROF_PARAMS)
+ 
+ call.svg: perf.data
+ 	perf script | gprof2dot -f perf | dot -Tsvg -o > $@
+diff --git a/ai.c b/ai.c
+index 6286909..455b23e 100644
+--- a/ai.c
++++ b/ai.c
+@@ -10,6 +10,8 @@
+ #define MOST_NEG_DBL (-DBL_MAX)
+ 
+ #define MAX(a, b) ((a)>(b)? (a):(b))
++#define G_STACK_CNT(g, c) ((g)->stacks[c][-2])
++#define G_RELIEF(g, c) ((g)->stacks[c][G_STACK_CNT(g, c)-1])
+ 
+ void feature_gaps ( grid* g, double* ordered_raws );
+ void feature_variance ( grid* g, double* ordered_raws );
+@@ -19,9 +21,7 @@ void init_feat_names (  )	{
+   feat_names[FEATIDX_RELIEF_AVG] = "RELIEF_AVG";
+   feat_names[FEATIDX_RELIEF_VAR] = "RELIEF_VAR";
+   feat_names[FEATIDX_GAPS] = "GAPS     ";
+-  // feat_names[FEATIDX_GAPS_EXP] = "GAPS_EXP     ";
+   feat_names[FEATIDX_OBS] = "OBS     ";
+-  // feat_names[FEATIDX_OBS_EXP] = "OBS_EXP     ";
+   feat_names[FEATIDX_DISCONT] = "DISCONT";
+ }
+ 
+@@ -50,12 +50,14 @@ static block** blocks;
+ static game_move** best_moves;
+ static int grids_count = 0;
+ 
++
+ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* weights,
+ 			      int depth_left, double* result_value, int relief_max );
+ 
+ game_move* ai_best_move_rec ( grid* g, shape_stream* stream, double* w,
+ 			      int depth_left, double* value, int relief_max )	{
+   double best_score = MOST_NEG_DBL;
++  // assert(max(g->relief, g->width)<=relief_max);
+ 
+   int depth = stream->max_len-depth_left-1;
+   shape* s = shape_stream_peek(stream, depth);
+@@ -135,7 +137,7 @@ game_move* ai_best_move ( grid* g, shape_stream* ss, double* w )	{
+   int relief_mx = -1;
+   int i;
+   for ( i = 0; i < g->width; i++ ){
+-    relief_mx = MAX(relief_mx, g->relief[i]);
++    relief_mx = MAX(relief_mx, G_RELIEF(g, i));
+   }
+ 
+   game_move* best_move = ai_best_move_rec(g, ss, w, ss->max_len-1, &best_value,
+@@ -156,7 +158,8 @@ void feature_variance ( grid* g, double* ordered_raws )	{
+   int discont = -1, last_height = -1;
+   int gaps = 0, obs = 0;
+   for ( i = 0; i < width; i++ )	{
+-    int height = g->relief[i];
++    int stack_cnt = g->stacks[i][-2];
++    int height = g->stacks[i][stack_cnt-1];
+     if (height>max)	{
+       max = height;
+     }
+@@ -164,14 +167,19 @@ void feature_variance ( grid* g, double* ordered_raws )	{
+     discont += last_height != height;
+     last_height = height;
+ 
+-    int cgaps = g->gaps[i];
++    int cgaps = g->stacks[i][stack_cnt-1]+1-stack_cnt;
++
+     gaps+=cgaps;
+-    obs += height-cgaps;
++    if (stack_cnt>=2)	{
++      obs += height-g->stacks[i][stack_cnt-2];
++    }
+   }
+   avg/=width;
+ 
+   for ( i = 0; i < g->width; i++ )	{
+-    int height = g->relief[i];
++    int stack_cnt = g->stacks[i][-2];
++    int height = g->stacks[i][stack_cnt-1];
++    // int height = g->relief[i];
+     double diff = avg-height;
+     var += diff*diff;
+   }
+diff --git a/grid.c b/grid.c
+index 1360a2c..47deb8e 100644
+--- a/grid.c
++++ b/grid.c
+@@ -5,18 +5,33 @@
+ #include "tetris.h"
+ #include "limits.h"
+ 
++#define GRID_WIDTH 10 // fix grid width at compile time
++// #define G_WIDTH(g) ((g)->width)
++#define G_WIDTH(g) GRID_WIDTH
++#define G_STACK_CNT(g, c) ((g)->stacks[c][-2])
++#define G_RELIEF(g, c) ((g)->stacks[c][G_STACK_CNT(g, c)-1])
++
++int grid_assert_consistency ( grid* g );
++
+ grid* grid_new ( int height, int width )	{
+   grid* g = malloc(sizeof(grid));
+   g->height = height;
+   g->width = width;
++  assert(width == GRID_WIDTH);
+   g->rows = malloc(height*sizeof(*g->rows));
+-  g->relief = malloc(width*sizeof(*g->relief));
+-  g->gaps = malloc(width*sizeof(*g->gaps));
++  g->stacks = malloc(width*sizeof(*g->stacks));
+   g->row_fill_count = malloc(height*sizeof(*g->row_fill_count));
+   g->full_rows = malloc(height*sizeof(*g->full_rows));
+   int r;
+   for ( r = 0; r < g->height; r++ )	{
+-    g->rows[r] = malloc(g->width*sizeof(*g->rows));
++    g->rows[r] = malloc(G_WIDTH(g)*sizeof(*g->rows));
++  }
++  int c;
++  for ( c = 0; c < G_WIDTH(g); c++ )	{
++    //alloc a single chunk?
++    // g->stacks[i][-1] == -1, consistent with g->relief[i] value
++    // g->stacks[i][-1] == size of the stack
++    g->stacks[c] = malloc((2+g->height)*sizeof(*g->stacks));
+   }
+   grid_reset(g);
+   return g;
+@@ -25,12 +40,12 @@ grid* grid_new ( int height, int width )	{
+ void grid_reset ( grid* g )	{
+   int r;
+   for ( r = 0; r < g->height; r++ )	{
+-    memset(g->rows[r], 0, g->width*sizeof(*g->rows[r]));
++    memset(g->rows[r], 0, G_WIDTH(g)*sizeof(*g->rows[r]));
+   }
+   int c;
+-  for ( c = 0; c < g->width; c++ )	{
+-    g->relief[c] = -1;
+-    g->gaps[c] = 0;
++  for ( c = 0; c < G_WIDTH(g); c++ )	{
++    g->stacks[c][-1] = -1;// always -1
++    g->stacks[c][-2] = 0;// counts
+   }
+   memset(g->row_fill_count, 0, g->height*sizeof(*g->row_fill_count));
+   g->total_cleared_count = 0;
+@@ -49,14 +64,14 @@ void grid_cpy ( grid* dest, grid* src )	{
+     memcpy(dest->rows[i], src->rows[i],
+ 	   src->width*sizeof(*src->rows[i]));
+   }
++  for ( i = 0; i < src->width; i++ )	{
++    memcpy(dest->stacks[i]-2, src->stacks[i]-2,
++	   (src->height+2)*sizeof(*src->stacks[i]));
++  }
+   memcpy(dest->full_rows, src->full_rows,
+ 	 src->height*sizeof(*src->full_rows));
+   memcpy(dest->row_fill_count, src->row_fill_count,
+ 	 src->height*sizeof(*src->row_fill_count));
+-  memcpy(dest->relief, src->relief,
+-	   src->width*sizeof(*src->relief));
+-  memcpy(dest->gaps, src->gaps,
+-	   src->width*sizeof(*src->gaps));
+ }
+ 
+ 
+@@ -91,66 +106,69 @@ inline void grid_cell_add ( grid* g, int r, int c )	{
+   g->rows[r][c] = color;
+   {
+     g->row_fill_count[r] += 1;
+-    if (g->row_fill_count[r] == g->width)	{
++    if (g->row_fill_count[r] == G_WIDTH(g))	{
+       g->full_rows[g->full_rows_count++] = r;
+     }
+-    assert(g->relief[c] != r);
+-    int top = g->relief[c];
++    int top = g->stacks[c][g->stacks[c][-2]-1];
+     if (top<r)	{
+-      g->relief[c] = r;
+-      g->gaps[c] += r-1-top;
++      g->stacks[c][g->stacks[c][-2]++] = r;
+     }else 	{
+-      g->gaps[c] --;
++      printf( "warning: adding under the relief!\n" );
++      assert(r != top);
++      assert(g->stacks[c][g->stacks[c][-2]-1] == top);
++      int idx = g->stacks[c][-2]-1;//insert idx
++      for ( ; idx > 0 && g->stacks[c][idx-1]>r; idx-- );
++      memmove(g->stacks[c]+idx+1, g->stacks[c]+idx,
++	      (g->stacks[c][-2]-idx)*sizeof(*g->stacks[c]));
++      g->stacks[c][idx] = r;
++      g->stacks[c][-2]++;
+     }
++    assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
+   }
+ }
+ 
+ inline void grid_cell_remove ( grid* g, int r, int c )	{
+   const int color = 0;
+   assert(!g->rows[r][c] ^ !color);
++  assert(grid_assert_consistency(g)); //turn into assert(grid_consistency(g));
+   g->rows[r][c] = color;
+   {
+-    if (g->row_fill_count[r] == g->width)	{
++    if (g->row_fill_count[r] == G_WIDTH(g))	{
+       // need to maintain g->full_rows and g->full_rows_count invariants
+       grid_remove_full_row(g, r);
+     }
+     g->row_fill_count[r] -= 1;
+-    int top = g->relief[c];
++    // assert(g->relief[c] == g->stacks[c][g->stacks[c][-2]-1]);
++    int top = g->stacks[c][g->stacks[c][-2]-1];
++    assert(top>=0);
+     if (top == r)	{
+-      int new_top = r-1;
+-      for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
+-      g->relief[c] = new_top;
+-      g->gaps[c] -= (top-1-new_top);
++      assert(g->stacks[c][-2]>0);
++      assert(top == g->stacks[c][g->stacks[c][-2]-1]);
++      g->stacks[c][-2]--;
++      // int new_top = g->stacks[c][g->stacks[c][-2]-1];
++      // assert(new_top<top);
++      // int new_top = top-1
++      // for ( ; new_top>=0 && !g->rows[new_top][c] ; new_top-- );
++    }else 	{
++      assert(r<top);
++      printf( "warning: removing under the relief!\n" );
++      int idx = g->stacks[c][-2]-1; //insert idx
++      for ( ; g->stacks[c][idx]!=r; idx-- );
++      assert(g->stacks[c][idx]);
++      assert(idx >= 0);
++      memmove(g->stacks[c]+idx, g->stacks[c]+idx+1,
++	      (g->stacks[c][-2]-idx)*sizeof(*g->stacks[c]));
++      g->stacks[c][-2]--;
+     }
+   }
+ }
+ 
+ inline void grid_set_color ( grid* g, int r, int c, int color )	{
+   assert(!g->rows[r][c] ^ !color);
+-  g->rows[r][c] = color;
+   if (color == 0)	{
+-    g->row_fill_count[r] -= 1;
+-    int top = g->relief[c];
+-    if (top == r)	{
+-      int new_top = grid_height_at_start_at(g, c, r-1);
+-      g->relief[c] = new_top;
+-      g->gaps[c] -= (top-1-new_top);
+-    }
+-    if (g->row_fill_count[r] == g->width-1)	{
+-      // need to maintain g->full_rows and g->full_rows_count invariants
+-      grid_remove_full_row(g, r);
+-    }
++    grid_cell_add(g, r, c);
+   }else 	{
+-    g->row_fill_count[r] += 1;
+-    if (g->row_fill_count[r] == g->width)	{
+-      g->full_rows[g->full_rows_count++] = r;
+-    }
+-    assert(g->relief[c] != r);
+-    int top = g->relief[c];
+-    if (top<r)	{
+-      g->relief[c] = r;
+-      g->gaps[c] += r-1-top;
+-    }
++    grid_cell_remove(g, r, c);
+   }
+ }
+ 
+@@ -228,16 +246,16 @@ void grid_block_remove ( grid* g, block* b )	{
+     // roti++;
+     roti+=2;
+   }*/
+-  c = *rot++; r = *rot++;
++  c = rot[6]; r = rot[7];
+   grid_cell_remove(g, r+dr, c+dc);
+ 
+-  c = *rot++; r = *rot++;
++  c = rot[4]; r = rot[5];
+   grid_cell_remove(g, r+dr, c+dc);
+ 
+-  c = *rot++; r = *rot++;
++  c = rot[2]; r = rot[3];
+   grid_cell_remove(g, r+dr, c+dc);
+ 
+-  c = *rot++; r = *rot++;
++  c = rot[0]; r = rot[1];
+   grid_cell_remove(g, r+dr, c+dc);
+ }
+ 
+@@ -296,10 +314,15 @@ int grid_clear_lines ( grid* g )	{
+   // smallest full row
+   int y = g->full_rows[g->full_rows_count-1];
+   // largest occupied (full or non-full) row.
+-  int ymax = max (g->relief, g->width);
++  int ymax = G_RELIEF(g, 0);
++  {
++    int i;
++    for ( i = 1; i < G_WIDTH(g); i++ )
++      ymax = G_RELIEF(g, i)>ymax? G_RELIEF(g, i): ymax;
++  }
+   assert(ymax<g->height);
+   assert(grid_assert_consistency(g));
+-  assert(g->row_fill_count[y] == g->width);
++  assert(g->row_fill_count[y] == G_WIDTH(g));
+   assert(g->full_rows[g->full_rows_count-1] == y);
+ 
+   int next_non_full = y+1;
+@@ -310,7 +333,7 @@ int grid_clear_lines ( grid* g )	{
+ 
+     // find the next non-full
+     assert(next_non_full<g->height);
+-    while (g->row_fill_count[next_non_full] == g->width)	{
++    while (g->row_fill_count[next_non_full] == G_WIDTH(g))	{
+       next_non_full++;
+       // it should be (almost) impossible for the highest row to get full
+       // however, it is still possible,eg if new shape exactly fits into top row
+@@ -325,9 +348,9 @@ int grid_clear_lines ( grid* g )	{
+       break;
+     }
+     // invariant: next_non_full should be not full
+-    assert(g->row_fill_count[next_non_full] != g->width);
++    assert(g->row_fill_count[next_non_full] != G_WIDTH(g));
+ 
+-    if (g->row_fill_count[y]==g->width) {
++    if (g->row_fill_count[y]==G_WIDTH(g)) {
+       // in this case, save row y for the end
+       assert(g->full_rows[g->full_rows_count-1] == y);
+       g->full_rows_count--;
+@@ -359,48 +382,67 @@ int grid_clear_lines ( grid* g )	{
+       g->rows[g->full_rows[--g->full_rows_count]]:
+       cleared[--cleared_count];
+     g->row_fill_count[y] = 0;
+-    memset(g->rows[y], 0, g->width*sizeof(*g->rows[y]));
++    memset(g->rows[y], 0, G_WIDTH(g)*sizeof(*g->rows[y]));
+     y++;
+   }
+   assert(g->full_rows_count == 0);
+   // now we need to update relief
++  // and stacks
+   int i;
+-  for ( i = 0; i < g->width; i++ )	{
+-    int new_top = grid_height_at_start_at(g, i, g->relief[i]);
+-    g->relief[i] = new_top;
+-    int gaps = 0;
++  for ( i = 0; i < G_WIDTH(g); i++ )	{
++    int old_top = G_RELIEF(g, i);
++    // int new_top = grid_height_at_start_at(g, i, );
++    // g->relief[i] = new_top;
+     int ii;
+-    for ( ii = new_top-1; ii >=0; ii--){
++    g->stacks[i][-2] = 0;
++    for ( ii = 0; ii <= old_top; ii++){
+       // gaps += !g->rows[i][ii];
+       if (!(g->rows[ii][i]))	{
+-	gaps++;
++      }else 	{
++	g->stacks[i][g->stacks[i][-2]++] = ii;
+       }
+     }
+-    g->gaps[i] = gaps;
+   }
+   // we should be done.
+   // should assert consistency
++  assert(grid_assert_consistency(g));
+   return g->last_cleared_count;
+ }
+ 
+ int grid_assert_consistency ( grid* g )	{
++  return 1;
+   int i;
+-  for ( i = 0; i < g->width; i++ )	{
+-    assert(g->relief[i] == grid_height_at(g, i));
++  for ( i = 0; i < G_WIDTH(g); i++ )	{
++    assert(G_RELIEF(g, i) == grid_height_at(g, i));
+     int gaps = 0;
+     int ii;
+-    for ( ii = g->relief[i]-1; ii >= 0; ii-- )	{
++    for ( ii = G_RELIEF(g, i)-1; ii >= 0; ii-- )	{
+       if (!g->rows[ii][i])	{
+ 	gaps++;
+       }
+     }
+-    assert(gaps == g->gaps[i]);
++    // assert(gaps == g->gaps[i]);
++    // assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
++
++    // assert(g->stacks[i][-2] ==  g->relief[i]+1-gaps);
++    // assert((g->relief[i]==-1)  == (g->stacks[i][-2]==0));
++
++    // assert(g->relief[i] == -1 ||
++    // 	   g->relief[i] == g->stacks[i][g->stacks[i][-2]-1] );
++
++    // assert(!g->stacks[i][-2] ||
++    // 	   g->stacks[i][g->stacks[i][-2]-1]+1 - g->stacks[i][-2] == gaps);
++
++    for ( ii = 0; ii < g->stacks[i][-2]; ii++ )	{
++      assert(g->rows[g->stacks[i][ii]][i]);
++      assert(g->stacks[i][ii]>=ii);
++    }
+   }
+   int r;
+   for ( r = 0; r < g->height; r++ )	{
+     int count = 0;
+     int c;
+-    for ( c = 0; c < g->width; c++ )	{
++    for ( c = 0; c < G_WIDTH(g); c++ )	{
+       count += g->rows[r][c]?1:0;
+     }
+     assert(g->row_fill_count[r] == count);
+@@ -408,7 +450,7 @@ int grid_assert_consistency ( grid* g )	{
+   for ( i = 0; i < g->full_rows_count; i++ )	{
+     int y = g->full_rows[i];
+     (void)y;
+-    assert(g->row_fill_count[y] == g->width);
++    assert(g->row_fill_count[y] == G_WIDTH(g));
+   }
+ 
+   int* sorted_rows[g->height];
+@@ -422,14 +464,14 @@ int grid_assert_consistency ( grid* g )	{
+   memset(checked, 0, sizeof(checked));
+   for ( i = 0; i < g->full_rows_count; i++ )	{
+     r = g->full_rows[i];
+-    assert(g->row_fill_count[r] == g->width);
++    assert(g->row_fill_count[r] == G_WIDTH(g));
+     assert(checked[r] == 0);
+     checked[r] = 1;
+   }
+ 
+   for ( i = 0; i < g->height; i++ )	{
+     if (!checked[i])	{
+-      assert(g->row_fill_count[i] != g->width);
++      assert(g->row_fill_count[i] != G_WIDTH(g));
+     }
+   }
+   return 1;
+@@ -452,7 +494,7 @@ int grid_equal(grid* a, grid* b){
+ 
+ int grid_block_in_bounds ( grid* g, block* b )	{
+   return block_extreme(b, LEFT)>=0 &&
+-    block_extreme(b, RIGHT)<g->width &&
++    block_extreme(b, RIGHT)<G_WIDTH(g) &&
+     block_extreme(b, BOT)>=0 &&
+     block_extreme(b, TOP)<g->height;
+ }
+@@ -494,7 +536,7 @@ inline int grid_block_elevate ( grid* g, block* b )	{
+ 
+ inline int grid_block_center_elevate (grid* g, block* b)	{
+   // return whether block was successfully centered
+-  b->offset[0] = (g->width - b->shape->rot_wh[b->rot][0])/2;
++  b->offset[0] = (G_WIDTH(g) - b->shape->rot_wh[b->rot][0])/2;
+   return grid_block_elevate(g, b);
+ }
+ 
+@@ -517,7 +559,7 @@ int drop_amount ( grid* g, block* b )	{
+ 
+     assert(b->shape->crust_flat[rot][BOT][i][0] ==
+ 	   b->shape->crust[rot][BOT][i][0]);
+-    int amnt = r-(g->relief[c]+1);
++    int amnt = r-(G_RELIEF(g, c)+1);
+     if (amnt<min_amnt)	{
+       min_amnt = amnt;
+     }
+@@ -555,17 +597,17 @@ int grid_block_drop ( grid* g, block* b )	{
+ void grid_print ( grid* g )	{
+   printf( "\n" );
+   int row, col;
+-  char row_s[g->width+2];
+-  row_s[g->width] = '|';
+-  row_s[g->width+1] = 0;
++  char row_s[G_WIDTH(g)+2];
++  row_s[G_WIDTH(g)] = '|';
++  row_s[G_WIDTH(g)+1] = 0;
+   for ( row = g->height-1; row >= 0; row-- )	{
+-    for ( col = 0; col < g->width; col++ )	{
++    for ( col = 0; col < G_WIDTH(g); col++ )	{
+       row_s[col] = g->rows[row][col]? '*' : ' ';
+     }
+     printf("%s\n", row_s);
+   }
+-  memset(row_s, 'T', g->width*sizeof(char));
+-  row_s[g->width] = ' ';
++  memset(row_s, 'T', G_WIDTH(g)*sizeof(char));
++  row_s[G_WIDTH(g)] = ' ';
+   printf("%s\n", row_s);
+ }
+ 
+@@ -613,9 +655,9 @@ void print_arr ( int* arr, int len )	{
+ void print_relief ( grid* g )	{
+   int i;
+   printf( "relief:   " );
+-  print_arr(g->relief, g->width);
++  // print_arr(g->relief, G_WIDTH(g));
+   printf( "heigh at: " );
+-  for ( i = 0; i < g->width; i++ )	{
++  for ( i = 0; i < G_WIDTH(g); i++ )	{
+     printf( "%d ", grid_height_at(g, i) );
+   }
+   printf( "\n" );
+@@ -629,12 +671,13 @@ void grid_block_move_safe ( grid* g, block* b, int direction, int amount )	{
+ }
+ 
+ void grid_block_move_safe_to ( grid* g, block* b, int c )	{
++  (void)g;
+   b->offset[0] = c;
+   assert(c>=0);
+   if (c<0)	{
+     b->offset[0] = 0;
+   }else 	{
+-    int over = block_extreme(b, RIGHT)-(g->width-1);
++    int over = block_extreme(b, RIGHT)-(G_WIDTH(g)-1);
+     if (over>0)	{
+       b->offset[0] -= over;
+     }
+diff --git a/shape.c b/shape.c
+index e8298ce..c563634 100644
+--- a/shape.c
++++ b/shape.c
+@@ -6,12 +6,10 @@
+ int cmp_coord (const void* a, const void* b  )	{
+   int* A = *((int**)a);
+   int* B = *((int**)b);
+-  int suma = A[0]+A[1];
+-  int sumb = B[0]+B[1];
+-  if ( suma != sumb)	{
+-    return sumb-suma;
++  if (A[1] != B[1])	{
++    return -(B[1]-A[1]);
+   }else	{
+-    return B[0]-A[0];
++    return A[0]-B[0];
+   }
+ }
+ 
+@@ -143,6 +141,7 @@ shape* shape_new ( int** shape_rot, int shape_len )	{
+ 	  ii++;
+ 	}
+       }
++      qsort(s->crust[roti][d], crust_len, sizeof(int)*2, cmp_coord);
+     }
+   }
+   {
+@@ -226,10 +225,7 @@ void shape_print ( shape* s, int quiet )	{
+ 
+ shape** shapes_read ( char* file, int* shape_count)	{
+   FILE* fh = fopen(file, "r");
+-  if (!fh)	{
+-    printf( "unable to open %s\n", file );
+-    return NULL;
+-  }
++  if (!fh) return NULL;
+   *shape_count = 0;
+   shape** shapes = malloc(1*sizeof(shape*));
+   while (!feof (fh))	{
+diff --git a/tetris-ncurses.c b/tetris-ncurses.c
+index 18847ae..4ff111b 100644
+--- a/tetris-ncurses.c
++++ b/tetris-ncurses.c
+@@ -4,6 +4,7 @@
+ const int EDGE=1;
+ 
+ const int SHADOW_COLOR=5;
++
+ WINDOW* win;
+ inline void ncurses_paint ( int r, int c, int on )	{
+ 
+@@ -42,7 +43,8 @@ void ncurses_grid_print_fill_count ( grid* g )	{
+ 
+   int col;
+   for ( col = 0; col < g->width; col++ )	{
+-    int tall = g->relief[col];
++    // int tall = g->relief[col];
++    int tall = 0;
+     continue;
+     mvwaddch(win, EDGE+g->height+1, col+EDGE,
+ 	    tall == -1? '-' :
+@@ -51,7 +53,8 @@ void ncurses_grid_print_fill_count ( grid* g )	{
+   }
+ 
+   for ( col = 0; col < g->width; col++ )	{
+-    int gaps = g->gaps[col];
++    // int gaps = g->gaps[col];
++    int gaps = 0;
+     mvwaddch(win, EDGE+g->height, col+EDGE,
+ 	     !gaps ? '-' :
+ 	     gaps<10?'0'+gaps:
+diff --git a/tetris.c b/tetris.c
+index bf59ed0..c16012a 100644
+--- a/tetris.c
++++ b/tetris.c
+@@ -6,40 +6,73 @@
+ #include "tetris.h"
+ #include "tetris_ai.h"
+ 
++#include <unistd.h>
+ 
+-void fatal(char* msg){
+-  printf("FATAL: %s", msg);
+-  exit(1);
+-}
++
++#define FATAL(fmt, ...) { fprintf(stderr, fmt, ##__VA_ARGS__); exit(1); }
+ 
+ int main(int argc, char** argv)
+ {
+-  SHAPES = shapes_read("shapes.in", &SHAPE_COUNT);
++  char* shapes_file = "shapes.in";
+   int seed = time(NULL);
++
++  int depth = 3;
++  int max_moves = 5000;
++  int show_grid = 0;
++
++  int c;
++  while ((c = getopt (argc, argv, "d:m:hvs:S:")) != -1)
++    switch (c)
++      {
++      case 'd':
++	depth = atoi(optarg);
++        break;
++      case 'm':
++	max_moves = atoi(optarg);
++        break;
++      case 's':
++	seed = atoi(optarg);
++        break;
++      case 'S':
++	shapes_file = optarg;
++        break;
++      case 'v':
++	show_grid = 1;
++        break;
++      case 'h':
++	printf ("usage: tetris play|ai|evolve|test\n");
++	exit(0);
++        break;
++      case '?':
++	FATAL("unknown flag %c", optopt);
++      default:
++	assert(0);
++      }
++
++  if (optind>=argc)	{
++    FATAL("must provide command");
++  }
++  char* cmd = argv[optind];
++
++  if (!(SHAPES = shapes_read(shapes_file, &SHAPE_COUNT)))	{
++    FATAL("unable to open %s", shapes_file);
++  }
++
+   printf( "seed %d \n", seed );
+   srand(seed);
+-  if (argc<2)	{
+-    fatal("must provide subcommand");
++
++  if (!strcmp(cmd, "play"))	{
++    ui_play();
++  }else if (!strcmp(cmd, "ai"))	{
++    ai_run(max_moves, depth, show_grid);
++  }else if (!strcmp(cmd, "evolve"))	{
++    evolution_test();
++  }else if (!strcmp(cmd, "test"))	{
++    shape_test();
++    grid_test();
++    shape_stream_test();
+   }else 	{
+-    char* opt = argv[1];
+-    if (!strcmp(argv[1], "play"))	{
+-      ui_play();
+-      // ai_play(3, 1);
+-    }else if (!strcmp(argv[1], "ai"))	{
+-      int max_moves = 5000;
+-      int depth = 3;
+-      int show_grid = 0;
+-      ai_run(max_moves, depth, show_grid);
+-    }else if (!strcmp(opt, "evolve"))	{
+-      evolution_test();
+-    }else if (!strcmp(opt, "test"))	{
+-      shape_test();
+-      grid_test();
+-      shape_stream_test();
+-    }else 	{
+-      printf( "unknown option: %s\n", opt );
+-      return 1;
+-    }
++    FATAL("unknown command: %s\n", cmd );
+   }
+   return 0;
+ }
+diff --git a/tetris.h b/tetris.h
+index 5038274..3d570f2 100644
+--- a/tetris.h
++++ b/tetris.h
+@@ -56,7 +56,8 @@ typedef struct {
+ void game_move_print(game_move* g);
+ typedef struct {
+   int** rows;
+-  int* relief;
++  int** stacks;
++  // int* relief;
+   int* row_fill_count;
+   int* full_rows;
+   int full_rows_count;
+@@ -65,7 +66,6 @@ typedef struct {
+ 
+   int total_cleared_count;
+   int last_cleared_count;
+-  int* gaps;
+ } grid;
+ grid* grid_new(int height, int width);
+ void grid_reset ( grid* g );
+@@ -87,6 +87,7 @@ void grid_block_rotate_safe(grid* g, block* b, int amount);
+ int grid_clear_lines(grid* g);
+ int grid_equal(grid* a, grid* b);
+ void grid_test();
++
+ #define GRID_HEIGHT 19
+ #define GRID_WIDTH 10
+ 
