@@ -3,6 +3,9 @@
 set -euo pipefail
 
 if ! tetris -h; then
+    if ! command -v autoreconf || ! command -v libtoolize; then
+        sudo apt-get install -y autoconf libtool
+    fi
     autoreconf --install && ./configure && make
     sudo make install
     sudo ldconfig
