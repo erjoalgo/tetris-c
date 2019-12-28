@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+
 if ! command -v autoreconf || ! command -v libtoolize; then
     sudo apt-get install -y autoconf libtool
 fi
