@@ -12,7 +12,6 @@ ldconfig -p | grep libtetris
 # check that binary was installed
 tetris -h
 
-# build, start the service
 sudo apt-get install -y buildapp libfixposix-dev
 if ! which sbcl && ! ~/.stumpwmrc.d/scripts/installs/sbcl.sh; then
     echo "sbcl, quickload not found"
