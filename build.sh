@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if ! tetris -h; then
+if ! tetris -h > /dev/null; then
     if ! command -v autoreconf || ! command -v libtoolize; then
         sudo apt-get install -y autoconf libtool
     fi
