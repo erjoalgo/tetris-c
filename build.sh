@@ -2,15 +2,13 @@
 
 set -euo pipefail
 
-if ! tetris -h > /dev/null; then
-    if ! command -v autoreconf || ! command -v libtoolize; then
-        sudo apt-get install -y autoconf libtool
-    fi
-    autoreconf --install && ./configure && make
-    sudo make install
-    sudo ldconfig
-    ldconfig -p | grep libtetris
+if ! command -v autoreconf || ! command -v libtoolize; then
+    sudo apt-get install -y autoconf libtool
 fi
+autoreconf --install && ./configure && make
+sudo make install
+sudo ldconfig
+ldconfig -p | grep libtetris
 # check that binary was installed
 tetris -h
 
