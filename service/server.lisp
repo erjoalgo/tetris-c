@@ -39,8 +39,10 @@
   seed
   (grid-height-width (cons tetris-ai:default-height
                            tetris-ai:default-width))
+  ;; max time to wait for the game thread to produce a new move
   (max-move-catchup-wait-secs 10)
   (ai-depth 3)
+  ;; sleep time between ai moves
   (default-ai-move-delay-millis 5)
   (log-filename "tetris-ai-rest.log"))
 
