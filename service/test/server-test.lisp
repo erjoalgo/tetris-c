@@ -101,7 +101,7 @@
   (let* ((new-game (tetris-ai:game-init 10
                                         10))
          (last-state (tetris-ai-rest:game-serialize-state new-game 0)))
-    (is (null (tetris-ai-rest::last-recorded-state-on-cells last-state)))))
+    (is (null (tetris-ai-rest::game-state-snapshot-on-cells last-state)))))
 
 (stefil:deftest test-game-status nil
   (let* ((game-status (req (format nil "/games/~D" test-game-no)))

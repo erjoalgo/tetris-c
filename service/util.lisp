@@ -16,7 +16,7 @@ to be called within a hunchentoot handler.
 
 (defmethod jonathan:%to-json ((game-exc game-execution))
   "define the serialization of a `game-execution'"
-  (with-slots (game running-p last-recorded-state
+  (with-slots (game running-p game-state-snapshot
                     ai-move-delay-secs)
       game-exc
     (jonathan:with-object
@@ -25,7 +25,7 @@ to be called within a hunchentoot handler.
       (jonathan:write-key-value "running_p" (or running-p :false))
       (jonathan:write-key-value "ai-move-delay-secs" ai-move-delay-secs)
       (jonathan:write-key-value "ws_port" (config-ws-port (service-config *service*)))
-      (with-slots (move-no on-cells) (game-execution-last-recorded-state game-exc)
+      (with-slots (move-no on-cells) (game-execution-game-state-snapshot game-exc)
         (jonathan:write-key-value "move_no" move-no)
         (jonathan:write-key-value "on_cells" on-cells)))))
 

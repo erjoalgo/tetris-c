@@ -58,14 +58,14 @@
   (moves (make-array 0 :adjustable t
                      :fill-pointer t
                      :element-type 'tetris-ai:game-move))
-  last-recorded-state
+  game-state-snapshot
   running-p
 
   max-moves
   (ai-move-delay-secs .5)
-  (last-recorded-state-check-delay-secs 2))
+  (game-state-snapshot-check-delay-secs 5))
 
-(defstruct last-recorded-state
+(defstruct game-state-snapshot
   timestamp
   on-cells
   ;; on-cells-cnt
@@ -207,7 +207,7 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 
 (defun game-serialize-state (game move-no)
   "serialize the current state of the game `game' at move number `move-no'"
-  (make-last-recorded-state
+  (make-game-state-snapshot
    :timestamp (get-universal-time)
    :move-no move-no
    :on-cells (tetris-ai:game-on-cells-packed game)))
@@ -217,11 +217,11 @@ The capturing behavior is based on wrapping `ppcre:register-groups-bind'
 until either the game is lost, or `max-moves' is reached"
   (setf (game-execution-running-p game-exc) t)
   (with-slots (game moves max-moves ai-move-delay-secs
-                    last-recorded-state-check-delay-secs)
+                    game-state-snapshot-check-delay-secs)
       game-exc
     (loop
-       with last-recorded-state-check-multiple
-         = (max 1 (floor last-recorded-state-check-delay-secs (max .001 ai-move-delay-secs)))
+       with game-state-snapshot-check-multiple
+         = (max 1 (floor game-state-snapshot-check-delay-secs (max .001 ai-move-delay-secs)))
        with print-string = nil
        for i from 0
        as next-move = (tetris-ai:game-apply-next-move game)
@@ -234,13 +234,13 @@ until either the game is lost, or `max-moves' is reached"
              (unless (zerop ai-move-delay-secs)
                (sleep ai-move-delay-secs))
              (vector-push-extend native moves)))
-       if (zerop (mod i last-recorded-state-check-multiple))
+       if (zerop (mod i game-state-snapshot-check-multiple))
        do
-         (setf (game-execution-last-recorded-state game-exc)
+         (setf (game-execution-game-state-snapshot game-exc)
                (game-serialize-state game i))
        finally
          (setf (game-execution-running-p game-exc) nil
-               (game-execution-last-recorded-state game-exc) (game-serialize-state game i)))))
+               (game-execution-game-state-snapshot game-exc) (game-serialize-state game i)))))
 
 (defun game-create (&rest make-game-exc-extra-args)
   "create a game `game-no' with any arguments proxied to make-game-execution.
@@ -260,8 +260,7 @@ until either the game is lost, or `max-moves' is reached"
                                         :ai-depth ai-depth)))
            (game-exc (apply 'make-game-execution
                             :game game
-                            :last-recorded-state (game-serialize-state game 0)
-
+                            :game-state-snapshot (game-serialize-state game 0)
                             (append make-game-exc-extra-args
                                     (list :ai-move-delay-secs
                                           (/ default-ai-move-delay-millis 1000)))))
