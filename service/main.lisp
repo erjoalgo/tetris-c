@@ -5,8 +5,10 @@
 (defparameter +service-option-spec+
   '(
     (("port" #\p) :type integer :optional t :documentation "service port")
-    (("shapes-file" #\s) :type string :optional t :documentation "path to a libtetris shapes.in"
-     :initial-value "/usr/local/share/tetris/shapes.in")
+    (("shapes-file" #\s)
+     :type string :optional t
+     :documentation "path to a libtetris shapes.in"
+     :initial-value "shapes.in")
     (("ai-weights-file" #\a) :type string :optional t :documentation "path to a libtetris ai weights file")
     (("seed" #\e) :type integer :optional t :documentation "libtetris ai seed to use")
     (("dims" #\g) :type string :optional t :documentation
