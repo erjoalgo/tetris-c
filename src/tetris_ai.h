@@ -9,7 +9,7 @@ double* load_weights(char* ai_weights_file);
 
 game_move* ai_best_move ( grid* g, shape_stream* ss, double* w );
 
-char* feat_names[FEAT_COUNT];
+extern const char* FEAT_NAMES[FEAT_COUNT];
 void evolution_test();
 
 void ui_play(double* w );

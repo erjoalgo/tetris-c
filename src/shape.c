@@ -6,6 +6,9 @@
 
 #define MAX(a, b) ((a)>(b)? (a):(b))
 
+shape** SHAPES;
+int SHAPE_COUNT;
+
 int cmp_coord (const void* a, const void* b  )	{
   int* A = *((int**)a);
   int* B = *((int**)b);

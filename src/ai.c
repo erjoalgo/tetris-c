@@ -18,7 +18,7 @@
 #define FEATIDX_OBS 4
 #define FEATIDX_DISCONT 5
 
-const char* FEAT_NAMES[] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS", "OBS", "DISCONT"};
+const char* FEAT_NAMES[FEAT_COUNT] = {"RELIEF_MAX", "RELIEF_AVG", "RELIEF_VAR", "GAPS", "OBS", "DISCONT"};
 const double default_weights[]  = { 0.23, -3.62, -0.21, -0.89, -0.96, -0.27 };
 
 void feature_gaps ( grid* g, double* ordered_raws );

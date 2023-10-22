@@ -24,9 +24,11 @@ shape** shapes_read(char* file, int* shape_count);
 void shape_test();
 void shape_new_test();
 int shapes_init (char* shapes_file);
+
 //global shapes and count
-shape** SHAPES;
-int SHAPE_COUNT;
+extern shape** SHAPES;
+extern int SHAPE_COUNT;
+
 #define SHAPE_O SHAPES[0]
 #define SHAPE_T SHAPES[1]
 #define SHAPE_I SHAPES[2]

@@ -10,6 +10,7 @@
 #define AI_BROTHER_COUNT 3
 #define ROUND_COUNT 5
 
+extern const char* FEAT_NAMES[FEAT_COUNT];
 
 typedef struct {
   double w[FEAT_COUNT];//weights
@@ -30,9 +31,8 @@ void mutate_ai ( ai* ai, double* parent_weights )	{
   ai->mutation_amt = amount;
 }
 
-extern char* feat_names[FEAT_COUNT];
 void mutation_print ( int feat_idx, double amount )	{
-  printf( "%s %s BY %.2f\n", feat_names[feat_idx],
+  printf( "%s %s BY %.2f\n", FEAT_NAMES[feat_idx],
 	  amount>0? "UP" : "DOWN",
 	  amount * (amount>0? 1 : -1) );
 }
