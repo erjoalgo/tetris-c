@@ -14,15 +14,15 @@ WORKDIR /tetris
 COPY . .
 
 # simply load the lisp libraries and dependencies in an early layer for caching
-RUN cd service; sbcl --eval  --load "tetris.asd" --eval "(ql:quickload 'tetris-ai-rest)"
+RUN cd service; sbcl --load "tetris.asd" --eval "(ql:quickload 'tetris-ai-rest)"
 
 # work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039612;msg=5
-RUN unset BASH_VERSION; autoreconf --install && ./configure
-RUN make && make install && ldconfig && ldconfig -p | grep tetris
+RUN pwd && ls && unset BASH_VERSION; autoreconf --install && ./configure
+RUN make clean && make && make install && ldconfig && ldconfig -p | grep tetris
 
 EXPOSE 4242 4243
 
-RUN cp shapes.in /usr/local/share/tetris/shapes.in
+RUN cp data/shapes.in /usr/local/share/tetris/shapes.in
 
 CMD cd service; sbcl --eval '(declaim (optimize (speed 3)))'  --load "tetris.asd" --eval "(ql:quickload 'tetris-ai-rest)" --non-interactive --eval "(tetris-ai-rest:main)"; tail -f /dev/null
 
