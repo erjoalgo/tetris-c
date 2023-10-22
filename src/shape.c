@@ -54,11 +54,14 @@ shape* shape_new ( int** shape_rot, int shape_len, int shape_id )	{
   s->rot[0] = malloc(shape_len * sizeof(*s->rot[0]));
   int i;
   // first rotation: normalize to (0, 0)
+  assert(shape_len > 0);
   for ( i = 0; i < shape_len; i++ )	{
     s->rot[0][i] = malloc(2*sizeof(*s->rot[0][i]));
     s->rot[0][i][0] = shape_rot[i][0] - extreme_left;
     s->rot[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
+  int a1 = s->rot[0][0][0];
+  printf("a1: %d\n", a1);
   s->max_dim_len = MAX(max_dim(s->rot[0], shape_len, 0),
                        max_dim(s->rot[0], shape_len, 1)) + 1;
 
