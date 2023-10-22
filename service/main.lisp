@@ -41,7 +41,7 @@
        (service-start-with-config config))
      (loop do (sb-thread:join-thread (game-create-run-thread))))))
 
-(defun main (args)
+(defun main (&optional args)
   "main entry point"
   (command-line-arguments:handle-command-line
    +service-option-spec+ 'main-parse-args
