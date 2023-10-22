@@ -1,7 +1,10 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "tetris.h"
+
+#define MAX(a, b) ((a)>(b)? (a):(b))
 
 int cmp_coord (const void* a, const void* b  )	{
   int* A = *((int**)a);
@@ -34,10 +37,6 @@ int min_dim(int** coords, int count, int dim) {
   return mn;
 }
 
-int max_ab ( int a, int b )	{
-  return a>b?a:b;
-}
-
 shape* shape_new ( int** shape_rot, int shape_len, int shape_id )	{
   // shape_rot is one rotation of the shape
   shape* s = malloc(sizeof(shape));
@@ -57,8 +56,9 @@ shape* shape_new ( int** shape_rot, int shape_len, int shape_id )	{
     s->rot[0][i][0] = shape_rot[i][0] - extreme_left;
     s->rot[0][i][1] = shape_rot[i][1] - extreme_bot;
   }
-  s->max_dim_len = max_ab(max_dim(s->rot[0], shape_len, 0),
-			  max_dim(s->rot[0], shape_len, 1)) + 1;
+  s->max_dim_len = MAX(max_dim(s->rot[0], shape_len, 0),
+                       max_dim(s->rot[0], shape_len, 1)) + 1;
+
   // define 1-4 rotations
   int roti;
   for ( roti = 1; roti < 4; roti++ )	{
