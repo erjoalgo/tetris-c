@@ -7,7 +7,8 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 sudo apt-get install -y autoconf libtool
 # work around https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039612;msg=5
 unset BASH_VERSION
-autoreconf --install && ./configure && make
+autoreconf --install && ./configure
+make
 sudo make install
 sudo ldconfig
 ldconfig -p | grep libtetris
