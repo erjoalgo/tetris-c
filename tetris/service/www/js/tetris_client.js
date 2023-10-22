@@ -488,7 +488,7 @@ Game.prototype.init = function(gameNo) {
 
             if (supportsWebSockets && resp.ws_port) {
                 var scheme = window.location.protocol == "https:"? "wss": "ws";
-                var ws_url = `${scheme}://${window.location.hostname}:${resp.ws_port}/ws/games/${game.gameNo}`;
+                var ws_url = `${scheme}://${window.location.hostname}:${window.location.port}/ws/games/${game.gameNo}`;
                 return game.initWs(ws_url);
             }
         });
