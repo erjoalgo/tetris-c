@@ -1,3 +1,6 @@
+#ifndef TETRIS_H
+#define TETRIS_H
+
 typedef enum {BOT, LEFT, TOP, RIGHT} direction;
 
 typedef int coord[2];//TODO do away with this?
@@ -124,3 +127,5 @@ static const char COL_SHORTCUT_KEYS[] = "1234qwersd";
 static const char ROT_SHORTCUT_KEYS[] = "zxcv";
 
 void shape_stream_test();
+
+#endif // TETRIS_H

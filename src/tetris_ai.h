@@ -1,9 +1,11 @@
+#ifndef TETRIS_AI_H
+#define TETRIS_AI_H
+
 #define FEAT_COUNT 6
 
 double* default_weights_cpy();
 
 void ai_run ( int max_moves, int depth, int show_grid, double* w );
-
 
 double* load_weights(char* ai_weights_file);
 
@@ -14,3 +16,5 @@ void evolution_test();
 
 void ui_play(double* w );
 void ui_play_ai(int depth, int delay_secs, double* w);
+
+#endif // TETRIS_AI_H
