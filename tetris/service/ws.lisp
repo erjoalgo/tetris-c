@@ -25,7 +25,7 @@
   (vom:debug "initializing new session... ~D" game-no)
 
   (setf game-exc (gethash game-no (service-game-executions *service*)))
-  (let ((path (format nil "/games/~D" game-no)))
+  (let ((path (format nil "/ws/games/~D" game-no)))
     (clws:register-global-resource
      path
      (make-instance 'exc-resource :game-exc game-exc)

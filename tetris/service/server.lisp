@@ -45,7 +45,8 @@
   (ai-depth 3)
   ;; sleep time between ai moves
   (default-ai-move-delay-millis 5)
-  (log-filename "tetris-ai-rest.log"))
+  (log-filename "tetris-ai-rest.log")
+  (use-single-port-p (equal (sb-posix:getenv "TETRIS_WS_SHARE_HTTP_PORT") "true")))
 
 (defstruct service
   config

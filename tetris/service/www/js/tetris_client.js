@@ -488,7 +488,7 @@ Game.prototype.init = function(gameNo) {
 
             if (supportsWebSockets && resp.ws_port) {
                 var ws_url = "ws://" + window.location.hostname + ":" + resp.ws_port +
-                    "/games/" + game.gameNo;
+                    "/ws/games/" + game.gameNo;
                 return game.initWs(ws_url);
             }
         });
