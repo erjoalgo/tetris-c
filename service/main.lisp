@@ -49,4 +49,4 @@
    :name "tetris-ai-rest"
    :rest-arity :positional))
 
-'(main '("./script" "-p" "1234" "-h" "-v" "pmlkasdf"))
+'(main '("./script" "-p" "1234" "-h" "-v"))
