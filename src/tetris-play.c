@@ -129,6 +129,7 @@ void ui_play(double* w) {
       case MVDOWN: grid_block_move_safe(g, b, BOT, 1); break;
 
       case DROP_TO_ARG:  grid_block_move_safe_to(g, b, arg);
+          [[fallthrough]];
       case DROP: dropped = 1; break;
 
       case ROTCW:
