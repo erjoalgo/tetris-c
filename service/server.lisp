@@ -27,7 +27,8 @@
    #:service-config
    #:grid-height-width
    #:config-grid-height-width
-   #:game-serialize-state))
+   #:game-serialize-state
+   #:main))
 
 (in-package #:tetris-ai-rest)
 
